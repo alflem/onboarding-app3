@@ -1,0 +1,336 @@
+// components/Header.tsx
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Home, CheckSquare, Settings, Building, Menu, X } from "lucide-react";
+import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
+
+// Typdeklarationer som matchar Prisma-schemat
+enum Role {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  ADMIN = "ADMIN",
+  EMPLOYEE = "EMPLOYEE"
+}
+
+const Header: React.FC = () => {
+  // Använd NextAuth's useSession hook
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  const toggleMenu = (): void => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Funktion för att kontrollera om en knapp är aktiv baserat på nuvarande sökväg
+  const isActive = (path: string): boolean => {
+    return pathname === path;
+  };
+
+  // Funktion för att kontrollera användarroll baserat på Prisma Role enum
+  const hasRole = (requiredRole: Role): boolean => {
+    if (!session?.user?.role) return false;
+
+    const roleHierarchy: Record<Role, number> = {
+      [Role.EMPLOYEE]: 1,
+      [Role.ADMIN]: 2,
+      [Role.SUPER_ADMIN]: 3
+    };
+
+    const userRoleLevel = roleHierarchy[session.user.role as Role] || 0;
+    const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
+
+    return userRoleLevel >= requiredRoleLevel;
+  };
+
+  return (
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* App logo and title */}
+          <div className="flex-1">
+            <Link href="/" className="text-gray-800 font-medium text-lg">
+              Onboarding
+            </Link>
+          </div>
+
+          {/* Desktop navigation - alla knappar samlade på högersidan */}
+          <nav className="hidden md:flex items-center space-x-1">
+            <Link href="/" passHref>
+              <Button
+                variant={isActive("/") ? "default" : "ghost"}
+                size="sm"
+                className="text-gray-600"
+                aria-current={isActive("/") ? "page" : undefined}
+              >
+                <Home className="mr-1 h-4 w-4" />
+                Hem
+              </Button>
+            </Link>
+
+            {session?.user && (
+              <Link href="/checklist" passHref>
+                <Button
+                  variant={isActive("/checklist") ? "default" : "ghost"}
+                  size="sm"
+                  className="text-gray-600"
+                  aria-current={isActive("/checklist") ? "page" : undefined}
+                >
+                  <CheckSquare className="mr-1 h-4 w-4" />
+                  Checklista
+                </Button>
+              </Link>
+            )}
+
+            {hasRole(Role.ADMIN) && (
+              <Link href="/admin" passHref>
+                <Button
+                  variant={isActive("/admin") ? "default" : "ghost"}
+                  size="sm"
+                  className="text-gray-600"
+                  aria-current={isActive("/admin") ? "page" : undefined}
+                >
+                  <Settings className="mr-1 h-4 w-4" />
+                  Admin
+                </Button>
+              </Link>
+            )}
+
+            {hasRole(Role.SUPER_ADMIN) && (
+              <Link href="/super-admin" passHref>
+                <Button
+                  variant={isActive("/super-admin") ? "default" : "ghost"}
+                  size="sm"
+                  className="text-gray-600"
+                  aria-current={isActive("/super-admin") ? "page" : undefined}
+                >
+                  <Building className="mr-1 h-4 w-4" />
+                  Organisationer
+                </Button>
+              </Link>
+            )}
+
+            {/* User authentication */}
+            {status === "loading" ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse ml-2"></div>
+            ) : status === "authenticated" && session?.user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center ml-2"
+                  >
+                    <Avatar className="h-8 w-8 border border-gray-200">
+                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                        {session.user.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="ml-2 text-sm">{session.user.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs text-gray-500">
+                    {session.user.organization?.name}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Min profil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={() => signOut()}
+                  >
+                    Logga ut
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/auth/signin">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
+                >
+                  Logga in
+                </Button>
+              </Link>
+            )}
+          </nav>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleMenu}
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            <Link
+              href="/"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                isActive("/")
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:bg-gray-50"
+              }`}
+              onClick={toggleMenu}
+            >
+              <div className="flex items-center">
+                <Home className="mr-2 h-4 w-4" />
+                Hem
+              </div>
+            </Link>
+
+            {session?.user && (
+              <Link
+                href="/checklist"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/checklist")
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+                onClick={toggleMenu}
+              >
+                <div className="flex items-center">
+                  <CheckSquare className="mr-2 h-4 w-4" />
+                  Checklista
+                </div>
+              </Link>
+            )}
+
+            {hasRole(Role.ADMIN) && (
+              <Link
+                href="/admin"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/admin")
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+                onClick={toggleMenu}
+              >
+                <div className="flex items-center">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin
+                </div>
+              </Link>
+            )}
+
+            {hasRole(Role.SUPER_ADMIN) && (
+              <Link
+                href="/super-admin"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/super-admin")
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+                onClick={toggleMenu}
+              >
+                <div className="flex items-center">
+                  <Building className="mr-2 h-4 w-4" />
+                  Organisationer
+                </div>
+              </Link>
+            )}
+
+            {/* User authentication for mobile */}
+            <div className="pt-4 pb-3 border-t border-gray-200">
+              {status === "loading" ? (
+                <div className="flex items-center px-5">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
+                  <div className="ml-3 w-24 h-4 bg-gray-200 animate-pulse rounded"></div>
+                </div>
+              ) : status === "authenticated" && session?.user ? (
+                <>
+                  <div className="flex items-center px-5">
+                    <Avatar className="h-8 w-8 border border-gray-200">
+                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                        {session.user.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="ml-3">
+                      <div className="text-base font-medium text-gray-800">
+                        {session.user.name}
+                      </div>
+                      <div className="text-sm font-medium text-gray-500">
+                        {session.user.organization?.name}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 px-2 space-y-1">
+                    <Link
+                      href="/profile"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
+                      onClick={toggleMenu}
+                    >
+                      Min profil
+                    </Link>
+                    <button
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
+                      onClick={() => {
+                        signOut();
+                        toggleMenu();
+                      }}
+                    >
+                      Logga ut
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="mt-3 px-2">
+                  <Link
+                    href="/auth/signin"
+                    className="block w-full"
+                    onClick={toggleMenu}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Logga in
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default Header;
