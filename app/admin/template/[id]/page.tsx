@@ -403,7 +403,6 @@ function SortableTask({
     isDragging,
   } = useSortable({
     id: task.id,
-    data: { type: 'task', categoryId: categoryId },
   });
 
   const style = {
@@ -509,7 +508,7 @@ export default function TemplateEditPage() {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 10,
-        delay: 150,
+        delay: 0,
         tolerance: 5,
       },
     }),
@@ -705,121 +704,7 @@ export default function TemplateEditPage() {
     }
   };
 
-  // Funktion för att hantera uppgift som dras över en annan kategori
-  const handleDragOver = (event: DragOverEvent) => {
-    if (!isDraggingTask || !template || isDragDelayed) return;
 
-    const { active, over } = event;
-    if (!over) return;
-
-    setIsDragDelayed(true);
-    dragDelayTimeoutRef.current = setTimeout(() => {
-      setIsDragDelayed(false);
-    }, 100);
-
-
-    const activeData = active.data.current;
-    if (!activeData || active.id === over.id) return;
-
-    // Hitta källkategori för uppgiften som dras
-    let sourceCategory: Category | undefined;
-    let draggedTask: Task | undefined;
-
-    for (const category of template.categories) {
-      const task = category.tasks.find((t) => t.id === active.id);
-      if (task) {
-        sourceCategory = category;
-        draggedTask = task;
-        break;
-      }
-    }
-
-    if (!sourceCategory || !draggedTask) return;
-
-    // Hitta målkategorin (kan vara samma eller annan kategori)
-    let targetCategory: Category | undefined;
-    let targetIndex = -1;
-
-    // Kontrollera om över-elementet är en kategori
-    targetCategory = template.categories.find((cat) => cat.id === over.id);
-    if (targetCategory) {
-      // Drar till en tom kategori eller slutet av en kategori
-      targetIndex = targetCategory.tasks.length;
-    } else {
-      // Kontrollera om över-elementet är en uppgift
-      for (const category of template.categories) {
-        const taskIndex = category.tasks.findIndex((t) => t.id === over.id);
-        if (taskIndex !== -1) {
-          targetCategory = category;
-          targetIndex = taskIndex;
-          break;
-        }
-      }
-    }
-
-    if (!targetCategory) return;
-
-    // Om vi redan har dragit till samma ställe, gör ingenting
-    if (
-      sourceCategory.id === targetCategory.id &&
-      sourceCategory.tasks.findIndex((t) => t.id === draggedTask?.id) ===
-        targetIndex
-    ) {
-      return;
-    }
-
-    // Om vi drar till en annan kategori eller en annan position i samma kategori
-    const sourceTasks = [...sourceCategory.tasks];
-    const sourceIndex = sourceTasks.findIndex((t) => t.id === draggedTask.id);
-
-    // Ta bort uppgiften från källkategorin
-    sourceTasks.splice(sourceIndex, 1);
-
-    // Förbered uppgiften för dess nya kategori
-    const taskToMove = {
-      ...draggedTask,
-      categoryId: targetCategory.id,
-    };
-
-    // Lägg till uppgiften i målkategorin
-    const targetTasks = [...targetCategory.tasks];
-    targetTasks.splice(targetIndex, 0, taskToMove);
-
-    // Uppdatera order för både käll- och målkategori
-    const updatedSourceTasks = sourceTasks.map((task, index) => ({
-      ...task,
-      order: index,
-    }));
-
-    const updatedTargetTasks = targetTasks.map((task, index) => ({
-      ...task,
-      order: index,
-    }));
-
-
-    // Uppdatera mall
-    setTemplate({
-      ...template,
-      categories: template.categories.map((cat) => {
-        if (cat.id === sourceCategory?.id) {
-          return { ...cat, tasks: updatedSourceTasks };
-        }
-        if (cat.id === targetCategory?.id) {
-          return { ...cat, tasks: updatedTargetTasks };
-        }
-        return cat;
-      }),
-    });
-
-    // Spara ändringar till databasen
-    handleMoveTask(
-      taskToMove,
-      targetCategory.id,
-      targetIndex,
-      updatedSourceTasks,
-      updatedTargetTasks
-    );
-  };
 
   // Funktion för att spara kategoriordning till databasen
   const handleSaveCategoryOrder = async (categories: Category[]) => {
@@ -862,7 +747,7 @@ export default function TemplateEditPage() {
         order: task.order,
       }));
 
-      const response = await fetch("/api/tasks/reorder", {
+      const response = await fetch("../../api/tasks/reorder", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -885,80 +770,6 @@ export default function TemplateEditPage() {
     }
   };
 
-  // Funktion för att hantera flyttning av uppgift mellan kategorier
-  const handleMoveTask = async (
-    task: Task,
-    newCategoryId: string,
-    newOrder: number,
-    updatedSourceTasks: Task[],
-    updatedTargetTasks: Task[]
-  ) => {
-    setSaving(true);
-    try {
-      // Uppdatera uppgiften med ny kategori och ordning
-      const moveResponse = await fetch(`/api/tasks/${task.id}/move`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          categoryId: newCategoryId,
-          order: newOrder,
-        }),
-      });
-
-      if (!moveResponse.ok) {
-        throw new Error("Kunde inte flytta uppgiften");
-      }
-
-      // Uppdatera ordningen för uppgifter i källkategorin om det finns några
-      if (updatedSourceTasks.length > 0) {
-        const sourceUpdates = updatedSourceTasks.map((task) => ({
-          id: task.id,
-          order: task.order,
-        }));
-
-        const sourceResponse = await fetch("/api/tasks/reorder", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tasks: sourceUpdates }),
-        });
-
-        if (!sourceResponse.ok) {
-          throw new Error("Kunde inte uppdatera källordningen");
-        }
-      }
-
-      // Uppdatera ordningen för uppgifter i målkategorin
-      const destUpdates = updatedTargetTasks.map((task) => ({
-        id: task.id,
-        order: task.order,
-      }));
-
-      const destResponse = await fetch("/api/tasks/reorder", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tasks: destUpdates }),
-      });
-
-      if (!destResponse.ok) {
-        throw new Error("Kunde inte uppdatera målordningen");
-      }
-    } catch (error) {
-      console.error("Fel vid flyttning av uppgift mellan kategorier:", error);
-      toast.error("Ett fel inträffade", {
-        description: "Kunde inte flytta uppgiften. Försök igen senare.",
-      });
-      // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Funktioner för att hantera kategorier
   const handleAddCategory = async () => {
@@ -1433,7 +1244,6 @@ export default function TemplateEditPage() {
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
           >
             <SortableContext
@@ -1472,7 +1282,7 @@ export default function TemplateEditPage() {
                 easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)", // Mjukare, lätt studsa-effekt
               }}
             >
-              {activeId && activeCategory && !isDraggingTask ? (
+              {activeId && activeCategory ? (
                 // Visa kategori om en kategori dras
                 <div className="border rounded-lg p-4 bg-background shadow-lg opacity-90">
                   <div className="flex items-center space-x-2">

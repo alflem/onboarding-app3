@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useSession } from "next-auth/react";
@@ -8,35 +7,71 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ArrowRight } from "lucide-react";
-
+import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
 
 interface Organization {
   id: string;
   name: string;
 }
 
+interface RecentTask {
+  id: string;
+  title: string;
+  description: string | null;
+  completedAt: string;
+}
+
+interface DashboardData {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  organization: Organization;
+  progress: number;
+  recentTasks: RecentTask[];
+}
+
 export default function Home() {
   const { data: session, status } = useSession();
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [progress, setProgress] = useState(0);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // I en riktig app skulle vi hämta denna data från en API
-    if (status === "authenticated") {
-      // Simulera API-anrop
-      setOrganization({
-        id: "org123",
-        name: "Exempel AB"
-      });
+    async function fetchDashboardData() {
+      if (status === "authenticated") {
+        setLoading(true);
+        setError(null);
 
-      // Simulera progress
-      setProgress(35);
+        try {
+          const response = await fetch("/api/user-dashboard");
+          if (!response.ok) {
+            throw new Error("Kunde inte hämta användardata");
+          }
+
+          const data = await response.json();
+          setDashboardData(data);
+        } catch (err) {
+          console.error("Error fetching dashboard data:", err);
+          setError("Det gick inte att ladda dina uppgifter. Försök igen senare.");
+        } finally {
+          setLoading(false);
+        }
+      }
     }
+
+    fetchDashboardData();
   }, [status]);
 
-  if (status === "loading") {
-    return <div className="container p-8 flex justify-center">Laddar...</div>;
+  if (status === "loading" || loading) {
+    return (
+      <div className="container p-8 flex flex-col items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin mb-4" />
+        <p className="text-muted-foreground">Laddar dashboard...</p>
+      </div>
+    );
   }
 
   return (
@@ -44,28 +79,36 @@ export default function Home() {
       <section className="space-y-4">
         <h1 className="text-3xl font-bold">
           {status === "authenticated"
-            ? `Välkommen, ${session.user.name}!`
+            ? `Välkommen, ${session?.user?.name || 'användare'}!`
             : "Välkommen till Onboarding-plattformen!"}
         </h1>
 
-        {status === "authenticated" && organization && (
+        {status === "authenticated" && dashboardData?.organization && (
           <div className="text-lg text-muted-foreground">
-            Du är inloggad på <span className="font-medium text-foreground">{organization.name}</span>
+            Du är inloggad på <span className="font-medium text-foreground">{dashboardData.organization.name}</span>
           </div>
         )}
       </section>
 
       <Separator />
 
+      {error && (
+        <div className="bg-destructive/10 border border-destructive p-4 rounded-md">
+          <p className="text-destructive">{error}</p>
+        </div>
+      )}
+
       {status === "authenticated" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle>Din onboarding-progress</CardTitle>
-              <CardDescription>Du har klarat {progress}% av din checklista</CardDescription>
+              <CardDescription>
+                Du har klarat {dashboardData?.progress || 0}% av din checklista
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <Progress value={progress} className="h-3 mb-4" />
+              <Progress value={dashboardData?.progress || 0} className="h-3 mb-4" />
               <Button asChild className="w-full">
                 <Link href="/checklist">
                   Fortsätt med din checklista
@@ -79,27 +122,42 @@ export default function Home() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <CheckCircle className="mr-2 h-5 w-5 text-primary" />
-                Exempel Kort
+                Senast avklarade uppgifter
               </CardTitle>
-              <CardDescription>Lorem Ipsum</CardDescription>
+              <CardDescription>Dina senaste framsteg i onboarding-processen</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="border rounded-md p-3 bg-accent/30">
-                <div className="font-medium">Test</div>
-                <div className="text-sm text-muted-foreground">
-                  Ett introduktionsmöte med din chef för att diskutera mål
+              {dashboardData?.recentTasks && dashboardData.recentTasks.length > 0 ? (
+                dashboardData.recentTasks.map((task) => (
+                  <div key={task.id} className="border rounded-md p-3 bg-accent/30">
+                    <div className="font-medium">{task.title}</div>
+                    {task.description && (
+                      <div className="text-sm text-muted-foreground line-clamp-2">
+                        {task.description}
+                      </div>
+                    )}
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Avklarad: {new Date(task.completedAt).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-4 text-muted-foreground">
+                  Inga avklarade uppgifter än. Börja med din checklista!
                 </div>
-              </div>
-              <div className="border rounded-md p-3 bg-accent/30">
-                <div className="font-medium">Test</div>
-                <div className="text-sm text-muted-foreground">
-                  Ett introduktionsmöte med din chef för att diskutera mål
-                </div>
-              </div>
+              )}
 
+              {dashboardData?.recentTasks && dashboardData.recentTasks.length > 0 && (
+                <Button variant="outline" asChild className="w-full">
+                  <Link href="/checklist">
+                    Visa alla uppgifter
+                  </Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
 
+          {/* Du kan lägga till fler kort här, t.ex. information om buddy, kommande möten, etc. */}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

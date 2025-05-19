@@ -122,15 +122,18 @@ export default function ChecklistPage() {
 
       // Skicka uppdatering till servern
       const response = await fetch(`/api/tasks/${taskId}/progress`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ completed }),
       });
 
-      if (!response.ok) {
-        throw new Error('Kunde inte uppdatera uppgiftsstatus');
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        throw new Error('Kunde inte uppdatera uppgiftsstatusen');
       }
 
       // Uppdatering lyckades
