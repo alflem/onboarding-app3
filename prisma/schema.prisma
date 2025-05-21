@@ -13,16 +13,60 @@ model User {
   id             String           @id @default(cuid())
   name           String
   email          String           @unique
-  password       String
+  password       String?          // Gör lösenord valfritt för OAuth-användare
+  image          String?          // Lägg till bild-URL för användarens profilbild
+  emailVerified  DateTime?        // Lägg till e-postverifieringsdatum
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  organizationId String
-  organization   Organization     @relation(fields: [organizationId], references: [id])
+  organizationId String?          // Gör organization valfri
+  organization   Organization?    @relation(fields: [organizationId], references: [id])
   role           Role             @default(EMPLOYEE)
   progress       TaskProgress[]
   buddyFor       User[]           @relation("BuddyRelation")
   buddy          User?            @relation("BuddyRelation", fields: [buddyId], references: [id])
   buddyId        String?
+
+  // NextAuth-relationer
+  accounts       Account[]
+  sessions       Session[]
+}
+
+// Next Auth-modeller
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  // Lagra alla extra fält som JSON
+  extraFields       Json?   @db.JsonB  // För PostgreSQL
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
 }
 
 // Organisationer
@@ -35,7 +79,7 @@ model Organization {
   templates Template[]
 }
 
-// Checklistmallar
+// Övriga modeller oförändrade
 model Template {
   id             String           @id @default(cuid())
   name           String
@@ -46,7 +90,6 @@ model Template {
   updatedAt      DateTime         @updatedAt
 }
 
-// Kategorier i checklistan
 model Category {
   id         String   @id @default(cuid())
   name       String
@@ -58,7 +101,6 @@ model Category {
   updatedAt  DateTime @updatedAt
 }
 
-// Uppgifter i checklistan
 model Task {
   id          String         @id @default(cuid())
   title       String
@@ -72,7 +114,6 @@ model Task {
   updatedAt   DateTime       @updatedAt
 }
 
-// Användarens framsteg för varje uppgift
 model TaskProgress {
   id        String   @id @default(cuid())
   userId    String
@@ -86,7 +127,6 @@ model TaskProgress {
   @@unique([userId, taskId])
 }
 
-// Användarroller
 enum Role {
   SUPER_ADMIN
   ADMIN

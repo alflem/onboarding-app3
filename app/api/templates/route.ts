@@ -26,7 +26,7 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organization?.id;
 
     // Hämta alla mallar för användarens organisation
     const templates = await prisma.template.findMany({
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organization?.id;
 
     // Skapa ny mall i databasen
     const newTemplate = await prisma.template.create({

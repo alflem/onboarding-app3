@@ -10,12 +10,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Home, CheckSquare, Settings, Building, Menu, X } from "lucide-react";
 import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
+import Image from 'next/image';
 
 // Typdeklarationer som matchar Prisma-schemat
 enum Role {
@@ -60,11 +60,16 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* App logo and title */}
-          <div className="flex-1">
-            <Link href="/" className="text-gray-800 font-medium text-lg">
-              Onboarding
-            </Link>
-          </div>
+        <div className="flex-1">
+          <Link href="/" className="flex items-center gap-2 text-gray-800 font-medium text-lg">
+            <img
+              src="/logo.svg"
+              alt="Company Logo"
+              className="h-7 w-auto"
+            />
+            Onboarding
+          </Link>
+        </div>
 
           {/* Desktop navigation - alla knappar samlade på högersidan */}
           <nav className="hidden md:flex items-center space-x-1">
@@ -149,11 +154,6 @@ const Header: React.FC = () => {
                   <DropdownMenuLabel className="text-xs text-gray-500">
                     {session.user.organization?.name}
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Min profil</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-600"
                     onClick={() => signOut()}
@@ -291,13 +291,7 @@ const Header: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-3 px-2 space-y-1">
-                    <Link
-                      href="/profile"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                      onClick={toggleMenu}
-                    >
-                      Min profil
-                    </Link>
+
                     <button
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
                       onClick={() => {

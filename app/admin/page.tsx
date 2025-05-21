@@ -73,8 +73,6 @@ type Buddy = {
   name: string;
 };
 
-
-
 export default function AdminPage() {
   const { data: session, status } = useSession({ required: true });
   const router = useRouter();
@@ -94,7 +92,14 @@ export default function AdminPage() {
   // State för åtgärder
   const [submitting, setSubmitting] = useState(false);
 
-
+  // State för dialog-kontroll
+  const [newTemplateDialogOpen, setNewTemplateDialogOpen] = useState(false);
+  const [newEmployeeDialogOpen, setNewEmployeeDialogOpen] = useState(false);
+  const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
+  const [deleteTemplateDialogOpen, setDeleteTemplateDialogOpen] = useState(false);
+  const [deleteEmployeeDialogOpen, setDeleteEmployeeDialogOpen] = useState(false);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -195,6 +200,7 @@ export default function AdminPage() {
 
       setTemplates([...templates, createdTemplate]);
       setNewTemplate({ name: "" });
+      setNewTemplateDialogOpen(false);
 
       toast.success("Mall skapad", {
         description: "Den nya mallen har skapats framgångsrikt."
@@ -223,6 +229,8 @@ export default function AdminPage() {
       }
 
       setTemplates(templates.filter(t => t.id !== id));
+      setDeleteTemplateDialogOpen(false);
+      setTemplateToDelete(null);
 
       toast.success("Mall borttagen", {
         description: "Mallen har tagits bort från systemet."
@@ -252,7 +260,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           name: newEmployee.name,
           email: newEmployee.email,
-          organizationId: session?.user.organization.id,
+          organizationId: session?.user.organization?.id,
         }),
       });
 
@@ -264,6 +272,7 @@ export default function AdminPage() {
 
       setEmployees([...employees, createdEmployee]);
       setNewEmployee({ name: "", email: "" });
+      setNewEmployeeDialogOpen(false);
 
       toast.success("Medarbetare tillagd", {
         description: "Den nya medarbetaren har lagts till framgångsrikt."
@@ -292,6 +301,8 @@ export default function AdminPage() {
       }
 
       setEmployees(employees.filter(e => e.id !== id));
+      setDeleteEmployeeDialogOpen(false);
+      setEmployeeToDelete(null);
 
       toast.success("Medarbetare borttagen", {
         description: "Medarbetaren har tagits bort från systemet."
@@ -334,6 +345,7 @@ export default function AdminPage() {
 
       setSelectedEmployeeId(null);
       setSelectedBuddyId(null);
+      setBuddyDialogOpen(false);
 
       toast.success("Buddy tilldelad", {
         description: "Buddy har tilldelats till medarbetaren."
@@ -382,7 +394,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Checklistmallar</h2>
 
-            <Dialog>
+            <Dialog open={newTemplateDialogOpen} onOpenChange={setNewTemplateDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
                   <Plus className="h-4 w-4" />
@@ -408,15 +420,9 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Avbryt</Button>
-                  </DialogClose>
+                  <Button variant="outline" onClick={() => setNewTemplateDialogOpen(false)}>Avbryt</Button>
                   <Button
-                    onClick={() => {
-                      handleAddTemplate();
-                      const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                      closeButton?.click();
-                    }}
+                    onClick={handleAddTemplate}
                     disabled={!newTemplate.name.trim() || submitting}
                   >
                     {submitting ? (
@@ -437,7 +443,7 @@ export default function AdminPage() {
                 <ClipboardList className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-muted-foreground">Inga mallar har skapats ännu.</p>
                 <p className="text-muted-foreground mb-4">Skapa din första mall för att komma igång.</p>
-                <Dialog>
+                <Dialog open={newTemplateDialogOpen} onOpenChange={setNewTemplateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
@@ -463,15 +469,9 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="outline">Avbryt</Button>
-                      </DialogClose>
+                      <Button variant="outline" onClick={() => setNewTemplateDialogOpen(false)}>Avbryt</Button>
                       <Button
-                        onClick={() => {
-                          handleAddTemplate();
-                          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                          closeButton?.click();
-                        }}
+                        onClick={handleAddTemplate}
                         disabled={!newTemplate.name.trim() || submitting}
                       >
                         {submitting ? (
@@ -497,9 +497,19 @@ export default function AdminPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex justify-end gap-2">
-                    <AlertDialog>
+                    <AlertDialog
+                      open={deleteTemplateDialogOpen && templateToDelete === template.id}
+                      onOpenChange={(open) => {
+                        setDeleteTemplateDialogOpen(open);
+                        if (!open) setTemplateToDelete(null);
+                      }}
+                    >
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="icon">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setTemplateToDelete(template.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -511,7 +521,12 @@ export default function AdminPage() {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                          <AlertDialogCancel onClick={() => {
+                            setDeleteTemplateDialogOpen(false);
+                            setTemplateToDelete(null);
+                          }}>
+                            Avbryt
+                          </AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteTemplate(template.id)}
                             disabled={submitting}
@@ -544,7 +559,7 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">Medarbetare</h2>
 
-            <Dialog>
+            <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
@@ -580,15 +595,9 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Avbryt</Button>
-                  </DialogClose>
+                  <Button variant="outline" onClick={() => setNewEmployeeDialogOpen(false)}>Avbryt</Button>
                   <Button
-                    onClick={() => {
-                      handleAddEmployee();
-                      const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                      closeButton?.click();
-                    }}
+                    onClick={handleAddEmployee}
                     disabled={!newEmployee.name.trim() || !newEmployee.email.trim() || submitting}
                   >
                     {submitting ? (
@@ -609,7 +618,7 @@ export default function AdminPage() {
                 <Users className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-muted-foreground">Inga medarbetare har lagts till ännu.</p>
                 <p className="text-muted-foreground mb-4">Lägg till din första medarbetare för att komma igång.</p>
-                <Dialog>
+                <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
                   <DialogTrigger asChild>
                     <Button>
                       <UserPlus className="h-4 w-4 mr-2" />
@@ -645,15 +654,9 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="outline">Avbryt</Button>
-                      </DialogClose>
+                      <Button variant="outline" onClick={() => setNewEmployeeDialogOpen(false)}>Avbryt</Button>
                       <Button
-                        onClick={() => {
-                          handleAddEmployee();
-                          const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                          closeButton?.click();
-                        }}
+                        onClick={handleAddEmployee}
                         disabled={!newEmployee.name.trim() || !newEmployee.email.trim() || submitting}
                       >
                         {submitting ? (
@@ -704,9 +707,24 @@ export default function AdminPage() {
                               <span>Tilldelad</span>
                             </Badge>
                           ) : (
-                            <Dialog>
+                            <Dialog
+                              open={buddyDialogOpen && selectedEmployeeId === employee.id}
+                              onOpenChange={(open) => {
+                                setBuddyDialogOpen(open);
+                                if (!open) {
+                                  setSelectedEmployeeId(null);
+                                  setSelectedBuddyId(null);
+                                }
+                              }}
+                            >
                               <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">Tilldela buddy</Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedEmployeeId(employee.id)}
+                                >
+                                  Tilldela buddy
+                                </Button>
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
@@ -722,7 +740,6 @@ export default function AdminPage() {
                                       className={`flex items-center gap-2 p-2 border rounded-md hover:bg-accent/50 cursor-pointer ${selectedBuddyId === session?.user.id ? 'bg-accent' : ''}`}
                                       onClick={() => {
                                         setSelectedBuddyId(session?.user.id || null);
-                                        setSelectedEmployeeId(employee.id);
                                       }}
                                     >
                                       <User className="h-5 w-5 text-muted-foreground" />
@@ -735,7 +752,6 @@ export default function AdminPage() {
                                         className={`flex items-center gap-2 p-2 border rounded-md hover:bg-accent/50 cursor-pointer ${selectedBuddyId === buddy.id ? 'bg-accent' : ''}`}
                                         onClick={() => {
                                           setSelectedBuddyId(buddy.id);
-                                          setSelectedEmployeeId(employee.id);
                                         }}
                                       >
                                         <User className="h-5 w-5 text-muted-foreground" />
@@ -745,15 +761,15 @@ export default function AdminPage() {
                                   </div>
                                 </div>
                                 <DialogFooter>
-                                  <DialogClose asChild>
-                                    <Button variant="outline">Avbryt</Button>
-                                  </DialogClose>
+                                  <Button variant="outline" onClick={() => {
+                                    setBuddyDialogOpen(false);
+                                    setSelectedEmployeeId(null);
+                                    setSelectedBuddyId(null);
+                                  }}>
+                                    Avbryt
+                                  </Button>
                                   <Button
-                                    onClick={() => {
-                                      handleAssignBuddy();
-                                      const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]') as HTMLButtonElement;
-                                      closeButton?.click();
-                                    }}
+                                    onClick={handleAssignBuddy}
                                     disabled={!selectedBuddyId || submitting}
                                   >
                                     {submitting ? (
@@ -775,9 +791,19 @@ export default function AdminPage() {
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <AlertDialog>
+                            <AlertDialog
+                              open={deleteEmployeeDialogOpen && employeeToDelete === employee.id}
+                              onOpenChange={(open) => {
+                                setDeleteEmployeeDialogOpen(open);
+                                if (!open) setEmployeeToDelete(null);
+                              }}
+                            >
                               <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="icon">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => setEmployeeToDelete(employee.id)}
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
@@ -789,7 +815,12 @@ export default function AdminPage() {
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                  <AlertDialogCancel onClick={() => {
+                                    setDeleteEmployeeDialogOpen(false);
+                                    setEmployeeToDelete(null);
+                                  }}>
+                                    Avbryt
+                                  </AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => handleDeleteEmployee(employee.id)}
                                     disabled={submitting}
