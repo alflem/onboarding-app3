@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Onboarding-App
 
-## Getting Started
+En omfattande onboarding-applikation byggd med Next.js och Prisma för att förenkla introduktionen av nya medarbetare. Applikationen stödjer anpassningsbara checklistor, administratörsfunktioner och en buddy-system för att hjälpa nya medarbetare att komma igång.
 
-First, run the development server:
+## Funktioner
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Administratörspanel**: Hantera användare, mallar och organisationer
+- **Anpassningsbara checklistor**: Skapa och administrera onboarding-checklistor
+- **Buddy-system**: Tilldela erfarna medarbetare som mentorer till nya anställda
+- **Användarroller**: Stöd för Super Admin, Admin och medarbetarroller
+- **Autentisering**: Använder NextAuth med stöd för lösenord och OAuth
+- **Databas**: PostgreSQL via Prisma ORM
+- **Modern UI**: Responsiv design med Tailwind CSS och Shadcn UI-komponenter
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Teknisk stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Databas**: PostgreSQL (Docker)
+- **Autentisering**: NextAuth.js
+- **UI-komponenter**: Radix UI, Shadcn/UI
+- **Drag and Drop**: DND Kit
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Kom igång
 
-## Learn More
+### Förutsättningar
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js v18 eller senare
+- Docker och Docker Compose
+- Git
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Klona projektet
+   ```bash
+   git clone [repo-url]
+   cd onboarding-app3
+   ```
 
-## Deploy on Vercel
+2. Installera beroenden
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Konfigurera miljövariabler
+   Skapa en `.env` fil i roten av projektet med följande innehåll:
+   ```
+   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/onboarding_db"
+   NEXTAUTH_SECRET="din_secret_key"
+   NEXTAUTH_URL="http://localhost:3000"
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Starta PostgreSQL med Docker
+   ```bash
+   docker-compose up -d
+   ```
+
+5. Kör Prisma migreringar
+   ```bash
+   npx prisma migrate dev
+   ```
+
+6. Ladda databasen med testdata (valfritt)
+   ```bash
+   npx prisma db seed
+   ```
+
+7. Starta utvecklingsservern
+   ```bash
+   npm run dev
+   ```
+
+8. Öppna [http://localhost:3000](http://localhost:3000) i din webbläsare
+
+## Projektstruktur
+
+- `/app` - Next.js App Router-struktur med sidor och API-endpoints
+- `/components` - Återanvändbara React-komponenter
+- `/lib` - Hjälpfunktioner och utilities
+- `/prisma` - Databasschema och migreringar
+- `/public` - Statiska filer
+- `/styles` - CSS och Tailwind-konfiguration
+
+## Användning
+
+### Användarroller
+
+- **Super Admin**: Kan hantera hela systemet inklusive organisationer
+- **Admin**: Kan hantera användare och checklistor inom sin organisation
+- **Medarbetare**: Kan se och slutföra sina tilldelade checklistor
+
+### Flöde för nya användare
+
+1. Administratören skapar ett konto för den nya medarbetaren
+2. Den nya medarbetaren får inloggningsuppgifter och tillgång till sin checklista
+3. Administratören kan tilldela en buddy (mentor) till den nya medarbetaren
+4. Medarbetaren slutför uppgifter i sin checklista, med stöd från sin buddy
+
+## Deployment
+
+Rekommenderat sätt att deploya applikationen är via Vercel.
+
+1. Konfigurera en produktionsdatabas (t.ex. via Vercel Postgres)
+2. Koppla ditt GitHub-repo till Vercel
+3. Konfigurera miljövariabler på Vercel
+4. Deploy!
+
+## Utveckling
+
+För att bidra till projektet:
+
+1. Skapa en ny branch: `git checkout -b feature/din-feature`
+2. Gör dina ändringar
+3. Commita: `git commit -m 'Lägg till någon feature'`
+4. Pusha: `git push origin feature/din-feature`
+5. Skapa en Pull Request
