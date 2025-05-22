@@ -8,7 +8,7 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-// GET /api/templates/[id] - Hämta en specifik mall
+// GET /api/templates/[id] - Hämta en specifik checklista
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     // Hämta användarsession
@@ -30,16 +30,17 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Hämta mall-id från URL:en - med await eftersom params är Promise
+    // Hämta checklista-id från URL:en - med await eftersom params är Promise
     const params = await context.params;
     const { id } = params;
 
-    // Hämta mall från databasen, inklusive kategorier och uppgifter
-    const template = await prisma.template.findUnique({
+    // Hämta checklista från databasen, inklusive kategorier och uppgifter
+    const checklist = await prisma.checklist.findUnique({
       where: {
         id: id
       },
       include: {
+        organization: true,
         categories: {
           orderBy: {
             order: 'asc'
@@ -55,34 +56,34 @@ export async function GET(request: NextRequest, context: RouteContext) {
       }
     });
 
-    // Kontrollera om mallen finns
-    if (!template) {
+    // Kontrollera om checklistan finns
+    if (!checklist) {
       return NextResponse.json(
-        { error: 'Mallen hittades inte' },
+        { error: 'Checklistan hittades inte' },
         { status: 404 }
       );
     }
 
-    // Kontrollera om användaren har tillgång till mallen
-    if (template.organizationId !== session.user.organization.id) {
+    // Kontrollera om användaren har tillgång till checklistan
+    if (checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
       );
     }
 
-    return NextResponse.json(template);
+    return NextResponse.json(checklist);
 
   } catch (error) {
-    console.error('Fel vid hämtning av mall:', error);
+    console.error('Fel vid hämtning av checklista:', error);
     return NextResponse.json(
-      { error: 'Kunde inte hämta mall' },
+      { error: 'Kunde inte hämta checklista' },
       { status: 500 }
     );
   }
 }
 
-// PATCH /api/templates/[id] - Uppdatera en mall
+// PATCH /api/templates/[id] - Uppdatera checklistan
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     // Hämta användarsession
@@ -104,136 +105,64 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Hämta mall-id från URL:en - med await eftersom params är Promise
+    // Hämta checklista-id från URL:en - med await eftersom params är Promise
     const params = await context.params;
     const { id } = params;
 
-    // Hämta existerande mall för att verifiera ägarskap
-    const existingTemplate = await prisma.template.findUnique({
+    // Hämta data från request body
+    const data = await request.json();
+    const { name } = data;
+
+    // Hitta checklistan för att verifiera ägarskap
+    const checklist = await prisma.checklist.findUnique({
       where: {
         id: id
       }
     });
 
-    // Kontrollera om mallen finns
-    if (!existingTemplate) {
+    if (!checklist) {
       return NextResponse.json(
-        { error: 'Mallen hittades inte' },
+        { error: 'Checklistan hittades inte' },
         { status: 404 }
       );
     }
 
-    // Kontrollera om användaren har tillgång till mallen
-    if (existingTemplate.organizationId !== session.user.organization.id) {
+    // Kontrollera om användaren har tillgång till checklistan
+    if (checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
       );
     }
 
-    // Hämta och validera begäransdata
-    const body = await request.json();
-
-    // Uppdatera mall i databasen
-    const updatedTemplate = await prisma.template.update({
+    // Uppdatera namn på Organization istället för Checklist (som inte har name-fält)
+    const updatedOrganization = await prisma.organization.update({
       where: {
-        id: id
+        id: checklist.organizationId
       },
       data: {
-        name: body.name ? body.name.trim() : undefined
+        name: name
       }
     });
 
-    return NextResponse.json(updatedTemplate);
+    return NextResponse.json({
+      ...checklist,
+      name: updatedOrganization.name
+    });
 
   } catch (error) {
-    console.error('Fel vid uppdatering av mall:', error);
+    console.error('Fel vid uppdatering av checklista:', error);
     return NextResponse.json(
-      { error: 'Kunde inte uppdatera mall' },
+      { error: 'Kunde inte uppdatera checklista' },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/templates/[id] - Ta bort en mall
+// DELETE /api/templates/[id] - Ta bort en checklista är inte tillåtet
 export async function DELETE(request: NextRequest, context: RouteContext) {
-  try {
-    // Hämta användarsession
-    const session = await getServerSession(authOptions);
-
-    // Kontrollera om användaren är inloggad
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Kontrollera att användaren har behörighet (admin eller super_admin)
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // Hämta mall-id från URL:en - med await eftersom params är Promise
-    const params = await context.params;
-    const { id } = params;
-
-    // Hämta existerande mall för att verifiera ägarskap
-    const existingTemplate = await prisma.template.findUnique({
-      where: {
-        id: id
-      }
-    });
-
-    // Kontrollera om mallen finns
-    if (!existingTemplate) {
-      return NextResponse.json(
-        { error: 'Mallen hittades inte' },
-        { status: 404 }
-      );
-    }
-
-    // Kontrollera om användaren har tillgång till mallen
-    if (existingTemplate.organizationId !== session.user.organization.id) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // Ta först bort alla uppgifter i mallen
-    await prisma.task.deleteMany({
-      where: {
-        category: {
-          templateId: id
-        }
-      }
-    });
-
-    // Ta sedan bort alla kategorier i mallen
-    await prisma.category.deleteMany({
-      where: {
-        templateId: id
-      }
-    });
-
-    // Slutligen ta bort själva mallen
-    await prisma.template.delete({
-      where: {
-        id: id
-      }
-    });
-
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-    console.error('Fel vid borttagning av mall:', error);
-    return NextResponse.json(
-      { error: 'Kunde inte ta bort mall' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: 'Method not allowed - checklistor kan inte tas bort' },
+    { status: 405 }
+  );
 }

@@ -152,7 +152,7 @@ const Header: React.FC = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs text-gray-500">
-                    {session.user.organization?.name}
+                    {session.user.organization.name}
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-600"
@@ -286,7 +286,7 @@ const Header: React.FC = () => {
                         {session.user.name}
                       </div>
                       <div className="text-sm font-medium text-gray-500">
-                        {session.user.organization?.name}
+                        {session.user.organization.name}
                       </div>
                     </div>
                   </div>

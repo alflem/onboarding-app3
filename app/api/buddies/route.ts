@@ -26,7 +26,7 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization?.id;
+    const organizationId = session.user.organization.id;
 
     // Hämta alla möjliga buddies (personal som kan vara buddies)
     // Detta kan vara alla användare utom EMPLOYEE, men kan anpassas efter behov

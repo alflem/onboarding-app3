@@ -55,15 +55,14 @@ async function main() {
     },
   });
 
-  // Create a template for the demo organization
-  const demoTemplate = await prisma.template.create({
+  // Create a checklist for the demo organization
+  const demoChecklist = await prisma.checklist.create({
     data: {
-      name: 'Standardonboarding',
       organizationId: demoOrg.id,
     },
   });
 
-  // Create categories for the template
+  // Create categories for the checklist
   const categories = [
     {
       name: 'Före första dagen',
@@ -114,7 +113,7 @@ async function main() {
       data: {
         name,
         order,
-        templateId: demoTemplate.id,
+        checklistId: demoChecklist.id,
       },
     });
 

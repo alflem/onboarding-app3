@@ -26,7 +26,7 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization;
+    const organizationId = session.user.organization.id;
 
     // Hämta alla medarbetare för användarens organisation
     const employees = await prisma.user.findMany({

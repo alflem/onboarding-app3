@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
+import { Checklist, Category, Task } from "@prisma/client";
+
+type ChecklistWithRelations = Checklist & {
+  categories: (Category & {
+    tasks: Task[];
+  })[];
+};
 
 export async function GET() {
   try {
@@ -25,8 +32,12 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Hämta mallen för användarens organisation
-    const template = await prisma.template.findFirst({
+    if (!user.organizationId) {
+      return NextResponse.json({ error: "User has no organization" }, { status: 404 });
+    }
+
+    // Hämta checklistan för användarens organisation
+    const checklist = await prisma.checklist.findFirst({
       where: { organizationId: user.organizationId },
       include: {
         categories: {
@@ -38,10 +49,10 @@ export async function GET() {
           }
         }
       }
-    });
+    }) as ChecklistWithRelations | null;
 
-    if (!template) {
-      return NextResponse.json({ error: "No template found for organization" }, { status: 404 });
+    if (!checklist) {
+      return NextResponse.json({ error: "No checklist found for organization" }, { status: 404 });
     }
 
     // Hämta användarens framsteg för alla uppgifter
@@ -55,9 +66,9 @@ export async function GET() {
       progressMap.set(progress.taskId, progress.completed);
     });
 
-    // Kombinera data från mallen och användarens framsteg
-    const checklist = {
-      categories: template.categories.map(category => ({
+    // Kombinera data från checklistan och användarens framsteg
+    const checklistData = {
+      categories: checklist.categories.map(category => ({
         id: category.id,
         name: category.name,
         order: category.order,
@@ -74,7 +85,7 @@ export async function GET() {
       }))
     };
 
-    return NextResponse.json(checklist);
+    return NextResponse.json(checklistData);
   } catch (error) {
     console.error("Error fetching checklist:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -92,11 +92,14 @@ type Category = {
   tasks: Task[];
 };
 
-type Template = {
+type Checklist = {
   id: string;
-  name: string;
+  name?: string; // Name is from the organization
   organizationId: string;
   categories: Category[];
+  organization: {
+    name: string;
+  };
 };
 
 // Sortable Category Component
@@ -520,7 +523,7 @@ export default function TemplateEditPage() {
   // Övrig state
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [template, setTemplate] = useState<Template | null>(null);
+  const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [newCategory, setNewCategory] = useState({ name: "" });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -542,12 +545,12 @@ export default function TemplateEditPage() {
 
   // Skapa en sorterad lista av kategori-IDs för SortableContext
   const categoryIds = useMemo(
-    () => template?.categories.map((category) => category.id) || [],
-    [template]
+    () => checklist?.categories.map((category) => category.id) || [],
+    [checklist]
   );
 
 
-  const fetchTemplate = useCallback(async () => {
+  const fetchChecklist = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/templates/${id}`);
@@ -557,7 +560,14 @@ export default function TemplateEditPage() {
       }
 
       const data = await response.json();
-      setTemplate(data);
+
+      // Ensure the organization is always present
+      if (!data.organization) {
+        // If for some reason the organization is missing, create a placeholder
+        data.organization = { name: "Onboarding Checklista" };
+      }
+
+      setChecklist(data);
     } catch (error) {
       console.error("Fel vid hämtning av mall:", error);
       toast.error("Ett fel inträffade", {
@@ -579,9 +589,9 @@ export default function TemplateEditPage() {
         return;
       }
 
-      fetchTemplate();
+      fetchChecklist();
     }
-  }, [status, session, router, id, fetchTemplate]);
+  }, [status, session, router, id, fetchChecklist]);
 
   // Funktion för att hantera drag-start
   const handleDragStart = (event: DragStartEvent) => {
@@ -589,7 +599,7 @@ export default function TemplateEditPage() {
     setActiveId(active.id);
 
     // Kolla om vi drar en kategori
-    const draggedCategory = template?.categories.find(
+    const draggedCategory = checklist?.categories.find(
       (cat) => cat.id === active.id
     );
     if (draggedCategory) {
@@ -599,7 +609,7 @@ export default function TemplateEditPage() {
     }
 
     // Kolla om vi drar en uppgift (task)
-    for (const category of template?.categories || []) {
+    for (const category of checklist?.categories || []) {
       const draggedTask = category.tasks.find((task) => task.id === active.id);
       if (draggedTask) {
         setActiveTask(draggedTask);
@@ -624,23 +634,23 @@ export default function TemplateEditPage() {
     setActiveTask(null);
     setIsDraggingTask(false);
 
-    if (!over || !template) return;
+    if (!over || !checklist) return;
 
     // Om aktivt och över-element är samma, gör ingenting
     if (active.id === over.id) return;
 
     // Om vi drar en kategori
     if (!isDraggingTask) {
-      const oldIndex = template.categories.findIndex(
+      const oldIndex = checklist.categories.findIndex(
         (cat) => cat.id === active.id
       );
-      const newIndex = template.categories.findIndex(
+      const newIndex = checklist.categories.findIndex(
         (cat) => cat.id === over.id
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const updatedCategories = arrayMove(
-          template.categories,
+          checklist.categories,
           oldIndex,
           newIndex
         ).map((cat, index) => ({
@@ -648,8 +658,8 @@ export default function TemplateEditPage() {
           order: index,
         }));
 
-        setTemplate({
-          ...template,
+        setChecklist({
+          ...checklist,
           categories: updatedCategories,
         });
 
@@ -659,11 +669,11 @@ export default function TemplateEditPage() {
     }
     // Om vi drar en uppgift inom samma kategori
     else {
-      const sourceCategory = template.categories.find((cat) =>
+      const sourceCategory = checklist.categories.find((cat) =>
         cat.tasks.some((task) => task.id === active.id)
       );
 
-      const targetCategory = template.categories.find((cat) =>
+      const targetCategory = checklist.categories.find((cat) =>
         cat.tasks.some((task) => task.id === over.id)
       );
 
@@ -686,14 +696,14 @@ export default function TemplateEditPage() {
             order: index,
           }));
 
-          const updatedCategories = template.categories.map((cat) =>
+          const updatedCategories = checklist.categories.map((cat) =>
             cat.id === sourceCategory.id
               ? { ...cat, tasks: reorderedTasks }
               : cat
           );
 
-          setTemplate({
-            ...template,
+          setChecklist({
+            ...checklist,
             categories: updatedCategories,
           });
 
@@ -732,7 +742,7 @@ export default function TemplateEditPage() {
         description: "Kunde inte spara den nya ordningen. Försök igen senare.",
       });
       // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
+      fetchChecklist();
     } finally {
       setSaving(false);
     }
@@ -764,7 +774,7 @@ export default function TemplateEditPage() {
         description: "Kunde inte spara den nya ordningen. Försök igen senare.",
       });
       // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
+      fetchChecklist();
     } finally {
       setSaving(false);
     }
@@ -773,14 +783,14 @@ export default function TemplateEditPage() {
 
   // Funktioner för att hantera kategorier
   const handleAddCategory = async () => {
-    if (newCategory.name.trim() && template) {
+    if (newCategory.name.trim() && checklist) {
       setSaving(true);
 
       try {
         const newCategoryObj = {
           name: newCategory.name,
-          order: template.categories.length,
-          templateId: template.id,
+          order: checklist.categories.length,
+          checklistId: checklist.id,
         };
 
         const response = await fetch("/api/categories", {
@@ -797,9 +807,9 @@ export default function TemplateEditPage() {
 
         const addedCategory = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: [...template.categories, { ...addedCategory, tasks: [] }],
+        setChecklist({
+          ...checklist,
+          categories: [...checklist.categories, { ...addedCategory, tasks: [] }],
         });
 
         setNewCategory({ name: "" });
@@ -819,7 +829,7 @@ export default function TemplateEditPage() {
   };
 
   const handleUpdateCategory = async () => {
-    if (editingCategory.name.trim() && editingCategoryId && template) {
+    if (editingCategory.name.trim() && editingCategoryId && checklist) {
       setSaving(true);
 
       try {
@@ -837,9 +847,9 @@ export default function TemplateEditPage() {
 
         const updatedCategory = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === editingCategoryId
               ? { ...cat, name: updatedCategory.name }
               : cat
@@ -863,7 +873,7 @@ export default function TemplateEditPage() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (template) {
+    if (checklist) {
       setSaving(true);
 
       try {
@@ -875,9 +885,9 @@ export default function TemplateEditPage() {
           throw new Error("Kunde inte ta bort kategori");
         }
 
-        setTemplate({
-          ...template,
-          categories: template.categories.filter(
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.filter(
             (cat) => cat.id !== categoryId
           ),
         });
@@ -898,11 +908,11 @@ export default function TemplateEditPage() {
 
   // Funktioner för att hantera uppgifter
   const handleAddTask = async () => {
-    if (newTask.title.trim() && newTask.categoryId && template) {
+    if (newTask.title.trim() && newTask.categoryId && checklist) {
       setSaving(true);
 
       try {
-        const category = template.categories.find(
+        const category = checklist.categories.find(
           (cat) => cat.id === newTask.categoryId
         );
 
@@ -932,9 +942,9 @@ export default function TemplateEditPage() {
 
         const addedTask = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === newTask.categoryId
               ? { ...cat, tasks: [...cat.tasks, addedTask] }
               : cat
@@ -963,7 +973,7 @@ export default function TemplateEditPage() {
   };
 
   const handleUpdateTask = async () => {
-    if (editingTask.title.trim() && editingTaskId && template) {
+    if (editingTask.title.trim() && editingTaskId && checklist) {
       setSaving(true);
 
       try {
@@ -987,9 +997,9 @@ export default function TemplateEditPage() {
 
         const updatedTask = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) => ({
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) => ({
             ...cat,
             tasks: cat.tasks.map((task) =>
               task.id === editingTaskId
@@ -1021,7 +1031,7 @@ export default function TemplateEditPage() {
   };
 
   const handleDeleteTask = async (categoryId: string, taskId: string) => {
-    if (template) {
+    if (checklist) {
       setSaving(true);
 
       try {
@@ -1033,9 +1043,9 @@ export default function TemplateEditPage() {
           throw new Error("Kunde inte ta bort uppgift");
         }
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === categoryId
               ? {
                   ...cat,
@@ -1060,17 +1070,19 @@ export default function TemplateEditPage() {
   };
 
   // Funktion för att spara mallen
-  const handleSaveTemplate = async () => {
-    if (template) {
+  const handleSaveChecklist = async () => {
+    if (checklist) {
       setSaving(true);
 
       try {
-        const response = await fetch(`/api/templates/${template.id}`, {
+        const response = await fetch(`/api/templates/${checklist.id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: template.name }),
+          body: JSON.stringify({
+            name: checklist.organization.name
+          }),
         });
 
         if (!response.ok) {
@@ -1092,12 +1104,12 @@ export default function TemplateEditPage() {
   };
 
   // Funktion för att ta bort mallen
-  const handleDeleteTemplate = async () => {
-    if (template) {
+  const handleDeleteChecklist = async () => {
+    if (checklist) {
       setSaving(true);
 
       try {
-        const response = await fetch(`/api/templates/${template.id}`, {
+        const response = await fetch(`/api/templates/${checklist.id}`, {
           method: "DELETE",
         });
 
@@ -1131,7 +1143,7 @@ export default function TemplateEditPage() {
   }
 
   // Render-logik om mallen inte kunde hittas
-  if (!template) {
+  if (!checklist) {
     return (
       <div className="container p-8 flex flex-col items-center justify-center min-h-[60vh]">
         <p className="text-xl font-semibold mb-2">Mallen kunde inte hittas</p>
@@ -1155,7 +1167,7 @@ export default function TemplateEditPage() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Tillbaka
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{template.name}</h1>
+            <h1 className="text-2xl font-bold">{checklist.organization.name}</h1>
             <p className="text-muted-foreground">
               Redigera mall och checklista
             </p>
@@ -1164,7 +1176,7 @@ export default function TemplateEditPage() {
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
-            onClick={handleSaveTemplate}
+            onClick={handleSaveChecklist}
             disabled={saving}
           >
             {saving ? (
@@ -1190,7 +1202,7 @@ export default function TemplateEditPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteTemplate}>
+                <AlertDialogAction onClick={handleDeleteChecklist}>
                   {saving ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -1215,14 +1227,20 @@ export default function TemplateEditPage() {
         <CardContent>
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="template-name">Mallnamn</Label>
+              <Label htmlFor="checklist-name">Organisationsnamn</Label>
               <Input
-                id="template-name"
-                value={template?.name || ""}
+                id="checklist-name"
+                value={checklist.organization.name}
                 onChange={(e) =>
-                  setTemplate({ ...template, name: e.target.value })
+                  setChecklist({
+                    ...checklist,
+                    organization: {
+                      ...checklist.organization,
+                      name: e.target.value
+                    }
+                  })
                 }
-                placeholder="Ange ett namn för mallen"
+                placeholder="Ange organisationens namn"
               />
             </div>
           </div>
@@ -1251,7 +1269,7 @@ export default function TemplateEditPage() {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-4">
-                {template.categories.map((category) => (
+                {checklist.categories.map((category) => (
                   <SortableCategory
                     key={category.id}
                     category={category}

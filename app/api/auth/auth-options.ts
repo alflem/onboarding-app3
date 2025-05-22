@@ -67,6 +67,7 @@ export const authOptions: NextAuthOptions = {
           session.user.role = token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
         }
 
+        // Ensure organization is always set
         if (token.organizationId) {
           session.user.organizationId = token.organizationId as string;
           if (token.organizationName) {
@@ -75,7 +76,15 @@ export const authOptions: NextAuthOptions = {
               id: token.organizationId as string,
               name: token.organizationName as string
             };
+          } else {
+            session.user.organization = {
+              id: token.organizationId as string,
+              name: "Unknown Organization"
+            };
           }
+        } else {
+          // If no organization is associated, provide a default or throw an error
+          throw new Error("User must have an organization");
         }
       }
       return session;

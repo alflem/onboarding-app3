@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,48 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Användare
 model User {
-  id             String           @id @default(cuid())
+  id             String         @id @default(cuid())
   name           String
-  email          String           @unique
-  password       String?          // Gör lösenord valfritt för OAuth-användare
-  image          String?          // Lägg till bild-URL för användarens profilbild
-  emailVerified  DateTime?        // Lägg till e-postverifieringsdatum
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  organizationId String?          // Gör organization valfri
-  organization   Organization?    @relation(fields: [organizationId], references: [id])
-  role           Role             @default(EMPLOYEE)
-  progress       TaskProgress[]
-  buddyFor       User[]           @relation("BuddyRelation")
-  buddy          User?            @relation("BuddyRelation", fields: [buddyId], references: [id])
+  email          String         @unique
+  password       String?
+  image          String?
+  emailVerified  DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organizationId String?
+  role           Role           @default(EMPLOYEE)
   buddyId        String?
-
-  // NextAuth-relationer
   accounts       Account[]
   sessions       Session[]
+  progress       TaskProgress[]
+  buddy          User?          @relation("BuddyRelation", fields: [buddyId], references: [id])
+  buddyFor       User[]         @relation("BuddyRelation")
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
 }
 
-// Next Auth-modeller
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  // Lagra alla extra fält som JSON
-  extraFields       Json?   @db.JsonB  // För PostgreSQL
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  extraFields       Json?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -66,63 +58,61 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+
   @@unique([identifier, token])
 }
 
-// Organisationer
 model Organization {
-  id        String     @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  checklist Checklist?
   users     User[]
-  templates Template[]
 }
 
-// Övriga modeller oförändrade
-model Template {
-  id             String           @id @default(cuid())
-  name           String
-  organizationId String
-  organization   Organization     @relation(fields: [organizationId], references: [id])
+model Checklist {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   categories     Category[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model Category {
-  id         String   @id @default(cuid())
-  name       String
-  templateId String
-  template   Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  tasks      Task[]
-  order      Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String    @id @default(cuid())
+  name        String
+  checklistId String
+  order       Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  tasks       Task[]
 }
 
 model Task {
   id          String         @id @default(cuid())
   title       String
-  description String?        @db.Text
+  description String?
   categoryId  String
-  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   order       Int
   isBuddyTask Boolean        @default(false)
-  progress    TaskProgress[]
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  progress    TaskProgress[]
 }
 
 model TaskProgress {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   taskId    String
-  task      Task     @relation(fields: [taskId], references: [id])
   completed Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, taskId])
 }

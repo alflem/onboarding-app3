@@ -35,29 +35,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!body.templateId) {
+    if (!body.checklistId) {
       return NextResponse.json(
-        { error: 'Template ID krävs' },
+        { error: 'Checklist ID krävs' },
         { status: 400 }
       );
     }
 
-    // Hitta mallen för att verifiera ägarskap
-    const template = await prisma.template.findUnique({
+    // Hitta checklistan för att verifiera ägarskap
+    const checklist = await prisma.checklist.findUnique({
       where: {
-        id: body.templateId
+        id: body.checklistId
       }
     });
 
-    if (!template) {
+    if (!checklist) {
       return NextResponse.json(
-        { error: 'Mallen hittades inte' },
+        { error: 'Checklistan hittades inte' },
         { status: 404 }
       );
     }
 
-    // Kontrollera att användaren har tillgång till mallen
-    if (template.organizationId !== session.user.organization.id) {
+    // Kontrollera att användaren har tillgång till checklistan
+    if (checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name.trim(),
         order: body.order || 0,
-        template: {
+        checklist: {
           connect: {
-            id: body.templateId
+            id: body.checklistId
           }
         }
       }

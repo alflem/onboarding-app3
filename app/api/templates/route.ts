@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/templates - Hämta alla mallar för användarens organisation
+// GET /api/templates - Hämta checklista för användarens organisation
 export async function GET() {
   try {
     // Hämta användarsession
@@ -26,10 +26,10 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization?.id;
+    const organizationId = session.user.organization.id;
 
-    // Hämta alla mallar för användarens organisation
-    const templates = await prisma.template.findMany({
+    // Hämta checklistan för användarens organisation
+    const checklist = await prisma.checklist.findFirst({
       where: {
         organizationId: organizationId
       },
@@ -48,43 +48,41 @@ export async function GET() {
             }
           }
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     });
 
-    // Beräkna antalet uppgifter för varje mall
-    const templatesWithCounts = templates.map(template => {
-      // Räkna totalt antal uppgifter genom att summera för varje kategori
-      const tasksCount = template.categories.reduce(
-        (sum, category) => sum + category._count.tasks,
-        0
-      );
+    if (!checklist) {
+      return NextResponse.json([]);
+    }
 
-      return {
-        id: template.id,
-        name: template.name,
-        organizationId: template.organizationId,
-        categoriesCount: template._count.categories,
-        tasksCount: tasksCount,
-        createdAt: template.createdAt,
-        updatedAt: template.updatedAt
-      };
-    });
+    // Beräkna antalet uppgifter
+    const tasksCount = checklist.categories.reduce(
+      (sum, category) => sum + category._count.tasks,
+      0
+    );
 
-    return NextResponse.json(templatesWithCounts);
+    const checklistWithCounts = {
+      id: checklist.id,
+      organizationId: checklist.organizationId,
+      categoriesCount: checklist._count.categories,
+      tasksCount: tasksCount,
+      createdAt: checklist.createdAt,
+      updatedAt: checklist.updatedAt
+    };
+
+    // Returnera som en array för kompatibilitet med existerande kod
+    return NextResponse.json([checklistWithCounts]);
 
   } catch (error) {
-    console.error('Fel vid hämtning av mallar:', error);
+    console.error('Fel vid hämtning av checklista:', error);
     return NextResponse.json(
-      { error: 'Kunde inte hämta mallar' },
+      { error: 'Kunde inte hämta checklista' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/templates - Skapa en ny mall
+// POST /api/templates - Skapa eller uppdatera organisationens checklista
 export async function POST(request: NextRequest) {
   try {
     // Hämta användarsession
@@ -106,46 +104,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hämta och validera begäransdata
-    const body = await request.json();
-
-    if (!body.name || typeof body.name !== 'string' || body.name.trim() === '') {
-      return NextResponse.json(
-        { error: 'Mallnamn krävs' },
-        { status: 400 }
-      );
-    }
-
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization?.id;
+    const organizationId = session.user.organization.id;
 
-    // Skapa ny mall i databasen
-    const newTemplate = await prisma.template.create({
-      data: {
-        name: body.name.trim(),
-        organization: {
-          connect: {
-            id: organizationId
-          }
-        }
+    // Kontrollera om det redan finns en checklista för organisationen
+    const existingChecklist = await prisma.checklist.findFirst({
+      where: {
+        organizationId: organizationId
       }
     });
 
-    // Returnera den skapade mallen med räkningen satt till 0
+    let checklist;
+
+    if (existingChecklist) {
+      // Om en checklista redan finns, returnera den befintliga
+      checklist = existingChecklist;
+    } else {
+      // Skapa ny checklista om det inte finns någon
+      checklist = await prisma.checklist.create({
+        data: {
+          organization: {
+            connect: {
+              id: organizationId
+            }
+          }
+        }
+      });
+    }
+
+    // Returnera checklistan
     return NextResponse.json({
-      id: newTemplate.id,
-      name: newTemplate.name,
-      organizationId: newTemplate.organizationId,
+      id: checklist.id,
+      organizationId: checklist.organizationId,
       categoriesCount: 0,
       tasksCount: 0,
-      createdAt: newTemplate.createdAt,
-      updatedAt: newTemplate.updatedAt
+      createdAt: checklist.createdAt,
+      updatedAt: checklist.updatedAt
     });
 
   } catch (error) {
-    console.error('Fel vid skapande av mall:', error);
+    console.error('Fel vid hantering av checklista:', error);
     return NextResponse.json(
-      { error: 'Kunde inte skapa mall' },
+      { error: 'Kunde inte hantera checklista' },
       { status: 500 }
     );
   }

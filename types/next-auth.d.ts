@@ -28,7 +28,7 @@ declare module "next-auth" {
       role?: Role;
       organizationId?: string;
       organizationName?: string;
-      organization?: {
+      organization: {
         id: string;
         name: string;
       };

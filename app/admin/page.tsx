@@ -39,7 +39,6 @@ import {
   TableRow
 } from "@/components/ui/table";
 import {
-  Trash2,
   Edit,
   Plus,
   Users,
@@ -51,9 +50,8 @@ import {
 } from "lucide-react";
 
 // Typdefintioner
-type Template = {
+type Checklist = {
   id: string;
-  name: string;
   organizationId: string;
   categoriesCount?: number;
   tasksCount?: number;
@@ -79,12 +77,11 @@ export default function AdminPage() {
 
   // State för datahämtning och laddningsstatus
   const [loading, setLoading] = useState(true);
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [buddies, setBuddies] = useState<Buddy[]>([]);
 
   // State för formulär
-  const [newTemplate, setNewTemplate] = useState({ name: "" });
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
@@ -93,12 +90,9 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // State för dialog-kontroll
-  const [newTemplateDialogOpen, setNewTemplateDialogOpen] = useState(false);
   const [newEmployeeDialogOpen, setNewEmployeeDialogOpen] = useState(false);
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
-  const [deleteTemplateDialogOpen, setDeleteTemplateDialogOpen] = useState(false);
   const [deleteEmployeeDialogOpen, setDeleteEmployeeDialogOpen] = useState(false);
-  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,30 +104,63 @@ export default function AdminPage() {
       }
 
       // Hämta data
-      fetchTemplates();
+      fetchChecklist();
       fetchEmployees();
       fetchBuddies();
     }
   }, [status, session, router]);
 
-  // Funktion för att hämta mallar från API
-  const fetchTemplates = async () => {
+  // Funktion för att hämta eller skapa en checklista
+  const fetchChecklist = async () => {
     try {
       const response = await fetch('/api/templates');
 
       if (!response.ok) {
-        throw new Error('Kunde inte hämta mallar');
+        throw new Error('Kunde inte hämta checklista');
       }
 
       const data = await response.json();
-      setTemplates(data);
+      if (data.length > 0) {
+        setChecklist(data[0]);
+      } else {
+        // Om ingen checklista finns, skapa en
+        await createChecklist();
+      }
     } catch (error) {
-      console.error("Fel vid hämtning av mallar:", error);
-      toast.error("Kunde inte ladda mallar", {
-        description: "Ett fel uppstod vid hämtning av mallar."
+      console.error("Fel vid hämtning av checklista:", error);
+      toast.error("Kunde inte ladda checklista", {
+        description: "Ett fel uppstod vid hämtning av checklista."
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Funktion för att skapa en checklista om ingen finns
+  const createChecklist = async () => {
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte skapa checklista');
+      }
+
+      const createdChecklist = await response.json();
+      setChecklist(createdChecklist);
+
+      toast.success("Checklista skapad", {
+        description: "En ny onboarding-checklista har skapats för din organisation."
+      });
+    } catch (error) {
+      console.error("Fel vid skapande av checklista:", error);
+      toast.error("Kunde inte skapa checklista", {
+        description: "Ett fel uppstod vid skapande av checklista."
+      });
     }
   };
 
@@ -175,76 +202,6 @@ export default function AdminPage() {
     }
   };
 
-  // Funktion för att lägga till en ny mall
-  const handleAddTemplate = async () => {
-    if (!newTemplate.name.trim()) return;
-
-    setSubmitting(true);
-
-    try {
-      const response = await fetch('/api/templates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newTemplate.name,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Kunde inte skapa mall');
-      }
-
-      const createdTemplate = await response.json();
-
-      setTemplates([...templates, createdTemplate]);
-      setNewTemplate({ name: "" });
-      setNewTemplateDialogOpen(false);
-
-      toast.success("Mall skapad", {
-        description: "Den nya mallen har skapats framgångsrikt."
-      });
-    } catch (error) {
-      console.error("Fel vid skapande av mall:", error);
-      toast.error("Kunde inte skapa mall", {
-        description: "Ett fel uppstod vid skapande av mallen."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Funktion för att ta bort en mall
-  const handleDeleteTemplate = async (id: string) => {
-    setSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/templates/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Kunde inte ta bort mall');
-      }
-
-      setTemplates(templates.filter(t => t.id !== id));
-      setDeleteTemplateDialogOpen(false);
-      setTemplateToDelete(null);
-
-      toast.success("Mall borttagen", {
-        description: "Mallen har tagits bort från systemet."
-      });
-    } catch (error) {
-      console.error("Fel vid borttagning av mall:", error);
-      toast.error("Kunde inte ta bort mall", {
-        description: "Ett fel uppstod vid borttagning av mallen."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   // Funktion för att lägga till en ny medarbetare
   const handleAddEmployee = async () => {
     if (!newEmployee.name.trim() || !newEmployee.email.trim()) return;
@@ -257,30 +214,26 @@ export default function AdminPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: newEmployee.name,
-          email: newEmployee.email,
-          organizationId: session?.user.organization?.id,
-        }),
+        body: JSON.stringify(newEmployee),
       });
 
       if (!response.ok) {
         throw new Error('Kunde inte skapa medarbetare');
       }
 
-      const createdEmployee = await response.json();
+      await response.json();
 
-      setEmployees([...employees, createdEmployee]);
+      fetchEmployees(); // Uppdatera listan med medarbetare
       setNewEmployee({ name: "", email: "" });
       setNewEmployeeDialogOpen(false);
 
       toast.success("Medarbetare tillagd", {
-        description: "Den nya medarbetaren har lagts till framgångsrikt."
+        description: "Den nya medarbetaren har lagts till."
       });
     } catch (error) {
-      console.error("Fel vid skapande av medarbetare:", error);
+      console.error("Fel vid tillägg av medarbetare:", error);
       toast.error("Kunde inte lägga till medarbetare", {
-        description: "Ett fel uppstod vid skapande av medarbetaren."
+        description: "Ett fel uppstod vid tillägg av medarbetaren."
       });
     } finally {
       setSubmitting(false);
@@ -317,15 +270,15 @@ export default function AdminPage() {
     }
   };
 
-  // Funktion för att tilldela en buddy till en medarbetare
+  // Funktion för att tilldela en buddy
   const handleAssignBuddy = async () => {
     if (!selectedEmployeeId || !selectedBuddyId) return;
 
     setSubmitting(true);
 
     try {
-      const response = await fetch(`/api/employees/${selectedEmployeeId}/assign-buddy`, {
-        method: 'POST',
+      const response = await fetch(`/api/employees/${selectedEmployeeId}/buddy`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -338,17 +291,15 @@ export default function AdminPage() {
         throw new Error('Kunde inte tilldela buddy');
       }
 
-      // Uppdatera lokal state
-      setEmployees(employees.map(emp =>
-        emp.id === selectedEmployeeId ? { ...emp, hasBuddy: true } : emp
-      ));
+      await response.json();
 
+      fetchEmployees(); // Uppdatera listan med medarbetare
       setSelectedEmployeeId(null);
       setSelectedBuddyId(null);
       setBuddyDialogOpen(false);
 
       toast.success("Buddy tilldelad", {
-        description: "Buddy har tilldelats till medarbetaren."
+        description: "Medarbetaren har tilldelats en buddy."
       });
     } catch (error) {
       console.error("Fel vid tilldelning av buddy:", error);
@@ -362,322 +313,127 @@ export default function AdminPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="container p-8 flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin mb-4" />
-        <p className="text-muted-foreground">Laddar administrationspanel...</p>
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Laddar administrationspanel...</span>
       </div>
     );
   }
 
   return (
-    <div className="container p-4 md:p-8 space-y-6">
-      <section className="space-y-2">
-        <h1 className="text-3xl font-bold">Administrationspanel</h1>
-        <p className="text-muted-foreground">
-          Hantera onboarding-checklistor och medarbetare för din organisation.
-        </p>
-      </section>
+    <div className="container p-6 space-y-8">
+      <h1 className="text-3xl font-bold">Administrationspanel</h1>
 
-      <Tabs defaultValue="templates" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="templates" className="flex items-center gap-1">
-            <ClipboardList className="h-4 w-4" />
-            <span>Checklistor</span>
+      <Tabs defaultValue="checklist">
+        <TabsList className="mb-4">
+          <TabsTrigger value="checklist">
+            <ClipboardList className="h-4 w-4 mr-2" />
+            Onboarding Checklista
           </TabsTrigger>
-          <TabsTrigger value="employees" className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>Medarbetare</span>
+          <TabsTrigger value="employees">
+            <Users className="h-4 w-4 mr-2" />
+            Medarbetare
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="templates" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Checklistmallar</h2>
-
-            <Dialog open={newTemplateDialogOpen} onOpenChange={setNewTemplateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  <span>Ny mall</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Skapa ny checklistmall</DialogTitle>
-                  <DialogDescription>
-                    Ge din nya mall ett namn. Du kan sedan lägga till kategorier och uppgifter.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="templateName">Mallnamn</Label>
-                    <Input
-                      id="templateName"
-                      value={newTemplate.name}
-                      onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                      placeholder="t.ex. Standard onboarding"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setNewTemplateDialogOpen(false)}>Avbryt</Button>
-                  <Button
-                    onClick={handleAddTemplate}
-                    disabled={!newTemplate.name.trim() || submitting}
-                  >
-                    {submitting ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4 mr-2" />
-                    )}
-                    Skapa mall
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {templates.length === 0 ? (
+        {/* Checklist Management */}
+        <TabsContent value="checklist" className="space-y-4">
+          {checklist ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <ClipboardList className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">Inga mallar har skapats ännu.</p>
-                <p className="text-muted-foreground mb-4">Skapa din första mall för att komma igång.</p>
-                <Dialog open={newTemplateDialogOpen} onOpenChange={setNewTemplateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Skapa första mallen
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Skapa ny checklistmall</DialogTitle>
-                      <DialogDescription>
-                        Ge din nya mall ett namn. Du kan sedan lägga till kategorier och uppgifter.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="templateName">Mallnamn</Label>
-                        <Input
-                          id="templateName"
-                          value={newTemplate.name}
-                          onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                          placeholder="t.ex. Standard onboarding"
-                        />
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div>
+                  <CardTitle>Onboarding Checklista</CardTitle>
+                  <CardDescription>Hantera din organisations onboarding-checklista</CardDescription>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="w-full md:w-3/4">
+                      <div className="rounded-lg border overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[250px]">Checklista</TableHead>
+                              <TableHead>Kategorier</TableHead>
+                              <TableHead>Uppgifter</TableHead>
+                              <TableHead className="text-right">Åtgärder</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>Onboarding Checklista</TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{checklist.categoriesCount || 0}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{checklist.tasksCount || 0}</Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="outline" size="sm" onClick={() => router.push(`/admin/template/${checklist.id}`)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Redigera
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      <div className="mt-4 text-sm text-muted-foreground">
+                        <p>Redigera checklistan för att lägga till kategorier och uppgifter som nyanställda behöver slutföra under onboarding.</p>
                       </div>
                     </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setNewTemplateDialogOpen(false)}>Avbryt</Button>
-                      <Button
-                        onClick={handleAddTemplate}
-                        disabled={!newTemplate.name.trim() || submitting}
-                      >
-                        {submitting ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Plus className="h-4 w-4 mr-2" />
-                        )}
-                        Skapa mall
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {templates.map((template) => (
-                <Card key={template.id}>
-                  <CardHeader className="pb-3">
-                    <CardTitle>{template.name}</CardTitle>
-                    <CardDescription>
-                      {template.categoriesCount || 0} kategorier, {template.tasksCount || 0} uppgifter
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-end gap-2">
-                    <AlertDialog
-                      open={deleteTemplateDialogOpen && templateToDelete === template.id}
-                      onOpenChange={(open) => {
-                        setDeleteTemplateDialogOpen(open);
-                        if (!open) setTemplateToDelete(null);
-                      }}
-                    >
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setTemplateToDelete(template.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Är du säker?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Detta kommer att ta bort mallen permanent. Denna åtgärd kan inte ångras.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => {
-                            setDeleteTemplateDialogOpen(false);
-                            setTemplateToDelete(null);
-                          }}>
-                            Avbryt
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteTemplate(template.id)}
-                            disabled={submitting}
-                          >
-                            {submitting ? (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4 mr-2" />
-                            )}
-                            Ta bort
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <Button
-                      className="gap-1"
-                      onClick={() => router.push(`/admin/template/${template.id}`)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Redigera
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Ingen Checklista Hittades</CardTitle>
+                <CardDescription>Din organisation har ingen checklista än</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={createChecklist} disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Skapar...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Skapa Checklista
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
 
+        {/* Employee Management */}
         <TabsContent value="employees" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Medarbetare</h2>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle>Medarbetare</CardTitle>
+                <CardDescription>Hantera medarbetare och buddy-tilldelningar</CardDescription>
+              </div>
+              <Button onClick={() => setNewEmployeeDialogOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Lägg till
+              </Button>
+            </CardHeader>
 
-            <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  <span>Lägg till medarbetare</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Lägg till ny medarbetare</DialogTitle>
-                  <DialogDescription>
-                    Fyll i uppgifter för den nya medarbetaren.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="employeeName">Namn</Label>
-                    <Input
-                      id="employeeName"
-                      placeholder="Fullständigt namn"
-                      value={newEmployee.name}
-                      onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="employeeEmail">E-postadress</Label>
-                    <Input
-                      id="employeeEmail"
-                      type="email"
-                      placeholder="E-post"
-                      value={newEmployee.email}
-                      onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setNewEmployeeDialogOpen(false)}>Avbryt</Button>
-                  <Button
-                    onClick={handleAddEmployee}
-                    disabled={!newEmployee.name.trim() || !newEmployee.email.trim() || submitting}
-                  >
-                    {submitting ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <UserPlus className="h-4 w-4 mr-2" />
-                    )}
-                    Lägg till
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {employees.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center p-6 text-center">
-                <Users className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-muted-foreground">Inga medarbetare har lagts till ännu.</p>
-                <p className="text-muted-foreground mb-4">Lägg till din första medarbetare för att komma igång.</p>
-                <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Lägg till första medarbetaren
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Lägg till ny medarbetare</DialogTitle>
-                      <DialogDescription>
-                        Fyll i uppgifter för den nya medarbetaren.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="employeeName">Namn</Label>
-                        <Input
-                          id="employeeName"
-                          placeholder="Fullständigt namn"
-                          value={newEmployee.name}
-                          onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="employeeEmail">E-postadress</Label>
-                        <Input
-                          id="employeeEmail"
-                          type="email"
-                          placeholder="E-post"
-                          value={newEmployee.email}
-                          onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setNewEmployeeDialogOpen(false)}>Avbryt</Button>
-                      <Button
-                        onClick={handleAddEmployee}
-                        disabled={!newEmployee.name.trim() || !newEmployee.email.trim() || submitting}
-                      >
-                        {submitting ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <UserPlus className="h-4 w-4 mr-2" />
-                        )}
-                        Lägg till
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="p-0">
+            <CardContent>
+              <div className="rounded-lg border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Namn</TableHead>
+                      <TableHead className="w-[250px]">Namn</TableHead>
                       <TableHead>E-post</TableHead>
                       <TableHead>Progress</TableHead>
                       <TableHead>Buddy</TableHead>
@@ -685,167 +441,194 @@ export default function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {employees.map((employee) => (
-                      <TableRow key={employee.id}>
-                        <TableCell className="font-medium">{employee.name}</TableCell>
-                        <TableCell>{employee.email}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <div className="bg-muted rounded-full h-2 w-24 overflow-hidden">
-                              <div
-                                className="bg-primary h-full"
-                                style={{ width: `${employee.progress}%` }}
-                              />
+                    {employees.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                          Inga medarbetare hittades
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      employees.map((employee) => (
+                        <TableRow key={employee.id}>
+                          <TableCell>{employee.name}</TableCell>
+                          <TableCell>{employee.email}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <div className="w-full bg-secondary/20 rounded-full h-2.5 mr-2">
+                                <div
+                                  className="bg-primary h-2.5 rounded-full"
+                                  style={{ width: `${employee.progress}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs tabular-nums">{employee.progress}%</span>
                             </div>
-                            <span>{employee.progress}%</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {employee.hasBuddy ? (
-                            <Badge variant="outline" className="bg-primary/10 flex gap-1 w-fit items-center">
-                              <CheckCircle2 className="h-3 w-3" />
-                              <span>Tilldelad</span>
-                            </Badge>
-                          ) : (
-                            <Dialog
-                              open={buddyDialogOpen && selectedEmployeeId === employee.id}
-                              onOpenChange={(open) => {
-                                setBuddyDialogOpen(open);
-                                if (!open) {
-                                  setSelectedEmployeeId(null);
-                                  setSelectedBuddyId(null);
-                                }
-                              }}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => setSelectedEmployeeId(employee.id)}
-                                >
-                                  Tilldela buddy
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Tilldela buddy</DialogTitle>
-                                  <DialogDescription>
-                                    Välj vem som ska vara buddy för {employee.name}.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-2 py-4">
-                                  <div className="font-medium">Välj buddy:</div>
-                                  <div className="space-y-1">
-                                    <div
-                                      className={`flex items-center gap-2 p-2 border rounded-md hover:bg-accent/50 cursor-pointer ${selectedBuddyId === session?.user.id ? 'bg-accent' : ''}`}
-                                      onClick={() => {
-                                        setSelectedBuddyId(session?.user.id || null);
-                                      }}
-                                    >
-                                      <User className="h-5 w-5 text-muted-foreground" />
-                                      <span>Du själv</span>
-                                    </div>
-
-                                    {buddies.map(buddy => (
-                                      <div
-                                        key={buddy.id}
-                                        className={`flex items-center gap-2 p-2 border rounded-md hover:bg-accent/50 cursor-pointer ${selectedBuddyId === buddy.id ? 'bg-accent' : ''}`}
-                                        onClick={() => {
-                                          setSelectedBuddyId(buddy.id);
-                                        }}
-                                      >
-                                        <User className="h-5 w-5 text-muted-foreground" />
-                                        <span>{buddy.name}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <DialogFooter>
-                                  <Button variant="outline" onClick={() => {
-                                    setBuddyDialogOpen(false);
-                                    setSelectedEmployeeId(null);
-                                    setSelectedBuddyId(null);
-                                  }}>
-                                    Avbryt
-                                  </Button>
-                                  <Button
-                                    onClick={handleAssignBuddy}
-                                    disabled={!selectedBuddyId || submitting}
-                                  >
-                                    {submitting ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : null}
-                                    Tilldela
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => router.push(`/admin/employee/${employee.id}`)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <AlertDialog
-                              open={deleteEmployeeDialogOpen && employeeToDelete === employee.id}
-                              onOpenChange={(open) => {
-                                setDeleteEmployeeDialogOpen(open);
-                                if (!open) setEmployeeToDelete(null);
-                              }}
-                            >
+                          </TableCell>
+                          <TableCell>
+                            {employee.hasBuddy ? (
+                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Tilldelad
+                              </Badge>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedEmployeeId(employee.id);
+                                  setBuddyDialogOpen(true);
+                                }}
+                              >
+                                <User className="h-3 w-3 mr-1" />
+                                Tilldela buddy
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
-                                  variant="outline"
+                                  variant="ghost"
                                   size="icon"
+                                  className="h-8 w-8 text-destructive"
                                   onClick={() => setEmployeeToDelete(employee.id)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <User className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Är du säker?</AlertDialogTitle>
+                                  <AlertDialogTitle>Ta bort medarbetare?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Detta kommer att ta bort medarbetaren från systemet. Denna åtgärd kan inte ångras.
+                                    Denna åtgärd kan inte ångras. Den valda medarbetaren och all tillhörande data kommer att tas bort permanent.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel onClick={() => {
-                                    setDeleteEmployeeDialogOpen(false);
-                                    setEmployeeToDelete(null);
-                                  }}>
-                                    Avbryt
-                                  </AlertDialogCancel>
+                                  <AlertDialogCancel>Avbryt</AlertDialogCancel>
                                   <AlertDialogAction
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     onClick={() => handleDeleteEmployee(employee.id)}
                                     disabled={submitting}
                                   >
                                     {submitting ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Tar bort...
+                                      </>
                                     ) : (
-                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      "Ta bort"
                                     )}
-                                    Ta bort
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
                             </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog för att lägga till ny medarbetare */}
+      <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lägg till ny medarbetare</DialogTitle>
+            <DialogDescription>
+              Fyll i uppgifterna för den nya medarbetaren.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="employee-name">Namn</Label>
+              <Input
+                id="employee-name"
+                placeholder="Namn"
+                value={newEmployee.name}
+                onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="employee-email">E-post</Label>
+              <Input
+                id="employee-email"
+                type="email"
+                placeholder="E-post"
+                value={newEmployee.email}
+                onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Avbryt</Button>
+            </DialogClose>
+            <Button
+              onClick={handleAddEmployee}
+              disabled={submitting || !newEmployee.name || !newEmployee.email}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                "Lägg till"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog för att tilldela buddy */}
+      <Dialog open={buddyDialogOpen} onOpenChange={setBuddyDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tilldela buddy</DialogTitle>
+            <DialogDescription>
+              Välj en medarbetare som ska vara buddy för den valda medarbetaren.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="buddy-select">Välj buddy</Label>
+              <select
+                id="buddy-select"
+                className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={selectedBuddyId || ""}
+                onChange={(e) => setSelectedBuddyId(e.target.value)}
+              >
+                <option value="" disabled>Välj en buddy...</option>
+                {buddies.map(buddy => (
+                  <option key={buddy.id} value={buddy.id}>{buddy.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Avbryt</Button>
+            </DialogClose>
+            <Button
+              onClick={handleAssignBuddy}
+              disabled={submitting || !selectedBuddyId}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sparar...
+                </>
+              ) : (
+                "Tilldela"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
