@@ -46,7 +46,8 @@ import {
   User,
   UserPlus,
   CheckCircle2,
-  Loader2
+  Loader2,
+  ClipboardCheck
 } from "lucide-react";
 
 // Typdefintioner
@@ -371,10 +372,16 @@ export default function AdminPage() {
                                 <Badge variant="outline">{checklist.tasksCount || 0}</Badge>
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => router.push(`/admin/template/${checklist.id}`)}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Redigera
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/template/${checklist.id}`)}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Redigera
+                                  </Button>
+                                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}>
+                                    <ClipboardCheck className="h-4 w-4 mr-2" />
+                                    Buddy-uppgifter
+                                  </Button>
+                                </div>
                               </TableCell>
                             </TableRow>
                           </TableBody>

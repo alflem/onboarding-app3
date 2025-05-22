@@ -74,8 +74,6 @@ import {
   restrictToWindowEdges,
 } from "@dnd-kit/modifiers";
 
-
-
 // Typdefinitioner
 type Task = {
   id: string;
@@ -111,6 +109,7 @@ function SortableCategory({
   setEditingCategory,
   handleUpdateCategory,
   handleDeleteCategory,
+  editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
@@ -150,8 +149,6 @@ function SortableCategory({
   handleAddTask: () => Promise<void>;
   saving: boolean;
 }) {
-
-
   // Hämta sortable-props för kategorin
   const {
     attributes,
@@ -169,13 +166,14 @@ function SortableCategory({
     zIndex: isDragging ? 1 : 0,
   };
 
-
-
   // Skapa en sorterad lista av uppgifts-IDs för SortableContext
   const taskIds = useMemo(
     () => category.tasks.map((task) => task.id),
     [category.tasks]
   );
+
+  // Create a local copy to avoid the linter confusion
+  const editingTaskIdProp = editingTaskId;
 
   return (
     <div
@@ -266,16 +264,20 @@ function SortableCategory({
       {/* Uppgifter inom kategorin */}
       <div className="space-y-2 ml-6 mt-2">
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {category.tasks.map((task) => (
-            <SortableTask
-              key={task.id}
-              task={task}
-              categoryId={category.id}
-              setEditingTaskId={setEditingTaskId}
-              setEditingTask={setEditingTask}
-              handleDeleteTask={handleDeleteTask}
-            />
-          ))}
+          {category.tasks
+            .filter((task) => !task.isBuddyTask)
+            .sort((a, b) => a.order - b.order)
+            .map((task) => (
+              <SortableTask
+                key={task.id}
+                task={task}
+                categoryId={category.id}
+                editingTaskId={editingTaskIdProp}
+                setEditingTaskId={setEditingTaskId}
+                setEditingTask={setEditingTask}
+                handleDeleteTask={handleDeleteTask}
+              />
+            ))}
         </SortableContext>
 
         {/* Lägg till uppgift i denna kategori */}
@@ -323,29 +325,11 @@ function SortableCategory({
                       ...newTask,
                       description: e.target.value,
                       categoryId: category.id,
+                      isBuddyTask: false,
                     })
                   }
                   placeholder="Ange en beskrivning (valfritt)"
                 />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="buddy-task"
-                  checked={newTask.isBuddyTask}
-                  onCheckedChange={(checked) =>
-                    setNewTask({
-                      ...newTask,
-                      isBuddyTask: !!checked,
-                      categoryId: category.id,
-                    })
-                  }
-                />
-                <Label
-                  htmlFor="buddy-task"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Detta är en buddy-uppgift
-                </Label>
               </div>
             </div>
             <DialogFooter>
@@ -381,12 +365,14 @@ function SortableCategory({
 function SortableTask({
   task,
   categoryId,
+  editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
 }: {
   task: Task;
   categoryId: string;
+  editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
@@ -410,16 +396,18 @@ function SortableTask({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 120ms ease',
+    transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
+    zIndex: isDragging ? 999 : "auto",
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-md p-3 ${isDragging ? 'border-primary bg-accent/5' : 'bg-background'}`}
+      className={`border rounded-md p-3 ${
+        isDragging ? "border-primary bg-accent/5" : "bg-background"
+      }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -548,7 +536,6 @@ export default function TemplateEditPage() {
     () => checklist?.categories.map((category) => category.id) || [],
     [checklist]
   );
-
 
   const fetchChecklist = useCallback(async () => {
     setLoading(true);
@@ -714,8 +701,6 @@ export default function TemplateEditPage() {
     }
   };
 
-
-
   // Funktion för att spara kategoriordning till databasen
   const handleSaveCategoryOrder = async (categories: Category[]) => {
     setSaving(true);
@@ -780,7 +765,6 @@ export default function TemplateEditPage() {
     }
   };
 
-
   // Funktioner för att hantera kategorier
   const handleAddCategory = async () => {
     if (newCategory.name.trim() && checklist) {
@@ -809,7 +793,10 @@ export default function TemplateEditPage() {
 
         setChecklist({
           ...checklist,
-          categories: [...checklist.categories, { ...addedCategory, tasks: [] }],
+          categories: [
+            ...checklist.categories,
+            { ...addedCategory, tasks: [] },
+          ],
         });
 
         setNewCategory({ name: "" });
@@ -980,7 +967,7 @@ export default function TemplateEditPage() {
         const updateData = {
           title: editingTask.title,
           description: editingTask.description,
-          isBuddyTask: editingTask.isBuddyTask,
+          isBuddyTask: false, // Always false in the regular template page
         };
 
         const response = await fetch(`/api/tasks/${editingTaskId}`, {
@@ -1081,7 +1068,7 @@ export default function TemplateEditPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: checklist.organization.name
+            name: checklist.organization.name,
           }),
         });
 
@@ -1160,60 +1147,32 @@ export default function TemplateEditPage() {
 
   // Huvudrenderingen av mallen
   return (
-    <div className="container p-4 md:p-8 space-y-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Tillbaka
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/admin")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tillbaka
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{checklist.organization.name}</h1>
+            <h1 className="text-2xl font-bold">Onboarding Checklista</h1>
             <p className="text-muted-foreground">
-              Redigera mall och checklista
+              Hantera mallen för nyanställda
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleSaveChecklist}
-            disabled={saving}
-          >
-            {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Spara
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Ta bort mall
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Är du säker?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Denna åtgärd kan inte ångras. Detta kommer permanent ta bort
-                  mallen och alla dess kategorier och uppgifter.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteChecklist}>
-                  {saving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  )}
-                  Ta bort
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/admin/buddy-template/${id}`)}
+        >
+          <ClipboardCheck className="h-4 w-4 mr-2" />
+          Hantera Buddy-uppgifter
+        </Button>
       </div>
 
       {/* Mallinställningar */}
@@ -1236,8 +1195,8 @@ export default function TemplateEditPage() {
                     ...checklist,
                     organization: {
                       ...checklist.organization,
-                      name: e.target.value
-                    }
+                      name: e.target.value,
+                    },
                   })
                 }
                 placeholder="Ange organisationens namn"
@@ -1409,24 +1368,6 @@ export default function TemplateEditPage() {
                   }
                   placeholder="Ange en beskrivning (valfritt)"
                 />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="edit-buddy-task"
-                  checked={editingTask.isBuddyTask}
-                  onCheckedChange={(checked) =>
-                    setEditingTask({
-                      ...editingTask,
-                      isBuddyTask: !!checked,
-                    })
-                  }
-                />
-                <Label
-                  htmlFor="edit-buddy-task"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Detta är en buddy-uppgift
-                </Label>
               </div>
             </div>
             <DialogFooter>
