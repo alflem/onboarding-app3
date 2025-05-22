@@ -133,16 +133,18 @@ function SortableTask({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 120ms ease',
+    transition: transition || "transform 120ms ease",
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
+    zIndex: isDragging ? 999 : "auto",
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-md p-3 ${isDragging ? 'border-primary bg-accent/5' : 'bg-background'}`}
+      className={`border rounded-md p-3 ${
+        isDragging ? "border-primary bg-accent/5" : "bg-background"
+      }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -156,12 +158,6 @@ function SortableTask({
                 {task.description}
               </p>
             )}
-            <div className="flex items-center mt-1">
-              <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
-                <ClipboardCheck className="h-3 w-3 mr-1" />
-                Buddy-uppgift
-              </span>
-            </div>
           </div>
         </div>
         <div className="flex items-center space-x-1">
@@ -215,6 +211,12 @@ function SortableTask({
 // Sortable Category Component with Buddy Tasks
 function SortableBuddyCategory({
   category,
+  editingCategoryId,
+  editingCategory,
+  setEditingCategoryId,
+  setEditingCategory,
+  handleUpdateCategory,
+  handleDeleteCategory,
   editingTaskId,
   setEditingTaskId,
   setEditingTask,
@@ -225,6 +227,12 @@ function SortableBuddyCategory({
   saving,
 }: {
   category: Category;
+  editingCategoryId: string | null;
+  editingCategory: { id: string; name: string };
+  setEditingCategoryId: (id: string | null) => void;
+  setEditingCategory: (category: { id: string; name: string }) => void;
+  handleUpdateCategory: () => Promise<void>;
+  handleDeleteCategory: (id: string) => Promise<void>;
   editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
@@ -266,7 +274,7 @@ function SortableBuddyCategory({
   };
 
   // Filtered buddy tasks
-  const buddyTasks = category.tasks.filter(task => task.isBuddyTask);
+  const buddyTasks = category.tasks.filter((task) => task.isBuddyTask);
 
   // Skapa en sorterad lista av uppgifts-IDs för SortableContext
   const taskIds = useMemo(
@@ -274,8 +282,8 @@ function SortableBuddyCategory({
     [buddyTasks]
   );
 
-  if (buddyTasks.length === 0) {
-    return null; // Don't render categories with no buddy tasks
+  if (buddyTasks.length === 0 && category.tasks.length > 0) {
+    return null; // Don't render categories with tasks but no buddy tasks
   }
 
   return (
@@ -289,12 +297,115 @@ function SortableBuddyCategory({
           <div {...attributes} {...listeners} className="cursor-grab">
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium">{category.name}</h3>
+          {editingCategoryId === category.id ? (
+            <div className="flex items-center space-x-2">
+              <Input
+                value={editingCategory.name}
+                onChange={(e) =>
+                  setEditingCategory({
+                    ...editingCategory,
+                    name: e.target.value,
+                  })
+                }
+                className="w-48"
+              />
+              <Button
+                size="sm"
+                onClick={handleUpdateCategory}
+                disabled={saving}
+              >
+                Spara
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setEditingCategoryId(null)}
+              >
+                Avbryt
+              </Button>
+            </div>
+          ) : (
+            <h3 className="text-lg font-medium">{category.name}</h3>
+          )}
         </div>
 
+        <div className="flex items-center space-x-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              setEditingCategoryId(category.id);
+              setEditingCategory({
+                id: category.id,
+                name: category.name,
+              });
+            }}
+          >
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Redigera</span>
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="ghost">
+                <Trash2 className="h-4 w-4 text-destructive" />
+                <span className="sr-only">Ta bort</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Är du säker?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Detta tar bort kategorin och alla buddy-uppgifter inom den.
+                  Denna åtgärd kan inte ångras.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleDeleteCategory(category.id)}
+                  className="bg-destructive text-destructive-foreground"
+                >
+                  Ta bort
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+
+      <div className="space-y-3 ml-6 mt-2">
+        {buddyTasks.length > 0 ? (
+          <SortableContext
+            items={taskIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {buddyTasks
+              .sort((a, b) => a.order - b.order)
+              .map((task) => (
+                <SortableTask
+                  key={task.id}
+                  task={task}
+                  categoryId={category.id}
+                  setEditingTaskId={setEditingTaskId}
+                  setEditingTask={setEditingTask}
+                  handleDeleteTask={handleDeleteTask}
+                />
+              ))}
+          </SortableContext>
+        ) : (
+          <p className="text-center py-4 text-muted-foreground">
+            Inga buddy-uppgifter i denna kategori ännu. Lägg till en!
+          </p>
+        )}
+
+        {/* Lägg till uppgift i denna kategori */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button
+              variant="outline"
+              className="w-full mt-2 border-dashed"
+              size="sm"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Lägg till buddy-uppgift
             </Button>
@@ -303,7 +414,7 @@ function SortableBuddyCategory({
             <DialogHeader>
               <DialogTitle>Lägg till buddy-uppgift</DialogTitle>
               <DialogDescription>
-                Lägg till en ny uppgift som ska genomföras av en buddy.
+                Lägg till en ny uppgift som ska genomföras av en buddy i kategorin {category.name}.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -365,29 +476,6 @@ function SortableBuddyCategory({
           </DialogContent>
         </Dialog>
       </div>
-
-      <div className="space-y-3 mt-4">
-        {buddyTasks.length > 0 ? (
-          <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-            {buddyTasks
-              .sort((a, b) => a.order - b.order)
-              .map((task) => (
-                <SortableTask
-                  key={task.id}
-                  task={task}
-                  categoryId={category.id}
-                  setEditingTaskId={setEditingTaskId}
-                  setEditingTask={setEditingTask}
-                  handleDeleteTask={handleDeleteTask}
-                />
-              ))}
-          </SortableContext>
-        ) : (
-          <p className="text-center py-4 text-muted-foreground">
-            Inga buddy-uppgifter i denna kategori ännu. Lägg till en!
-          </p>
-        )}
-      </div>
     </div>
   );
 }
@@ -399,13 +487,22 @@ export default function BuddyTemplatePage() {
   const router = useRouter();
   const { data: session, status } = useSession({ required: true });
 
-  // State för att hantera checklistan och dess delar
-  const [checklist, setChecklist] = useState<Checklist | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  // State for drag-and-drop
   const [draggedId, setDraggedId] = useState<UniqueIdentifier | null>(null);
 
-  // State för att hantera redigering av uppgifter
+  // State for template editing
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [checklist, setChecklist] = useState<Checklist | null>(null);
+
+  // State for category editing
+  const [newCategory, setNewCategory] = useState({ name: "" });
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null
+  );
+  const [editingCategory, setEditingCategory] = useState({ id: "", name: "" });
+
+  // State for task editing
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState({
     id: "",
@@ -413,8 +510,6 @@ export default function BuddyTemplatePage() {
     description: "",
     isBuddyTask: true, // Always true for buddy tasks
   });
-
-  // State för att hantera nya uppgifter
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -443,7 +538,7 @@ export default function BuddyTemplatePage() {
         const response = await fetch(`/api/templates/${id}`);
 
         if (!response.ok) {
-          throw new Error('Kunde inte hämta mallen');
+          throw new Error("Kunde inte hämta mallen");
         }
 
         const data = await response.json();
@@ -451,7 +546,7 @@ export default function BuddyTemplatePage() {
       } catch (error) {
         console.error("Fel vid hämtning av mall:", error);
         toast.error("Kunde inte ladda mallen", {
-          description: "Ett fel uppstod vid hämtning av mallen."
+          description: "Ett fel uppstod vid hämtning av mallen.",
         });
         router.push("/admin");
       } finally {
@@ -476,12 +571,18 @@ export default function BuddyTemplatePage() {
     if (over && active.id !== over.id) {
       if (checklist) {
         // Find what type of item is being dragged (category or task)
-        const isCategoryDrag = checklist.categories.some((cat) => cat.id === active.id);
+        const isCategoryDrag = checklist.categories.some(
+          (cat) => cat.id === active.id
+        );
 
         if (isCategoryDrag) {
           // Reordering categories
-          const oldIndex = checklist.categories.findIndex((cat) => cat.id === active.id);
-          const newIndex = checklist.categories.findIndex((cat) => cat.id === over.id);
+          const oldIndex = checklist.categories.findIndex(
+            (cat) => cat.id === active.id
+          );
+          const newIndex = checklist.categories.findIndex(
+            (cat) => cat.id === over.id
+          );
 
           const reorderedCategories = arrayMove(
             checklist.categories,
@@ -512,12 +613,18 @@ export default function BuddyTemplatePage() {
 
           if (sourceCategory && task) {
             // Find which category the task is being dragged to
-            const isSameCategory = sourceCategory.tasks.some((t) => t.id === over.id);
+            const isSameCategory = sourceCategory.tasks.some(
+              (t) => t.id === over.id
+            );
 
             if (isSameCategory) {
               // Reorder within the same category
-              const oldIndex = sourceCategory.tasks.findIndex((t) => t.id === active.id);
-              const newIndex = sourceCategory.tasks.findIndex((t) => t.id === over.id);
+              const oldIndex = sourceCategory.tasks.findIndex(
+                (t) => t.id === active.id
+              );
+              const newIndex = sourceCategory.tasks.findIndex(
+                (t) => t.id === over.id
+              );
 
               const reorderedTasks = arrayMove(
                 sourceCategory.tasks,
@@ -616,6 +723,136 @@ export default function BuddyTemplatePage() {
     }
   };
 
+  // Add a new category
+  const handleAddCategory = async () => {
+    if (newCategory.name.trim() && checklist) {
+      setSaving(true);
+
+      try {
+        const newCategoryObj = {
+          name: newCategory.name,
+          order: checklist.categories.length,
+          checklistId: checklist.id,
+        };
+
+        const response = await fetch("/api/categories", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newCategoryObj),
+        });
+
+        if (!response.ok) {
+          throw new Error("Kunde inte skapa kategori");
+        }
+
+        const addedCategory = await response.json();
+
+        setChecklist({
+          ...checklist,
+          categories: [
+            ...checklist.categories,
+            { ...addedCategory, tasks: [] },
+          ],
+        });
+
+        setNewCategory({ name: "" });
+
+        toast.success("Kategori skapad", {
+          description: "Kategorin har lagts till i mallen.",
+        });
+      } catch (error) {
+        console.error("Fel vid skapande av kategori:", error);
+        toast.error("Ett fel inträffade", {
+          description: "Kunde inte skapa kategorin. Försök igen senare.",
+        });
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  // Update an existing category
+  const handleUpdateCategory = async () => {
+    if (editingCategory.name.trim() && editingCategoryId && checklist) {
+      setSaving(true);
+
+      try {
+        const response = await fetch(`/api/categories/${editingCategoryId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: editingCategory.name }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Kunde inte uppdatera kategori");
+        }
+
+        const updatedCategory = await response.json();
+
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
+            cat.id === editingCategoryId
+              ? { ...cat, name: updatedCategory.name }
+              : cat
+          ),
+        });
+
+        setEditingCategoryId(null);
+
+        toast.success("Kategori uppdaterad", {
+          description: "Kategorin har uppdaterats i mallen.",
+        });
+      } catch (error) {
+        console.error("Fel vid uppdatering av kategori:", error);
+        toast.error("Ett fel inträffade", {
+          description: "Kunde inte uppdatera kategorin. Försök igen senare.",
+        });
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
+  // Delete a category
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (checklist) {
+      setSaving(true);
+
+      try {
+        const response = await fetch(`/api/categories/${categoryId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("Kunde inte ta bort kategori");
+        }
+
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.filter(
+            (cat) => cat.id !== categoryId
+          ),
+        });
+
+        toast.success("Kategori borttagen", {
+          description: "Kategorin har tagits bort från mallen.",
+        });
+      } catch (error) {
+        console.error("Fel vid borttagning av kategori:", error);
+        toast.error("Ett fel inträffade", {
+          description: "Kunde inte ta bort kategorin. Försök igen senare.",
+        });
+      } finally {
+        setSaving(false);
+      }
+    }
+  };
+
   // Add a new task
   const handleAddTask = async () => {
     if (newTask.title.trim() && newTask.categoryId && checklist) {
@@ -631,7 +868,7 @@ export default function BuddyTemplatePage() {
         }
 
         // Filter buddy tasks
-        const buddyTasks = category.tasks.filter(task => task.isBuddyTask);
+        const buddyTasks = category.tasks.filter((task) => task.isBuddyTask);
 
         const newTaskObj = {
           title: newTask.title,
@@ -797,25 +1034,38 @@ export default function BuddyTemplatePage() {
   // Render the template editor
   return (
     <div className="container p-6 space-y-6">
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/admin")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tillbaka
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Buddy Uppgifter</h1>
+            <p className="text-muted-foreground">
+              Hantera uppgifter som ska utföras av en buddy
+            </p>
+          </div>
+        </div>
+
         <Button
           variant="outline"
-          size="sm"
-          onClick={() => router.push("/admin")}
+          onClick={() => router.push(`/admin/template/${id}`)}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Tillbaka
+          Till Vanliga Uppgifter
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Buddy Uppgifter</h1>
-          <p className="text-muted-foreground">
-            Hantera uppgifter som ska utföras av en buddy
-          </p>
-        </div>
       </div>
 
       {editingTaskId && (
-        <Dialog defaultOpen={true} onOpenChange={(open) => !open && setEditingTaskId(null)}>
+        <Dialog
+          open={!!editingTaskId}
+          onOpenChange={(open) => !open && setEditingTaskId(null)}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Redigera buddy-uppgift</DialogTitle>
@@ -851,14 +1101,11 @@ export default function BuddyTemplatePage() {
               </div>
             </div>
             <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Avbryt</Button>
-              </DialogClose>
+              <Button variant="outline" onClick={() => setEditingTaskId(null)}>
+                Avbryt
+              </Button>
               <Button
-                onClick={() => {
-                  handleUpdateTask();
-                  setEditingTaskId(null);
-                }}
+                onClick={handleUpdateTask}
                 disabled={!editingTask.title.trim() || saving}
               >
                 {saving ? (
@@ -875,15 +1122,17 @@ export default function BuddyTemplatePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Buddy-uppgifter för {checklist?.organization.name}</CardTitle>
+          <CardTitle>Checklista och uppgifter</CardTitle>
           <CardDescription>
-            Hantera uppgifter som ska utföras av buddies.
+            Hantera uppgifter som ska utföras av buddies. Dra och släpp för
+            att ändra ordning.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Alla uppgifter på denna sida är buddy-uppgifter, vilket innebär att de ska utföras av en person som är buddy för en nyanställd.
+              Alla uppgifter på denna sida är buddy-uppgifter, vilket innebär
+              att de ska utföras av en person som är buddy för en nyanställd.
             </p>
 
             <DndContext
@@ -905,6 +1154,12 @@ export default function BuddyTemplatePage() {
                         <SortableBuddyCategory
                           key={category.id}
                           category={category}
+                          editingCategoryId={editingCategoryId}
+                          editingCategory={editingCategory}
+                          setEditingCategoryId={setEditingCategoryId}
+                          setEditingCategory={setEditingCategory}
+                          handleUpdateCategory={handleUpdateCategory}
+                          handleDeleteCategory={handleDeleteCategory}
                           editingTaskId={editingTaskId}
                           setEditingTaskId={setEditingTaskId}
                           setEditingTask={setEditingTask}
@@ -919,7 +1174,8 @@ export default function BuddyTemplatePage() {
                 ) : (
                   <div className="text-center py-12 border rounded-lg">
                     <p className="text-muted-foreground">
-                      Inga kategorier hittades. Gå till den vanliga checklista-redigeraren för att skapa kategorier.
+                      Inga kategorier hittades. Gå till den vanliga
+                      checklista-redigeraren för att skapa kategorier.
                     </p>
                   </div>
                 )}
@@ -933,6 +1189,37 @@ export default function BuddyTemplatePage() {
                 </DragOverlay>
               </div>
             </DndContext>
+
+            {/* Add new category */}
+            <div className="mt-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">
+                    Lägg till ny kategori
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      placeholder="Kategorinamn"
+                      value={newCategory.name}
+                      onChange={(e) => setNewCategory({ name: e.target.value })}
+                    />
+                    <Button
+                      onClick={handleAddCategory}
+                      disabled={!newCategory.name.trim() || saving}
+                    >
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4 mr-2" />
+                      )}
+                      Lägg till
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </CardContent>
       </Card>
