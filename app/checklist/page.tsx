@@ -226,12 +226,6 @@ export default function ChecklistPage() {
                       {buddyTasksCompleted} av {buddyTasksCount}
                     </Badge>
                   </div>
-                  <Link href="/checklist/buddy" className="w-full">
-                    <Button variant="outline" className="w-full mt-2 flex items-center gap-2">
-                      <Clipboard className="h-4 w-4" />
-                      <span>Visa buddy-checklista</span>
-                    </Button>
-                  </Link>
                 </div>
               </CardContent>
             </Card>

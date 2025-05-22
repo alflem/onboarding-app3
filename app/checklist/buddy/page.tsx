@@ -46,6 +46,22 @@ export default function BuddyChecklistPage() {
   const [checklist, setChecklist] = useState<ChecklistData>({ categories: [] });
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuddy, setIsBuddy] = useState<boolean | null>(null);
+
+  // Kontrollera om användaren är buddy
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/user/is-buddy')
+        .then(response => response.json())
+        .then(data => {
+          setIsBuddy(data.isBuddy);
+        })
+        .catch(error => {
+          console.error("Kunde inte kontrollera buddy-status:", error);
+          setIsBuddy(false);
+        });
+    }
+  }, [session?.user?.id]);
 
   const fetchChecklist = useCallback(async () => {
     try {
@@ -143,6 +159,19 @@ export default function BuddyChecklistPage() {
 
   if (status === "loading" || isLoading) {
     return <div className="container p-8 flex justify-center">Laddar...</div>;
+  }
+
+  if (isBuddy === false) {
+    return (
+      <div className="container p-4 md:p-8 space-y-6">
+        <section className="space-y-2">
+          <h1 className="text-3xl font-bold">Buddy Checklista</h1>
+          <p className="text-muted-foreground">
+            Du är inte en buddy.
+          </p>
+        </section>
+      </div>
+    );
   }
 
   return (

@@ -1,7 +1,7 @@
 // components/Header.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,22 @@ const Header: React.FC = () => {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isBuddy, setIsBuddy] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Kontrollera om användaren är buddy för någon
+    if (session?.user?.id) {
+      fetch('/api/user/is-buddy')
+        .then(response => response.json())
+        .then(data => {
+          setIsBuddy(data.isBuddy);
+        })
+        .catch(error => {
+          console.error("Kunde inte kontrollera buddy-status:", error);
+          setIsBuddy(false);
+        });
+    }
+  }, [session?.user?.id]);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -99,7 +115,7 @@ const Header: React.FC = () => {
               </Link>
             )}
 
-            {session?.user && (
+            {session?.user && isBuddy && (
               <Link href="/checklist/buddy" passHref>
                 <Button
                   variant={isActive("/checklist/buddy") ? "default" : "ghost"}
@@ -243,7 +259,7 @@ const Header: React.FC = () => {
               </Link>
             )}
 
-            {session?.user && (
+            {session?.user && isBuddy && (
               <Link
                 href="/checklist/buddy"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
