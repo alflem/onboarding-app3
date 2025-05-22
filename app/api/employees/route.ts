@@ -31,7 +31,7 @@ export async function GET() {
     // Hämta alla medarbetare för användarens organisation
     const employees = await prisma.user.findMany({
       where: {
-        organization: organizationId,
+        organizationId: organizationId,
         role: 'EMPLOYEE'
       },
       include: {
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Hämta en mall för organisationen (du kan välja en default-mall om du har en sådan flagga)
-    const template = await prisma.template.findFirst({
+    const checklist = await prisma.checklist.findFirst({
       where: {
         organizationId: organizationId
       },
@@ -166,11 +166,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Om det finns en mall, skapa progress-poster för alla uppgifter
-    if (template) {
+    if (checklist) {
       // Skapa en array av progress-data för alla uppgifter
       const progressData = [];
 
-      for (const category of template.categories) {
+      for (const category of checklist.categories) {
         for (const task of category.tasks) {
           progressData.push({
             userId: newEmployee.id,

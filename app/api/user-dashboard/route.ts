@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Hämta organisationens template för att beräkna total progress
-    const template = await prisma.template.findFirst({
+    // Hämta organisationens checklist för att beräkna total progress
+    const checklist = await prisma.checklist.findFirst({
       where: { organizationId: user.organizationId },
       include: {
         categories: {
@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
     let totalTasks = 0;
     let completedTasks = 0;
 
-    if (template) {
-      template.categories.forEach(category => {
+    if (checklist) {
+      checklist.categories.forEach(category => {
         category.tasks.forEach(task => {
           totalTasks++;
           // Kontrollera om denna uppgift är avklarad av användaren

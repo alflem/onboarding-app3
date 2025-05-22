@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Info, Users, HelpCircle } from "lucide-react";
+import Link from "next/link";
+import { Info, Users, HelpCircle, Clipboard } from "lucide-react";
 import { toast } from "sonner";
 
 // // Typdeklarationer baserade på Prisma-schemat
@@ -59,6 +60,8 @@ export default function ChecklistPage() {
   const [checklist, setChecklist] = useState<ChecklistData>({ categories: [] });
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [buddyTasksCount, setBuddyTasksCount] = useState(0);
+  const [buddyTasksCompleted, setBuddyTasksCompleted] = useState(0);
 
   const fetchChecklist = useCallback(async () => {
     try {
@@ -70,8 +73,34 @@ export default function ChecklistPage() {
       }
 
       const data = await response.json();
-      setChecklist(data);
-      calculateProgress(data.categories);
+
+      // Count buddy tasks
+      let buddyTotal = 0;
+      let buddyCompleted = 0;
+      data.categories.forEach(category => {
+        category.tasks.forEach(task => {
+          if (task.isBuddyTask) {
+            buddyTotal++;
+            if (task.completed) {
+              buddyCompleted++;
+            }
+          }
+        });
+      });
+
+      setBuddyTasksCount(buddyTotal);
+      setBuddyTasksCompleted(buddyCompleted);
+
+      // Filter out buddy tasks from the main checklist
+      const filteredData = {
+        categories: data.categories.map(category => ({
+          ...category,
+          tasks: category.tasks.filter(task => !task.isBuddyTask)
+        })).filter(category => category.tasks.length > 0)
+      };
+
+      setChecklist(filteredData);
+      calculateProgress(filteredData.categories);
     } catch (error) {
       console.error('Error fetching checklist:', error);
       toast.error('Ett fel uppstod när checklistan skulle hämtas');
@@ -92,11 +121,9 @@ export default function ChecklistPage() {
 
     categories.forEach(category => {
       category.tasks.forEach(task => {
-        if (!task.isBuddyTask) {
-          total++;
-          if (task.completed) {
-            completed++;
-          }
+        total++;
+        if (task.completed) {
+          completed++;
         }
       });
     });
@@ -161,33 +188,55 @@ export default function ChecklistPage() {
       </section>
 
       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
-        <Card className="w-full md:w-64 lg:w-80">
-          <CardHeader className="pb-2">
-            <CardTitle>Din progress</CardTitle>
-            <CardDescription>
-              Du har slutfört {progress}% av din checklista
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Progress value={progress} className="h-4" />
+        <div className="w-full md:w-64 lg:w-80 space-y-4">
+          <Card className="w-full">
+            <CardHeader className="pb-2">
+              <CardTitle>Din progress</CardTitle>
+              <CardDescription>
+                Du har slutfört {progress}% av din checklista
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={progress} className="h-4" />
 
-            <div className="mt-6 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Slutförda uppgifter</span>
-                <Badge variant="outline" className="bg-primary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => !t.isBuddyTask && t.completed).length} av {checklist.categories.flatMap(c => c.tasks).filter(t => !t.isBuddyTask).length}
-                </Badge>
+              <div className="mt-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Slutförda uppgifter</span>
+                  <Badge variant="outline" className="bg-primary/10">
+                    {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
+                  </Badge>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-center justify-between text-sm">
-                <span>Buddy-uppgifter</span>
-                <Badge variant="outline" className="bg-secondary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => t.isBuddyTask && t.completed).length} av {checklist.categories.flatMap(c => c.tasks).filter(t => t.isBuddyTask).length}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {buddyTasksCount > 0 && (
+            <Card className="w-full">
+              <CardHeader className="pb-2">
+                <CardTitle>Buddy-uppgifter</CardTitle>
+                <CardDescription>
+                  Uppgifter som ska utföras av din buddy
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Status</span>
+                    <Badge variant="outline" className="bg-secondary/10">
+                      {buddyTasksCompleted} av {buddyTasksCount}
+                    </Badge>
+                  </div>
+                  <Link href="/checklist/buddy" className="w-full">
+                    <Button variant="outline" className="w-full mt-2 flex items-center gap-2">
+                      <Clipboard className="h-4 w-4" />
+                      <span>Visa buddy-checklista</span>
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         <div className="w-full space-y-4">
           <Accordion type="multiple" defaultValue={["cat1"]} className="w-full">
@@ -218,11 +267,6 @@ export default function ChecklistPage() {
                           >
                             <div className="flex items-center gap-2">
                               {task.title}
-                              {task.isBuddyTask && (
-                                <Badge className="bg-secondary text-secondary-foreground">
-                                  Buddy
-                                </Badge>
-                              )}
                             </div>
                           </label>
                           <p className="text-sm text-muted-foreground">

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, CheckSquare, Settings, Building, Menu, X } from "lucide-react";
+import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucide-react";
 import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
 import Image from 'next/image';
 
@@ -95,6 +95,20 @@ const Header: React.FC = () => {
                 >
                   <CheckSquare className="mr-1 h-4 w-4" />
                   Checklista
+                </Button>
+              </Link>
+            )}
+
+            {session?.user && (
+              <Link href="/checklist/buddy" passHref>
+                <Button
+                  variant={isActive("/checklist/buddy") ? "default" : "ghost"}
+                  size="sm"
+                  className="text-gray-600"
+                  aria-current={isActive("/checklist/buddy") ? "page" : undefined}
+                >
+                  <UserCheck className="mr-1 h-4 w-4" />
+                  Buddy-Checklista
                 </Button>
               </Link>
             )}
@@ -225,6 +239,23 @@ const Header: React.FC = () => {
                 <div className="flex items-center">
                   <CheckSquare className="mr-2 h-4 w-4" />
                   Checklista
+                </div>
+              </Link>
+            )}
+
+            {session?.user && (
+              <Link
+                href="/checklist/buddy"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/checklist/buddy")
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+                onClick={toggleMenu}
+              >
+                <div className="flex items-center">
+                  <UserCheck className="mr-2 h-4 w-4" />
+                  Buddy-Checklista
                 </div>
               </Link>
             )}
