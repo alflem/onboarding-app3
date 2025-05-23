@@ -336,23 +336,21 @@ function SortableCategory({
               <DialogClose asChild>
                 <Button variant="outline">Avbryt</Button>
               </DialogClose>
-              <Button
-                onClick={() => {
-                  handleAddTask();
-                  const closeButton = document.querySelector(
-                    '[data-state="open"] button[aria-label="Close"]'
-                  ) as HTMLButtonElement;
-                  closeButton?.click();
-                }}
-                disabled={!newTask.title.trim() || saving}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
-                Lägg till
-              </Button>
+              <DialogClose asChild>
+                <Button
+                  onClick={async () => {
+                    await handleAddTask();
+                  }}
+                  disabled={!newTask.title.trim() || saving}
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Lägg till
+                </Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -801,6 +799,15 @@ export default function TemplateEditPage() {
 
         setNewCategory({ name: "" });
 
+        // Stäng alla öppna dialoger
+        const dialogs = document.querySelectorAll('[data-state="open"]');
+        dialogs.forEach(dialog => {
+          const closeButton = dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          }
+        });
+
         toast.success("Kategori skapad", {
           description: "Kategorin har lagts till i mallen.",
         });
@@ -844,6 +851,14 @@ export default function TemplateEditPage() {
         });
 
         setEditingCategoryId(null);
+
+        // Stäng eventuell dialog/formulär programmatiskt
+        const closeButton = document.querySelector(
+          '[data-state="open"] button[aria-label="Close"]'
+        ) as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.click();
+        }
 
         toast.success("Kategori uppdaterad", {
           description: "Kategorin har uppdaterats i mallen.",
@@ -945,6 +960,15 @@ export default function TemplateEditPage() {
           categoryId: "",
         });
 
+        // Stäng alla öppna dialoger
+        const dialogs = document.querySelectorAll('[data-state="open"]');
+        dialogs.forEach(dialog => {
+          const closeButton = dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          }
+        });
+
         toast.success("Uppgift skapad", {
           description: "Uppgiften har lagts till i mallen.",
         });
@@ -1002,6 +1026,12 @@ export default function TemplateEditPage() {
         });
 
         setEditingTaskId(null);
+
+        // Stäng dialogen programmatiskt
+        const closeButton = document.querySelector(
+          '[data-state="open"] button[aria-label="Close"]'
+        ) as HTMLButtonElement;
+        closeButton?.click();
 
         toast.success("Uppgift uppdaterad", {
           description: "Uppgiften har uppdaterats i mallen.",
@@ -1183,27 +1213,6 @@ export default function TemplateEditPage() {
             Anpassa grundinställningar för mallen
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="checklist-name">Organisationsnamn</Label>
-              <Input
-                id="checklist-name"
-                value={checklist.organization.name}
-                onChange={(e) =>
-                  setChecklist({
-                    ...checklist,
-                    organization: {
-                      ...checklist.organization,
-                      name: e.target.value,
-                    },
-                  })
-                }
-                placeholder="Ange organisationens namn"
-              />
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
       {/* Kategorier och uppgifter */}
@@ -1312,7 +1321,9 @@ export default function TemplateEditPage() {
                     onChange={(e) => setNewCategory({ name: e.target.value })}
                   />
                   <Button
-                    onClick={handleAddCategory}
+                    onClick={async () => {
+                      await handleAddCategory();
+                    }}
                     disabled={!newCategory.name.trim() || saving}
                   >
                     {saving ? (

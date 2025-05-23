@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         id: body.categoryId
       },
       include: {
-        template: {
+        checklist: {
           select: {
             organizationId: true
           }
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Kontrollera att användaren har tillgång till kategorin
-    if (category.template.organizationId !== session.user.organization.id) {
+    if (category.checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     await prisma.taskProgress.createMany({
       data: (await prisma.user.findMany({
         where: {
-          organizationId: category.template.organizationId,
+          organizationId: category.checklist.organizationId,
           role: 'EMPLOYEE'
         },
         select: {
