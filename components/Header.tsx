@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucide-react";
 import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
 import Image from 'next/image';
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Typdeklarationer som matchar Prisma-schemat
 enum Role {
@@ -96,7 +97,6 @@ const Header: React.FC = () => {
               <Button
                 variant={isActive("/") ? "default" : "ghost"}
                 size="sm"
-                className="text-muted-foreground"
                 aria-current={isActive("/") ? "page" : undefined}
               >
                 <Home className="mr-1 h-4 w-4" />
@@ -109,7 +109,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/checklist") ? "default" : "ghost"}
                   size="sm"
-                  className="text-muted-foreground"
                   aria-current={isActive("/checklist") ? "page" : undefined}
                 >
                   <CheckSquare className="mr-1 h-4 w-4" />
@@ -123,7 +122,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/checklist/buddy") ? "default" : "ghost"}
                   size="sm"
-                  className="text-muted-foreground"
                   aria-current={isActive("/checklist/buddy") ? "page" : undefined}
                 >
                   <UserCheck className="mr-1 h-4 w-4" />
@@ -137,7 +135,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-muted-foreground"
                   aria-current={isActive("/admin") ? "page" : undefined}
                 >
                   <Settings className="mr-1 h-4 w-4" />
@@ -151,7 +148,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/super-admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-muted-foreground"
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
@@ -159,6 +155,9 @@ const Header: React.FC = () => {
                 </Button>
               </Link>
             )}
+
+            {/* Theme toggle */}
+            <ThemeToggle />
 
             {/* User authentication */}
             {status === "loading" ? (
@@ -341,6 +340,12 @@ const Header: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-3 px-2 space-y-1">
+                    <div className="px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-medium">Tema</span>
+                        <ThemeToggle />
+                      </div>
+                    </div>
 
                     <button
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-accent/50"
