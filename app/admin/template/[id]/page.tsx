@@ -79,6 +79,7 @@ type Task = {
   id: string;
   title: string;
   description: string;
+  link: string | null;
   order: number;
   isBuddyTask: boolean;
 };
@@ -131,18 +132,21 @@ function SortableCategory({
     id: string;
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
   }) => void;
   handleDeleteTask: (categoryId: string, taskId: string) => Promise<void>;
   newTask: {
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
     categoryId: string;
   };
   setNewTask: (task: {
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
     categoryId: string;
   }) => void;
@@ -331,6 +335,22 @@ function SortableCategory({
                   placeholder="Ange en beskrivning (valfritt)"
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="task-link">Länk (valfritt)</Label>
+                <Input
+                  id="task-link"
+                  value={newTask.link}
+                  onChange={(e) =>
+                    setNewTask({
+                      ...newTask,
+                      link: e.target.value,
+                      categoryId: category.id,
+                    })
+                  }
+                  placeholder="https://exempel.se"
+                  type="url"
+                />
+              </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
@@ -376,6 +396,7 @@ function SortableTask({
     id: string;
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
   }) => void;
   handleDeleteTask: (categoryId: string, taskId: string) => Promise<void>;
@@ -439,6 +460,7 @@ function SortableTask({
                 id: task.id,
                 title: task.title,
                 description: task.description,
+                link: task.link || "",
                 isBuddyTask: task.isBuddyTask,
               });
             }}
@@ -518,6 +540,7 @@ export default function TemplateEditPage() {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
+    link: "",
     isBuddyTask: false,
     categoryId: "",
   });
@@ -526,6 +549,7 @@ export default function TemplateEditPage() {
     id: "",
     title: "",
     description: "",
+    link: "",
     isBuddyTask: false,
   });
 
@@ -925,6 +949,7 @@ export default function TemplateEditPage() {
         const newTaskObj = {
           title: newTask.title,
           description: newTask.description,
+          link: newTask.link,
           isBuddyTask: newTask.isBuddyTask,
           order: category.tasks.length,
           categoryId: newTask.categoryId,
@@ -956,6 +981,7 @@ export default function TemplateEditPage() {
         setNewTask({
           title: "",
           description: "",
+          link: "",
           isBuddyTask: false,
           categoryId: "",
         });
@@ -991,6 +1017,7 @@ export default function TemplateEditPage() {
         const updateData = {
           title: editingTask.title,
           description: editingTask.description,
+          link: editingTask.link,
           isBuddyTask: false, // Always false in the regular template page
         };
 
@@ -1018,6 +1045,7 @@ export default function TemplateEditPage() {
                     ...task,
                     title: updatedTask.title,
                     description: updatedTask.description,
+                    link: updatedTask.link,
                     isBuddyTask: updatedTask.isBuddyTask,
                   }
                 : task
@@ -1378,6 +1406,21 @@ export default function TemplateEditPage() {
                     })
                   }
                   placeholder="Ange en beskrivning (valfritt)"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-task-link">Länk (valfritt)</Label>
+                <Input
+                  id="edit-task-link"
+                  value={editingTask.link}
+                  onChange={(e) =>
+                    setEditingTask({
+                      ...editingTask,
+                      link: e.target.value,
+                    })
+                  }
+                  placeholder="https://exempel.se"
+                  type="url"
                 />
               </div>
             </div>

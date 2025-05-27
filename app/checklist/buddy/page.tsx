@@ -18,13 +18,14 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Info, Users, HelpCircle } from "lucide-react";
+import { Info, Users, HelpCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface Task {
   id: string;
   title: string;
   description: string | null;
+  link: string | null;
   isBuddyTask: boolean;
   order: number;
   completed: boolean;
@@ -259,6 +260,19 @@ export default function BuddyChecklistPage() {
                             <p className="text-sm text-muted-foreground">
                               {task.description}
                             </p>
+                            {task.link && (
+                              <div className="mt-2">
+                                                                  <a
+                                    href={task.link.startsWith('http') ? task.link : `https://${task.link}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
+                                  >
+                                  <ExternalLink className="h-3 w-3 group-hover:scale-110 transition-transform" />
+                                  Öppna länk
+                                </a>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}

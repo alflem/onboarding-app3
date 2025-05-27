@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       data: {
         title: body.title.trim(),
         description: body.description || "",
+        link: body.link || null,
         isBuddyTask: body.isBuddyTask || false,
         order: body.order || 0,
         category: {

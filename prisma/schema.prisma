@@ -96,6 +96,7 @@ model Task {
   id          String         @id @default(cuid())
   title       String
   description String?
+  link        String?
   categoryId  String
   order       Int
   isBuddyTask Boolean        @default(false)

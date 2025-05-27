@@ -142,6 +142,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       data: {
         title: body.title ? body.title.trim() : undefined,
         description: body.description !== undefined ? body.description : undefined,
+        link: body.link !== undefined ? body.link : undefined,
         isBuddyTask: body.isBuddyTask !== undefined ? body.isBuddyTask : undefined,
         order: body.order !== undefined ? body.order : undefined
       }

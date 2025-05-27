@@ -76,6 +76,7 @@ export async function GET() {
           id: task.id,
           title: task.title,
           description: task.description,
+          link: task.link,
           isBuddyTask: task.isBuddyTask,
           order: task.order,
           // Använd progressMap för att avgöra om en uppgift är slutförd
