@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
@@ -75,20 +76,38 @@ export default function Home() {
   }
 
   return (
-    <div className="container p-4 md:p-8 space-y-8">
-      <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
-          {status === "authenticated"
-            ? `Välkommen, ${session?.user?.name || 'användare'}!`
-            : "Välkommen till Onboarding-plattformen!"}
-        </h1>
-
-        {status === "authenticated" && dashboardData?.organization && (
-          <div className="text-lg text-muted-foreground">
-            Du är inloggad på <span className="font-medium text-foreground">{dashboardData.organization.name}</span>
+    <div className="space-y-8">
+      {/* Hero Section with Company Image */}
+      <section className="relative h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
+        <Image
+          src="/xlent-- 351_klar_web.jpg"
+          alt="Xlent företagsbild"
+          fill
+          className="object-cover object-top"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <div className="text-center text-white space-y-4 px-4">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+              {status === "authenticated"
+                ? `Välkommen, ${session?.user?.name || 'användare'}!`
+                : "Välkommen till Onboarding-plattformen!"}
+            </h1>
+            {status === "authenticated" && dashboardData?.organization && (
+              <div className="text-lg md:text-xl text-white/90">
+                Du är inloggad på <span className="font-medium">{dashboardData.organization.name}</span>
+              </div>
+            )}
+            {status !== "authenticated" && (
+              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
+                En sömlös och strukturerad onboarding för nya medarbetare
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </section>
+
+      <div className="container p-4 md:p-8 space-y-8">
 
       <Separator />
 
@@ -118,7 +137,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <CheckCircle className="mr-2 h-5 w-5 text-primary" />
@@ -155,7 +174,7 @@ export default function Home() {
                 </Button>
               )}
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Du kan lägga till fler kort här, t.ex. information om buddy, kommande möten, etc. */}
         </div>
@@ -207,6 +226,7 @@ export default function Home() {
           </Card>
         </div>
       )}
+      </div>
     </div>
   );
 }
