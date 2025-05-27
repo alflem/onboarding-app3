@@ -20,17 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import {
   Table,
   TableBody,
@@ -40,8 +30,6 @@ import {
   TableRow
 } from "@/components/ui/table";
 import {
-  Trash2,
-  Edit,
   Plus,
   Building,
   Loader2
@@ -65,8 +53,7 @@ export default function SuperAdminPage() {
   const [loading, setLoading] = useState(true);
   const [newOrg, setNewOrg] = useState({ name: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orgToDelete, setOrgToDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+
 
   // Hämta organisationer från API
   const fetchOrganizations = async () => {
@@ -169,43 +156,7 @@ export default function SuperAdminPage() {
     }
   };
 
-  // Ta bort en organisation
-  const handleDeleteOrganization = async (id: string) => {
-    try {
-      setIsDeleting(true);
-      setOrgToDelete(id);
 
-      console.log('Tar bort organisation:', id);
-      const response = await fetch(`/api/organizations/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Fel vid borttagning:', response.status, text);
-
-        let errorMsg = 'Kunde inte ta bort organisation';
-        try {
-          const errorData = JSON.parse(text);
-          if (errorData.error) errorMsg = errorData.error;
-        } catch (err) {
-          console.error('JSON parsing error:', err);
-          // Om det inte är JSON, använd standardfelmeddelandet
-        }
-
-        throw new Error(errorMsg);
-      }
-
-      setOrganizations(organizations.filter(org => org.id !== id));
-      toast.success("Organisationen har tagits bort framgångsrikt.");
-    } catch (error) {
-      console.error('Fel vid borttagning av organisation:', error);
-      toast.error(error instanceof Error ? error.message : 'Kunde inte ta bort organisation');
-    } finally {
-      setIsDeleting(false);
-      setOrgToDelete(null);
-    }
-  };
 
   if (status === "loading" || loading) {
     return (
@@ -231,53 +182,6 @@ export default function SuperAdminPage() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Organisationer</h2>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600">
-              <Plus className="h-4 w-4" />
-              <span>Ny organisation</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Skapa ny organisation</DialogTitle>
-              <DialogDescription>
-                Fyll i uppgifter för den nya organisationen. Efter att den skapats kan du lägga till adminanvändare.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="organizationName">Organisationsnamn</Label>
-                <Input
-                  id="organizationName"
-                  value={newOrg.name}
-                  onChange={(e) => setNewOrg({ ...newOrg, name: e.target.value })}
-                  placeholder="t.ex. Företaget AB"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setNewOrg({ name: "" })}>
-                Avbryt
-              </Button>
-              <Button
-                onClick={handleAddOrganization}
-                disabled={isSubmitting || !newOrg.name.trim()}
-                className="bg-amber-500 hover:bg-amber-600"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span>Skapar...</span>
-                  </>
-                ) : (
-                  "Skapa organisation"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {organizations.length > 0 ? (
@@ -290,65 +194,19 @@ export default function SuperAdminPage() {
                   <TableHead>Administratörer</TableHead>
                   <TableHead>Användare</TableHead>
                   <TableHead>Skapad</TableHead>
-                  <TableHead className="text-right">Åtgärder</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {organizations.map((org) => (
-                  <TableRow key={org.id}>
+                  <TableRow
+                    key={org.id}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => router.push(`/super-admin/organizations/${org.id}`)}
+                  >
                     <TableCell className="font-medium">{org.name}</TableCell>
                     <TableCell>{org.adminCount}</TableCell>
                     <TableCell>{org.userCount}</TableCell>
                     <TableCell>{org.createdAt}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => router.push(`/super-admin/organizations/${org.id}`)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setOrgToDelete(org.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Ta bort organisation</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Är du säker på att du vill ta bort organisationen &quot;{org.name}&quot;?
-                                Denna åtgärd kan inte ångras.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-red-500 hover:bg-red-600"
-                                onClick={() => handleDeleteOrganization(org.id)}
-                                disabled={isDeleting}
-                              >
-                                {isDeleting && orgToDelete === org.id ? (
-                                  <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    <span>Tar bort...</span>
-                                  </>
-                                ) : (
-                                  "Ta bort"
-                                )}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

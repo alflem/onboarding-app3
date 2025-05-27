@@ -44,10 +44,13 @@ import {
   Users,
   ClipboardList,
   User,
-  UserPlus,
   CheckCircle2,
   Loader2,
-  ClipboardCheck
+  ClipboardCheck,
+  Calendar,
+  UserX,
+  UserCheck,
+  BarChart3
 } from "lucide-react";
 
 // Typdefintioner
@@ -84,7 +87,6 @@ export default function AdminPage() {
   const [buddyEnabled, setBuddyEnabled] = useState<boolean>(true);
 
   // State för formulär
-  const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
 
@@ -92,10 +94,12 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // State för dialog-kontroll
-  const [newEmployeeDialogOpen, setNewEmployeeDialogOpen] = useState(false);
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
   const [deleteEmployeeDialogOpen, setDeleteEmployeeDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
+  const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
+  const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
+  const [employeeDetails, setEmployeeDetails] = useState<any>(null);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -223,43 +227,36 @@ export default function AdminPage() {
     }
   };
 
-  // Funktion för att lägga till en ny medarbetare
-  const handleAddEmployee = async () => {
-    if (!newEmployee.name.trim() || !newEmployee.email.trim()) return;
-
-    setSubmitting(true);
-
+  // Funktion för att hämta detaljerad information om en medarbetare
+  const fetchEmployeeDetails = async (employeeId: string) => {
     try {
-      const response = await fetch('/api/employees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEmployee),
-      });
+      setLoading(true);
+      const response = await fetch(`/api/employees/${employeeId}`);
 
       if (!response.ok) {
-        throw new Error('Kunde inte skapa medarbetare');
+        throw new Error('Kunde inte hämta medarbetardetaljer');
       }
 
-      await response.json();
-
-      fetchEmployees(); // Uppdatera listan med medarbetare
-      setNewEmployee({ name: "", email: "" });
-      setNewEmployeeDialogOpen(false);
-
-      toast.success("Medarbetare tillagd", {
-        description: "Den nya medarbetaren har lagts till."
-      });
+      const data = await response.json();
+      setEmployeeDetails(data);
     } catch (error) {
-      console.error("Fel vid tillägg av medarbetare:", error);
-      toast.error("Kunde inte lägga till medarbetare", {
-        description: "Ett fel uppstod vid tillägg av medarbetaren."
+      console.error("Fel vid hämtning av medarbetardetaljer:", error);
+      toast.error("Kunde inte ladda medarbetardetaljer", {
+        description: "Ett fel uppstod vid hämtning av medarbetarens information."
       });
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
+
+  // Funktion för att öppna medarbetardetaljer
+  const handleOpenEmployeeDetails = async (employeeId: string) => {
+    setSelectedEmployeeForDetail(employeeId);
+    setEmployeeDetailDialogOpen(true);
+    await fetchEmployeeDetails(employeeId);
+  };
+
+
 
   // Funktion för att ta bort en medarbetare
   const handleDeleteEmployee = async (id: string) => {
@@ -332,6 +329,46 @@ export default function AdminPage() {
     }
   };
 
+  // Funktion för att uppdatera buddy från detaljdialogen
+  const handleUpdateBuddyFromDetail = async (buddyId: string | null) => {
+    if (!selectedEmployeeForDetail) return;
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/employees/${selectedEmployeeForDetail}/buddy`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          buddyId: buddyId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte uppdatera buddy');
+      }
+
+      await response.json();
+
+      // Uppdatera både listan och detaljerna
+      fetchEmployees();
+      await fetchEmployeeDetails(selectedEmployeeForDetail);
+
+      toast.success(buddyId ? "Buddy tilldelad" : "Buddy borttagen", {
+        description: buddyId ? "Medarbetaren har tilldelats en buddy." : "Buddy-tilldelningen har tagits bort."
+      });
+    } catch (error) {
+      console.error("Fel vid uppdatering av buddy:", error);
+      toast.error("Kunde inte uppdatera buddy", {
+        description: "Ett fel uppstod vid uppdatering av buddy-tilldelning."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -343,89 +380,67 @@ export default function AdminPage() {
 
   return (
     <div className="container p-6 space-y-8">
-      <h1 className="text-3xl font-bold">Administrationspanel</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Administrationspanel</h1>
+      </div>
 
-      <Tabs defaultValue="checklist">
-        <TabsList className="mb-4">
-          <TabsTrigger value="checklist">
-            <ClipboardList className="h-4 w-4 mr-2" />
-            Onboarding Checklista
-          </TabsTrigger>
-          <TabsTrigger value="employees">
-            <Users className="h-4 w-4 mr-2" />
-            Medarbetare
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Checklist Management */}
-        <TabsContent value="checklist" className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Checklista Overview */}
+        <div className="lg:col-span-1">
           {checklist ? (
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
-                  <CardTitle>Onboarding Checklista</CardTitle>
-                  <CardDescription>Hantera din organisations onboarding-checklista</CardDescription>
-                </div>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5" />
+                  Onboarding Checklista
+                </CardTitle>
+                <CardDescription>Din organisations checklista</CardDescription>
               </CardHeader>
-
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="w-full md:w-3/4">
-                      <div className="rounded-lg border overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-[250px]">Checklista</TableHead>
-                              <TableHead>Kategorier</TableHead>
-                              <TableHead>Uppgifter</TableHead>
-                              <TableHead className="text-right">Åtgärder</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>Onboarding Checklista</TableCell>
-                              <TableCell>
-                                <Badge variant="outline">{checklist.categoriesCount || 0}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline">{checklist.tasksCount || 0}</Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/template/${checklist.id}`)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Redigera
-                                  </Button>
-                                  {buddyEnabled && (
-                                    <Button variant="outline" size="sm" onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}>
-                                      <ClipboardCheck className="h-4 w-4 mr-2" />
-                                      Buddy-uppgifter
-                                    </Button>
-                                  )}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </div>
-
-                      <div className="mt-4 text-sm text-muted-foreground">
-                        <p>Redigera checklistan för att lägga till kategorier och uppgifter som nyanställda behöver slutföra under onboarding.</p>
-                      </div>
-                    </div>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{checklist.categoriesCount || 0}</div>
+                    <div className="text-sm text-muted-foreground">Kategorier</div>
                   </div>
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{checklist.tasksCount || 0}</div>
+                    <div className="text-sm text-muted-foreground">Uppgifter</div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Button
+                    className="w-full"
+                    onClick={() => router.push(`/admin/template/${checklist.id}`)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Redigera Checklista
+                  </Button>
+                  {buddyEnabled && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}
+                    >
+                      <ClipboardCheck className="h-4 w-4 mr-2" />
+                      Buddy-uppgifter
+                    </Button>
+                  )}
+                </div>
+
+                <div className="text-xs text-muted-foreground">
+                  <p>Hantera kategorier och uppgifter som nyanställda behöver slutföra.</p>
                 </div>
               </CardContent>
             </Card>
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Ingen Checklista Hittades</CardTitle>
-                <CardDescription>Din organisation har ingen checklista än</CardDescription>
+                <CardTitle>Ingen Checklista</CardTitle>
+                <CardDescription>Skapa din första checklista</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={createChecklist} disabled={submitting}>
+                <Button onClick={createChecklist} disabled={submitting} className="w-full">
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -441,22 +456,19 @@ export default function AdminPage() {
               </CardContent>
             </Card>
           )}
-        </TabsContent>
+        </div>
 
-        {/* Employee Management */}
-        <TabsContent value="employees" className="space-y-4">
+        {/* Medarbetare Management */}
+        <div className="lg:col-span-2">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle>Medarbetare</CardTitle>
-                <CardDescription>
-                  Hantera medarbetare{buddyEnabled ? ' och buddy-tilldelningar' : ''}
-                </CardDescription>
-              </div>
-              <Button onClick={() => setNewEmployeeDialogOpen(true)}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Lägg till
-              </Button>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Medarbetare
+              </CardTitle>
+              <CardDescription>
+                Hantera medarbetare{buddyEnabled ? ' och buddy-tilldelningar' : ''}. Klicka på en rad för detaljer.
+              </CardDescription>
             </CardHeader>
 
             <CardContent>
@@ -480,7 +492,11 @@ export default function AdminPage() {
                       </TableRow>
                     ) : (
                       employees.map((employee) => (
-                        <TableRow key={employee.id}>
+                        <TableRow
+                          key={employee.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => handleOpenEmployeeDetails(employee.id)}
+                        >
                           <TableCell>{employee.name}</TableCell>
                           <TableCell>{employee.email}</TableCell>
                           <TableCell>
@@ -505,7 +521,8 @@ export default function AdminPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setSelectedEmployeeId(employee.id);
                                     setBuddyDialogOpen(true);
                                   }}
@@ -523,7 +540,10 @@ export default function AdminPage() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 text-destructive"
-                                  onClick={() => setEmployeeToDelete(employee.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEmployeeToDelete(employee.id);
+                                  }}
                                 >
                                   <User className="h-4 w-4" />
                                 </Button>
@@ -563,59 +583,10 @@ export default function AdminPage() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
-      {/* Dialog för att lägga till ny medarbetare */}
-      <Dialog open={newEmployeeDialogOpen} onOpenChange={setNewEmployeeDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Lägg till ny medarbetare</DialogTitle>
-            <DialogDescription>
-              Fyll i uppgifterna för den nya medarbetaren.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="employee-name">Namn</Label>
-              <Input
-                id="employee-name"
-                placeholder="Namn"
-                value={newEmployee.name}
-                onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="employee-email">E-post</Label>
-              <Input
-                id="employee-email"
-                type="email"
-                placeholder="E-post"
-                value={newEmployee.email}
-                onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Avbryt</Button>
-            </DialogClose>
-            <Button
-              onClick={handleAddEmployee}
-              disabled={submitting || !newEmployee.name || !newEmployee.email}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sparar...
-                </>
-              ) : (
-                "Lägg till"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Dialog för att tilldela buddy */}
       {buddyEnabled && (
@@ -664,6 +635,211 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
       )}
+
+      {/* Dialog för medarbetardetaljer */}
+      <Dialog open={employeeDetailDialogOpen} onOpenChange={setEmployeeDetailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              {employeeDetails?.name || "Medarbetardetaljer"}
+            </DialogTitle>
+            <DialogDescription>
+              Onboarding-status och buddy-hantering
+            </DialogDescription>
+          </DialogHeader>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="ml-2">Laddar...</span>
+            </div>
+          ) : employeeDetails ? (
+            <div className="space-y-6">
+                            {/* Grundläggande information */}
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Startdatum</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {employeeDetails.createdAt ? new Date(employeeDetails.createdAt).toLocaleDateString('sv-SE') : 'Okänt'}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Progress översikt */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Onboarding Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Totalt framsteg</span>
+                      <span className="text-sm font-bold">{employeeDetails.progress}%</span>
+                    </div>
+                    <div className="w-full bg-secondary/20 rounded-full h-3">
+                      <div
+                        className="bg-primary h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${employeeDetails.progress}%` }}
+                      ></div>
+                    </div>
+
+                    {employeeDetails.categories && (
+                      <div className="space-y-2 mt-4">
+                        <h4 className="text-sm font-medium">Kategorier</h4>
+                        {employeeDetails.categories.map((category: any) => (
+                          <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                            <span className="text-sm">{category.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">
+                                {category.completedTasks}/{category.totalTasks} uppgifter
+                              </span>
+                              <div className="w-16 bg-secondary/20 rounded-full h-2">
+                                <div
+                                  className="bg-primary h-2 rounded-full"
+                                  style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Buddy-hantering */}
+              {buddyEnabled && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4" />
+                      Buddy-tilldelning
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {employeeDetails.buddy ? (
+                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="h-4 w-4 text-green-600" />
+                            <div>
+                              <p className="text-sm font-medium text-green-800">{employeeDetails.buddy.name}</p>
+                              <p className="text-xs text-green-600">{employeeDetails.buddy.email}</p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUpdateBuddyFromDetail(null)}
+                            disabled={submitting}
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                          >
+                            {submitting ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <>
+                                <UserX className="h-3 w-3 mr-1" />
+                                Ta bort
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-sm text-muted-foreground">Ingen buddy tilldelad</p>
+                          <div className="space-y-2">
+                            <Label htmlFor="detail-buddy-select">Välj buddy</Label>
+                            <div className="flex gap-2">
+                              <select
+                                id="detail-buddy-select"
+                                className="flex-1 flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                value={selectedBuddyId || ""}
+                                onChange={(e) => setSelectedBuddyId(e.target.value)}
+                              >
+                                <option value="" disabled>Välj en buddy...</option>
+                                {buddies.map(buddy => (
+                                  <option key={buddy.id} value={buddy.id}>{buddy.name}</option>
+                                ))}
+                              </select>
+                              <Button
+                                onClick={() => {
+                                  if (selectedBuddyId) {
+                                    handleUpdateBuddyFromDetail(selectedBuddyId);
+                                    setSelectedBuddyId(null);
+                                  }
+                                }}
+                                disabled={submitting || !selectedBuddyId}
+                              >
+                                {submitting ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  "Tilldela"
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {employeeDetails.buddy && (
+                        <div className="space-y-2">
+                          <Label htmlFor="change-buddy-select">Byt buddy</Label>
+                          <div className="flex gap-2">
+                            <select
+                              id="change-buddy-select"
+                              className="flex-1 flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              value={selectedBuddyId || ""}
+                              onChange={(e) => setSelectedBuddyId(e.target.value)}
+                            >
+                              <option value="" disabled>Välj ny buddy...</option>
+                              {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id).map(buddy => (
+                                <option key={buddy.id} value={buddy.id}>{buddy.name}</option>
+                              ))}
+                            </select>
+                            <Button
+                              onClick={() => {
+                                if (selectedBuddyId) {
+                                  handleUpdateBuddyFromDetail(selectedBuddyId);
+                                  setSelectedBuddyId(null);
+                                }
+                              }}
+                              disabled={submitting || !selectedBuddyId}
+                            >
+                              {submitting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Byt"
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Kunde inte ladda medarbetardetaljer</p>
+            </div>
+          )}
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Stäng</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -8,6 +8,6 @@ export const config = {
     "/admin/:path*",
     "/checklist/:path*",
     // Exkludera API-rutter och publika rutter
-    "/((?!api|_next/static|_next/image|favicon.ico|auth/signin).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|auth/signin|.*\\.svg|.*\\.jpg|.*\\.jpeg|.*\\.png|.*\\.gif|.*\\.ico|.*\\.webp).*)",
   ],
 };
