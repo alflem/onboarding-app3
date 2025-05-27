@@ -85,6 +85,7 @@ export default function Home() {
           src="/xlent-- 351_klar_web.jpg"
           alt="Xlent företagsbild"
           fill
+          sizes="100vw"
           className="object-cover object-top"
           priority
         />

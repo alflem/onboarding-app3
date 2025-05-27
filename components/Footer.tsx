@@ -13,6 +13,7 @@ export default function Footer() {
               alt="Hållbara Konsulter"
               width={80}
               height={80}
+              style={{ width: 'auto', height: '80px' }}
             />
             <div>
               <h3 className="text-xl font-semibold text-foreground">Hållbara Konsulter</h3>

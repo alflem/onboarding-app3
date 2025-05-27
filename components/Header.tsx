@@ -82,10 +82,13 @@ const Header: React.FC = () => {
           {/* App logo and title */}
         <div className="flex-1">
           <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg">
-            <img
+            <Image
               src="/logo.svg"
               alt="Company Logo"
+              width={28}
+              height={28}
               className="h-7 w-auto"
+              style={{ width: 'auto', height: '28px' }}
             />
             Onboarding
           </Link>
