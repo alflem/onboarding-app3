@@ -41,18 +41,21 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Beräkna progress
+    // Beräkna progress (exkludera buddy-uppgifter)
     let totalTasks = 0;
     let completedTasks = 0;
 
     if (checklist) {
       checklist.categories.forEach(category => {
         category.tasks.forEach(task => {
-          totalTasks++;
-          // Kontrollera om denna uppgift är avklarad av användaren
-          const taskProgress = user.progress.find(p => p.taskId === task.id);
-          if (taskProgress && taskProgress.completed) {
-            completedTasks++;
+          // Exkludera buddy-uppgifter från progress-beräkningen
+          if (!task.isBuddyTask) {
+            totalTasks++;
+            // Kontrollera om denna uppgift är avklarad av användaren
+            const taskProgress = user.progress.find(p => p.taskId === task.id);
+            if (taskProgress && taskProgress.completed) {
+              completedTasks++;
+            }
           }
         });
       });
@@ -69,6 +72,8 @@ export async function GET(req: NextRequest) {
       },
       organization: user.organization,
       progress: progressPercentage,
+      completedTasks,
+      totalTasks,
       recentTasks: user.progress
         .filter(p => p.completed)
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())

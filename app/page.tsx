@@ -31,6 +31,8 @@ interface DashboardData {
   };
   organization: Organization;
   progress: number;
+  completedTasks: number;
+  totalTasks: number;
   recentTasks: RecentTask[];
 }
 
@@ -117,26 +119,70 @@ export default function Home() {
         </div>
       )}
 
-      {status === "authenticated" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {status === "authenticated" ? (
+        <div className="space-y-6">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Din onboarding-progress</CardTitle>
-              <CardDescription>
-                Du har klarat {dashboardData?.progress || 0}% av din checklista
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Progress value={dashboardData?.progress || 0} className="h-3 mb-4" />
-              <Button asChild className="w-full">
-                <Link href="/checklist">
-                  Fortsätt med din checklista
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
+                {/* Progress Circle & Title */}
+                <div className="flex flex-col items-center lg:items-start space-y-4">
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-primary">{dashboardData?.progress || 0}%</span>
+                    </div>
+                  </div>
+                  <div className="text-center lg:text-left">
+                    <h3 className="text-xl font-semibold">Onboarding Progress</h3>
+                    <p className="text-sm text-muted-foreground">Din framsteg hittills</p>
+                  </div>
+                </div>
+
+                {/* Progress Bar Section */}
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Slutförda uppgifter</span>
+                      <span className="text-sm text-muted-foreground">{dashboardData?.completedTasks || 0}/{dashboardData?.totalTasks || 0} uppgifter avklarade</span>
+                    </div>
+                    <Progress value={dashboardData?.progress || 0} className="h-3" />
+                  </div>
+
+                  {dashboardData?.recentTasks && dashboardData.recentTasks.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-sm font-medium">Senaste aktivitet</span>
+                      <div className="flex flex-wrap gap-2">
+                        {dashboardData.recentTasks.slice(0, 3).map((task) => (
+                          <div key={task.id} className="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
+                            <CheckCircle className="h-3 w-3 text-green-600" />
+                            <span className="text-xs font-medium text-green-700 truncate max-w-32">
+                              {task.title}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Button */}
+                <div className="flex flex-col space-y-3">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/checklist">
+                      Fortsätt
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <div className="text-center">
+                    <span className="text-xs text-muted-foreground">
+                      {Math.max(0, 100 - (dashboardData?.progress || 0))}% återstår
+                    </span>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
@@ -177,6 +223,7 @@ export default function Home() {
           </Card> */}
 
           {/* Du kan lägga till fler kort här, t.ex. information om buddy, kommande möten, etc. */}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
