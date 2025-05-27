@@ -8,6 +8,7 @@ async function main() {
   const adminOrg = await prisma.organization.create({
     data: {
       name: 'System Administration',
+      buddyEnabled: true,
     },
   });
 
@@ -27,6 +28,7 @@ async function main() {
   const demoOrg = await prisma.organization.create({
     data: {
       name: 'Demo Company',
+      buddyEnabled: true,
     },
   });
 

@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -31,13 +32,15 @@ import {
   Save,
   User,
   ArrowLeft,
-  UserCheck
+  UserCheck,
+  Users
 } from "lucide-react";
 
 // Typdefiitioner
 interface Organization {
   id: string;
   name: string;
+  buddyEnabled: boolean;
   createdAt: string;
 }
 
@@ -61,7 +64,9 @@ export default function OrganizationDetails() {
   const [loading, setLoading] = useState(true);
   const [savingUsers, setSavingUsers] = useState<Record<string, boolean>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingBuddy, setIsSavingBuddy] = useState(false);
   const [orgName, setOrgName] = useState("");
+  const [buddyEnabled, setBuddyEnabled] = useState(true);
 
   // Hämta organisationsdetaljer
   const fetchOrganizationDetails = async () => {
@@ -76,6 +81,7 @@ export default function OrganizationDetails() {
       const orgData = await orgResponse.json();
       setOrganization(orgData);
       setOrgName(orgData.name);
+      setBuddyEnabled(orgData.buddyEnabled);
 
       // Hämta användare för organisationen
       const usersResponse = await fetch(`/api/organizations/${organizationId}/users`);
@@ -134,6 +140,40 @@ export default function OrganizationDetails() {
       toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera organisationen");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Uppdatera buddy-inställningar
+  const handleUpdateBuddySettings = async () => {
+    if (buddyEnabled === organization?.buddyEnabled) return;
+
+    try {
+      setIsSavingBuddy(true);
+
+      const response = await fetch(`/api/organizations/${organizationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ buddyEnabled: buddyEnabled })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Kunde inte uppdatera buddy-inställningar");
+      }
+
+      const updatedOrg = await response.json();
+      setOrganization(updatedOrg);
+      toast.success(`Buddy-funktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
+
+    } catch (error) {
+      console.error("Fel vid uppdatering av buddy-inställningar:", error);
+      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");
+      // Återställ värdet vid fel
+      setBuddyEnabled(organization?.buddyEnabled || true);
+    } finally {
+      setIsSavingBuddy(false);
     }
   };
 
@@ -248,6 +288,53 @@ const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
               <>
                 <Save className="mr-2 h-4 w-4" />
                 <span>Spara ändringar</span>
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Buddy-inställningar
+          </CardTitle>
+          <CardDescription>
+            Hantera buddy-funktionalitet för denna organisation
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="buddy-enabled">Aktivera buddy-funktionen</Label>
+              <p className="text-sm text-muted-foreground">
+                När aktiverad kan administratörer tilldela buddies till nyanställda medarbetare
+              </p>
+            </div>
+            <Switch
+              id="buddy-enabled"
+              checked={buddyEnabled}
+              onCheckedChange={setBuddyEnabled}
+              disabled={isSavingBuddy}
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button
+            onClick={handleUpdateBuddySettings}
+            disabled={isSavingBuddy || buddyEnabled === organization?.buddyEnabled}
+            className="bg-amber-500 hover:bg-amber-600"
+          >
+            {isSavingBuddy ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>Sparar...</span>
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                <span>Spara buddy-inställningar</span>
               </>
             )}
           </Button>

@@ -28,6 +28,16 @@ export async function GET() {
     // Hämta organisationsid från användarsessionen
     const organizationId = session.user.organization.id;
 
+    // Kontrollera om buddy-funktionen är aktiverad för organisationen
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { buddyEnabled: true }
+    });
+
+    if (!organization || !organization.buddyEnabled) {
+      return NextResponse.json([]);
+    }
+
     // Hämta alla möjliga buddies (personal som kan vara buddies)
     // Detta kan vara alla användare utom EMPLOYEE, men kan anpassas efter behov
     const buddies = await prisma.user.findMany({
@@ -49,7 +59,7 @@ export async function GET() {
     });
 
     // Förenkla resultatet till bara id och namn för API-svaret
-    const simplifiedBuddies = buddies.map(buddy => ({
+    const simplifiedBuddies = buddies.map((buddy: { id: string; name: string }) => ({
       id: buddy.id,
       name: buddy.name
     }));

@@ -81,6 +81,7 @@ export default function AdminPage() {
   const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [buddies, setBuddies] = useState<Buddy[]>([]);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean>(true);
 
   // State för formulär
   const [newEmployee, setNewEmployee] = useState({ name: "", email: "" });
@@ -105,11 +106,30 @@ export default function AdminPage() {
       }
 
       // Hämta data
+      fetchOrganizationSettings();
       fetchChecklist();
       fetchEmployees();
       fetchBuddies();
     }
   }, [status, session, router]);
+
+  // Funktion för att hämta organisationsinställningar
+  const fetchOrganizationSettings = async () => {
+    try {
+      const response = await fetch('/api/organization/settings');
+
+      if (!response.ok) {
+        throw new Error('Kunde inte hämta organisationsinställningar');
+      }
+
+      const data = await response.json();
+      setBuddyEnabled(data.buddyEnabled);
+    } catch (error) {
+      console.error("Fel vid hämtning av organisationsinställningar:", error);
+      // Sätt default till true om det inte går att hämta
+      setBuddyEnabled(true);
+    }
+  };
 
   // Funktion för att hämta eller skapa en checklista
   const fetchChecklist = async () => {
@@ -377,10 +397,12 @@ export default function AdminPage() {
                                     <Edit className="h-4 w-4 mr-2" />
                                     Redigera
                                   </Button>
-                                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}>
-                                    <ClipboardCheck className="h-4 w-4 mr-2" />
-                                    Buddy-uppgifter
-                                  </Button>
+                                  {buddyEnabled && (
+                                    <Button variant="outline" size="sm" onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}>
+                                      <ClipboardCheck className="h-4 w-4 mr-2" />
+                                      Buddy-uppgifter
+                                    </Button>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>
@@ -427,7 +449,9 @@ export default function AdminPage() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
                 <CardTitle>Medarbetare</CardTitle>
-                <CardDescription>Hantera medarbetare och buddy-tilldelningar</CardDescription>
+                <CardDescription>
+                  Hantera medarbetare{buddyEnabled ? ' och buddy-tilldelningar' : ''}
+                </CardDescription>
               </div>
               <Button onClick={() => setNewEmployeeDialogOpen(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
@@ -443,14 +467,14 @@ export default function AdminPage() {
                       <TableHead className="w-[250px]">Namn</TableHead>
                       <TableHead>E-post</TableHead>
                       <TableHead>Progress</TableHead>
-                      <TableHead>Buddy</TableHead>
+                      {buddyEnabled && <TableHead>Buddy</TableHead>}
                       <TableHead className="text-right">Åtgärder</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {employees.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                        <TableCell colSpan={buddyEnabled ? 5 : 4} className="text-center py-4 text-muted-foreground">
                           Inga medarbetare hittades
                         </TableCell>
                       </TableRow>
@@ -470,26 +494,28 @@ export default function AdminPage() {
                               <span className="text-xs tabular-nums">{employee.progress}%</span>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            {employee.hasBuddy ? (
-                              <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Tilldelad
-                              </Badge>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedEmployeeId(employee.id);
-                                  setBuddyDialogOpen(true);
-                                }}
-                              >
-                                <User className="h-3 w-3 mr-1" />
-                                Tilldela buddy
-                              </Button>
-                            )}
-                          </TableCell>
+                          {buddyEnabled && (
+                            <TableCell>
+                              {employee.hasBuddy ? (
+                                <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Tilldelad
+                                </Badge>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedEmployeeId(employee.id);
+                                    setBuddyDialogOpen(true);
+                                  }}
+                                >
+                                  <User className="h-3 w-3 mr-1" />
+                                  Tilldela buddy
+                                </Button>
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell className="text-right">
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
@@ -592,7 +618,8 @@ export default function AdminPage() {
       </Dialog>
 
       {/* Dialog för att tilldela buddy */}
-      <Dialog open={buddyDialogOpen} onOpenChange={setBuddyDialogOpen}>
+      {buddyEnabled && (
+        <Dialog open={buddyDialogOpen} onOpenChange={setBuddyDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Tilldela buddy</DialogTitle>
@@ -636,6 +663,7 @@ export default function AdminPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      )}
     </div>
   );
 }

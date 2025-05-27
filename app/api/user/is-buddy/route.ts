@@ -12,6 +12,35 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Hämta användarens organisation för att kontrollera buddy-inställningar
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        organization: {
+          select: {
+            buddyEnabled: true
+          }
+        }
+      }
+    });
+
+    if (!user || !user.organization) {
+      return NextResponse.json({
+        isBuddy: false,
+        buddyFor: [],
+        buddyEnabled: false
+      });
+    }
+
+    // Om buddy-funktionen är inaktiverad för organisationen
+    if (!user.organization.buddyEnabled) {
+      return NextResponse.json({
+        isBuddy: false,
+        buddyFor: [],
+        buddyEnabled: false
+      });
+    }
+
     // Kontrollera om användaren är buddy för någon
     const employeesWithThisBuddy = await prisma.user.findMany({
       where: {
@@ -26,7 +55,8 @@ export async function GET() {
 
     return NextResponse.json({
       isBuddy: employeesWithThisBuddy.length > 0,
-      buddyFor: employeesWithThisBuddy
+      buddyFor: employeesWithThisBuddy,
+      buddyEnabled: true
     });
   } catch (error) {
     console.error('Error checking buddy status:', error);

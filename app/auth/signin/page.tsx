@@ -47,7 +47,7 @@ export default function SignIn() {
             >
               {isLoading ? "Loggar in..." : (
                 <>
-                  Logga in
+                  Logga in med Microsoft
                 </>
               )}
             </Button>

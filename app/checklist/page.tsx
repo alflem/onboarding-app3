@@ -62,6 +62,22 @@ export default function ChecklistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [buddyTasksCount, setBuddyTasksCount] = useState(0);
   const [buddyTasksCompleted, setBuddyTasksCompleted] = useState(0);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
+
+  // Kontrollera om buddy-funktionen är aktiverad
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/user/is-buddy')
+        .then(response => response.json())
+        .then(data => {
+          setBuddyEnabled(data.buddyEnabled);
+        })
+        .catch(error => {
+          console.error("Kunde inte kontrollera buddy-status:", error);
+          setBuddyEnabled(false);
+        });
+    }
+  }, [session?.user?.id]);
 
   const fetchChecklist = useCallback(async () => {
     try {
@@ -74,19 +90,21 @@ export default function ChecklistPage() {
 
       const data = await response.json();
 
-      // Count buddy tasks
+      // Count buddy tasks only if buddy is enabled
       let buddyTotal = 0;
       let buddyCompleted = 0;
-      data.categories.forEach(category => {
-        category.tasks.forEach(task => {
-          if (task.isBuddyTask) {
-            buddyTotal++;
-            if (task.completed) {
-              buddyCompleted++;
+      if (buddyEnabled) {
+        data.categories.forEach(category => {
+          category.tasks.forEach(task => {
+            if (task.isBuddyTask) {
+              buddyTotal++;
+              if (task.completed) {
+                buddyCompleted++;
+              }
             }
-          }
+          });
         });
-      });
+      }
 
       setBuddyTasksCount(buddyTotal);
       setBuddyTasksCompleted(buddyCompleted);
@@ -107,13 +125,13 @@ export default function ChecklistPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []); // Lägg till dependencies här om fetchChecklist behöver dem
+  }, [buddyEnabled]);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
+    if (status === "authenticated" && session?.user?.id && buddyEnabled !== null) {
       fetchChecklist();
     }
-  }, [status, session, fetchChecklist]);
+  }, [status, session, buddyEnabled, fetchChecklist]);
 
   const calculateProgress = (categories: Category[]) => {
     let completed = 0;
@@ -210,7 +228,7 @@ export default function ChecklistPage() {
             </CardContent>
           </Card>
 
-          {buddyTasksCount > 0 && (
+          {buddyEnabled && buddyTasksCount > 0 && (
             <Card className="w-full">
               <CardHeader className="pb-2">
                 <CardTitle>Buddy-uppgifter</CardTitle>

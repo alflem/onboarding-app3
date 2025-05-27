@@ -47,6 +47,7 @@ export default function BuddyChecklistPage() {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isBuddy, setIsBuddy] = useState<boolean | null>(null);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
 
   // Kontrollera om användaren är buddy
   useEffect(() => {
@@ -55,10 +56,12 @@ export default function BuddyChecklistPage() {
         .then(response => response.json())
         .then(data => {
           setIsBuddy(data.isBuddy);
+          setBuddyEnabled(data.buddyEnabled);
         })
         .catch(error => {
           console.error("Kunde inte kontrollera buddy-status:", error);
           setIsBuddy(false);
+          setBuddyEnabled(false);
         });
     }
   }, [session?.user?.id]);
@@ -76,10 +79,10 @@ export default function BuddyChecklistPage() {
 
       // Filter to only include categories with buddy tasks
       const buddyData = {
-        categories: data.categories.map(category => ({
+        categories: data.categories.map((category: Category) => ({
           ...category,
-          tasks: category.tasks.filter(task => task.isBuddyTask)
-        })).filter(category => category.tasks.length > 0)
+          tasks: category.tasks.filter((task: Task) => task.isBuddyTask)
+        })).filter((category: Category) => category.tasks.length > 0)
       };
 
       setChecklist(buddyData);
@@ -159,6 +162,19 @@ export default function BuddyChecklistPage() {
 
   if (status === "loading" || isLoading) {
     return <div className="container p-8 flex justify-center">Laddar...</div>;
+  }
+
+  if (buddyEnabled === false) {
+    return (
+      <div className="container p-4 md:p-8 space-y-6">
+        <section className="space-y-2">
+          <h1 className="text-3xl font-bold">Buddy Checklista</h1>
+          <p className="text-muted-foreground">
+            Buddy-funktionen är inaktiverad för din organisation.
+          </p>
+        </section>
+      </div>
+    );
   }
 
   if (isBuddy === false) {
