@@ -152,9 +152,9 @@ export default function Home() {
                       <span className="text-sm font-medium">Senaste aktivitet</span>
                       <div className="flex flex-wrap gap-2">
                         {dashboardData.recentTasks.slice(0, 3).map((task) => (
-                          <div key={task.id} className="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full">
-                            <CheckCircle className="h-3 w-3 text-green-600" />
-                            <span className="text-xs font-medium text-green-700 truncate max-w-32">
+                          <div key={task.id} className="flex items-center gap-2 px-3 py-1 bg-accent rounded-full">
+                            <CheckCircle className="h-3 w-3 text-primary" />
+                            <span className="text-xs font-medium text-accent-foreground truncate max-w-32">
                               {task.title}
                             </span>
                           </div>

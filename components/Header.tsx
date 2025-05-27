@@ -75,12 +75,12 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* App logo and title */}
         <div className="flex-1">
-          <Link href="/" className="flex items-center gap-2 text-gray-800 font-medium text-lg">
+          <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg">
             <img
               src="/logo.svg"
               alt="Company Logo"
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
               <Button
                 variant={isActive("/") ? "default" : "ghost"}
                 size="sm"
-                className="text-gray-600"
+                className="text-muted-foreground"
                 aria-current={isActive("/") ? "page" : undefined}
               >
                 <Home className="mr-1 h-4 w-4" />
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/checklist") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
+                  className="text-muted-foreground"
                   aria-current={isActive("/checklist") ? "page" : undefined}
                 >
                   <CheckSquare className="mr-1 h-4 w-4" />
@@ -123,7 +123,7 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/checklist/buddy") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
+                  className="text-muted-foreground"
                   aria-current={isActive("/checklist/buddy") ? "page" : undefined}
                 >
                   <UserCheck className="mr-1 h-4 w-4" />
@@ -137,7 +137,7 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
+                  className="text-muted-foreground"
                   aria-current={isActive("/admin") ? "page" : undefined}
                 >
                   <Settings className="mr-1 h-4 w-4" />
@@ -151,7 +151,7 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/super-admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
+                  className="text-muted-foreground"
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
@@ -162,7 +162,7 @@ const Header: React.FC = () => {
 
             {/* User authentication */}
             {status === "loading" ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse ml-2"></div>
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse ml-2"></div>
             ) : status === "authenticated" && session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -171,8 +171,8 @@ const Header: React.FC = () => {
                     size="sm"
                     className="flex items-center ml-2"
                   >
-                    <Avatar className="h-8 w-8 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                    <Avatar className="h-8 w-8 border border-border">
+                      <AvatarFallback className="bg-muted text-foreground">
                         {session.user.name
                           ?.split(" ")
                           .map((n) => n[0])
@@ -184,11 +184,11 @@ const Header: React.FC = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-xs text-gray-500">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
                     {session.user.organization.name}
                   </DropdownMenuLabel>
                   <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600"
+                    className="text-destructive focus:text-destructive"
                     onClick={() => signOut()}
                   >
                     Logga ut
@@ -228,14 +228,14 @@ const Header: React.FC = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
+        <div className="md:hidden bg-background border-t border-border">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link
               href="/"
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive("/")
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50"
               }`}
               onClick={toggleMenu}
             >
@@ -250,8 +250,8 @@ const Header: React.FC = () => {
                 href="/checklist"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/checklist")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -267,8 +267,8 @@ const Header: React.FC = () => {
                 href="/checklist/buddy"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/checklist/buddy")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -284,8 +284,8 @@ const Header: React.FC = () => {
                 href="/admin"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/admin")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -301,8 +301,8 @@ const Header: React.FC = () => {
                 href="/super-admin"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/super-admin")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -314,17 +314,17 @@ const Header: React.FC = () => {
             )}
 
             {/* User authentication for mobile */}
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-t border-border">
               {status === "loading" ? (
-                <div className="flex items-center px-5">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
-                  <div className="ml-3 w-24 h-4 bg-gray-200 animate-pulse rounded"></div>
-                </div>
+                                  <div className="flex items-center px-5">
+                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                    <div className="ml-3 w-24 h-4 bg-muted animate-pulse rounded"></div>
+                  </div>
               ) : status === "authenticated" && session?.user ? (
                 <>
                   <div className="flex items-center px-5">
-                    <Avatar className="h-8 w-8 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                    <Avatar className="h-8 w-8 border border-border">
+                      <AvatarFallback className="bg-muted text-foreground">
                         {session.user.name
                           ?.split(" ")
                           .map((n) => n[0])
@@ -332,10 +332,10 @@ const Header: React.FC = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">
+                      <div className="text-base font-medium text-foreground">
                         {session.user.name}
                       </div>
-                      <div className="text-sm font-medium text-gray-500">
+                      <div className="text-sm font-medium text-muted-foreground">
                         {session.user.organization.name}
                       </div>
                     </div>
@@ -343,7 +343,7 @@ const Header: React.FC = () => {
                   <div className="mt-3 px-2 space-y-1">
 
                     <button
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-accent/50"
                       onClick={() => {
                         signOut();
                         toggleMenu();

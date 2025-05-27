@@ -1226,7 +1226,7 @@ export default function BuddyTemplatePage() {
 
                 <DragOverlay>
                   {draggedId ? (
-                    <div className="border rounded-lg p-4 bg-white shadow-lg">
+                    <div className="border rounded-lg p-4 bg-background shadow-lg">
                       <div className="animate-pulse">Flyttar...</div>
                     </div>
                   ) : null}

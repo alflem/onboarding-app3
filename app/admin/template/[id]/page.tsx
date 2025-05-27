@@ -442,7 +442,7 @@ function SortableTask({
             )}
             {task.isBuddyTask && (
               <div className="flex items-center mt-1">
-                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
+                <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full flex items-center">
                   <ClipboardCheck className="h-3 w-3 mr-1" />
                   Buddy-uppgift
                 </span>
@@ -1320,7 +1320,7 @@ export default function TemplateEditPage() {
                       )}
                       {activeTask.isBuddyTask && (
                         <div className="flex items-center mt-1">
-                          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full flex items-center">
                             <ClipboardCheck className="h-3 w-3 mr-1" />
                             Buddy-uppgift
                           </span>

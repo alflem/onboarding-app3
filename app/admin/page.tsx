@@ -402,8 +402,8 @@ export default function AdminPage() {
                     <div className="text-2xl font-bold text-primary">{checklist.categoriesCount || 0}</div>
                     <div className="text-sm text-muted-foreground">Kategorier</div>
                   </div>
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">{checklist.tasksCount || 0}</div>
+                  <div className="text-center p-3 bg-secondary/20 rounded-lg">
+                    <div className="text-2xl font-bold text-primary">{checklist.tasksCount || 0}</div>
                     <div className="text-sm text-muted-foreground">Uppgifter</div>
                   </div>
                 </div>
@@ -513,7 +513,7 @@ export default function AdminPage() {
                           {buddyEnabled && (
                             <TableCell>
                               {employee.hasBuddy ? (
-                                <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                                <Badge className="bg-primary/10 text-primary hover:bg-primary/20">
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
                                   Tilldelad
                                 </Badge>
@@ -727,12 +727,12 @@ export default function AdminPage() {
                   <CardContent>
                     <div className="space-y-4">
                       {employeeDetails.buddy ? (
-                        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
                           <div className="flex items-center gap-2">
-                            <UserCheck className="h-4 w-4 text-green-600" />
+                            <UserCheck className="h-4 w-4 text-primary" />
                             <div>
-                              <p className="text-sm font-medium text-green-800">{employeeDetails.buddy.name}</p>
-                              <p className="text-xs text-green-600">{employeeDetails.buddy.email}</p>
+                              <p className="text-sm font-medium text-primary">{employeeDetails.buddy.name}</p>
+                              <p className="text-xs text-primary/70">{employeeDetails.buddy.email}</p>
                             </div>
                           </div>
                           <Button
@@ -740,7 +740,7 @@ export default function AdminPage() {
                             size="sm"
                             onClick={() => handleUpdateBuddyFromDetail(null)}
                             disabled={submitting}
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
                           >
                             {submitting ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
