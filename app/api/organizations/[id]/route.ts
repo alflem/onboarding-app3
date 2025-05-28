@@ -89,7 +89,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const { name, buddyEnabled } = body;
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: { name?: string; buddyEnabled?: boolean } = {};
 
     if (name !== undefined) {
       if (!name || typeof name !== 'string' || name.trim() === '') {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Card,
   CardContent,
@@ -59,7 +59,7 @@ import {
   DragStartEvent,
   DragEndEvent,
   UniqueIdentifier,
-  DragOverEvent,
+
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -110,7 +110,7 @@ function SortableCategory({
   setEditingCategory,
   handleUpdateCategory,
   handleDeleteCategory,
-  editingTaskId,
+  _editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
@@ -126,7 +126,7 @@ function SortableCategory({
   setEditingCategory: (category: { id: string; name: string }) => void;
   handleUpdateCategory: () => Promise<void>;
   handleDeleteCategory: (id: string) => Promise<void>;
-  editingTaskId: string | null;
+  _editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
@@ -177,7 +177,7 @@ function SortableCategory({
   );
 
   // Create a local copy to avoid the linter confusion
-  const editingTaskIdProp = editingTaskId;
+  const editingTaskIdProp = _editingTaskId;
 
   return (
     <div
@@ -276,7 +276,7 @@ function SortableCategory({
                 key={task.id}
                 task={task}
                 categoryId={category.id}
-                editingTaskId={editingTaskIdProp}
+                _editingTaskId={editingTaskIdProp}
                 setEditingTaskId={setEditingTaskId}
                 setEditingTask={setEditingTask}
                 handleDeleteTask={handleDeleteTask}
@@ -383,14 +383,14 @@ function SortableCategory({
 function SortableTask({
   task,
   categoryId,
-  editingTaskId,
+  _editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
 }: {
   task: Task;
   categoryId: string;
-  editingTaskId: string | null;
+  _editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
@@ -511,7 +511,6 @@ export default function TemplateEditPage() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isDraggingTask, setIsDraggingTask] = useState(false);
-  const [isDragDelayed, setIsDragDelayed] = useState(false);
   const dragDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sensorer för drag-and-drop
@@ -636,7 +635,6 @@ export default function TemplateEditPage() {
       clearTimeout(dragDelayTimeoutRef.current);
       dragDelayTimeoutRef.current = null;
     }
-    setIsDragDelayed(false);
 
     setActiveId(null);
     setActiveCategory(null);
@@ -1114,69 +1112,6 @@ export default function TemplateEditPage() {
     }
   };
 
-  // Funktion för att spara mallen
-  const handleSaveChecklist = async () => {
-    if (checklist) {
-      setSaving(true);
-
-      try {
-        const response = await fetch(`/api/templates/${checklist.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: checklist.organization.name,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Kunde inte spara mallen");
-        }
-
-        toast.success("Mall sparad", {
-          description: "Mallen har sparats framgångsrikt.",
-        });
-      } catch (error) {
-        console.error("Fel vid sparande av mall:", error);
-        toast.error("Ett fel inträffade", {
-          description: "Kunde inte spara mallen. Försök igen senare.",
-        });
-      } finally {
-        setSaving(false);
-      }
-    }
-  };
-
-  // Funktion för att ta bort mallen
-  const handleDeleteChecklist = async () => {
-    if (checklist) {
-      setSaving(true);
-
-      try {
-        const response = await fetch(`/api/templates/${checklist.id}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          throw new Error("Kunde inte ta bort mallen");
-        }
-
-        toast.success("Mall borttagen", {
-          description: "Mallen har tagits bort framgångsrikt.",
-        });
-
-        router.push("/admin");
-      } catch (error) {
-        console.error("Fel vid borttagning av mall:", error);
-        toast.error("Ett fel inträffade", {
-          description: "Kunde inte ta bort mallen. Försök igen senare.",
-        });
-        setSaving(false);
-      }
-    }
-  };
-
   // Render-logik för laddningsstatus
   if (status === "loading" || loading) {
     return (
@@ -1275,7 +1210,7 @@ export default function TemplateEditPage() {
                     setEditingCategory={setEditingCategory}
                     handleUpdateCategory={handleUpdateCategory}
                     handleDeleteCategory={handleDeleteCategory}
-                    editingTaskId={editingTaskId}
+                    _editingTaskId={editingTaskId}
                     setEditingTaskId={setEditingTaskId}
                     setEditingTask={setEditingTask}
                     handleDeleteTask={handleDeleteTask}

@@ -160,7 +160,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 // DELETE /api/templates/[id] - Ta bort en checklista är inte tillåtet
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(_request: NextRequest, _context: RouteContext) {
   return NextResponse.json(
     { error: 'Method not allowed - checklistor kan inte tas bort' },
     { status: 405 }

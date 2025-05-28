@@ -67,7 +67,7 @@ export async function PATCH(request: NextRequest) {
         }
       },
       include: {
-        template: {
+        checklist: {
           select: {
             organizationId: true
           }
@@ -85,7 +85,7 @@ export async function PATCH(request: NextRequest) {
 
     // Kontrollera om användaren har tillgång till alla kategorier
     const hasAccess = existingCategories.every(
-      cat => cat.template.organizationId === session.user.organization.id
+      cat => cat.checklist.organizationId === session.user.organization.id
     );
 
     if (!hasAccess) {

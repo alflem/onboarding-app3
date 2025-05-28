@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account, profile: _profile }) {
       // Om en användare loggar in via Azure AD
       if (user) {
         token.id = user.id;
@@ -53,7 +53,7 @@ export const authOptions: NextAuthOptions = {
         // Lägg till organization-info om det finns
         if ('organizationId' in user && user.organizationId) {
           token.organizationId = user.organizationId;
-          token.organizationName = (user as any).organizationName;
+          token.organizationName = (user as { organizationName?: string }).organizationName;
         }
       }
 

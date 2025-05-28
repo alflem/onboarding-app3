@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Info, Users, HelpCircle, Clipboard, ExternalLink } from "lucide-react";
+import { Info, Users, HelpCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 // // Typdeklarationer baserade på Prisma-schemat
@@ -95,8 +94,8 @@ export default function ChecklistPage() {
       let buddyTotal = 0;
       let buddyCompleted = 0;
       if (buddyEnabled) {
-        data.categories.forEach(category => {
-          category.tasks.forEach(task => {
+        data.categories.forEach((category: Category) => {
+          category.tasks.forEach((task: Task) => {
             if (task.isBuddyTask) {
               buddyTotal++;
               if (task.completed) {
@@ -112,10 +111,10 @@ export default function ChecklistPage() {
 
       // Filter out buddy tasks from the main checklist
       const filteredData = {
-        categories: data.categories.map(category => ({
+        categories: data.categories.map((category: Category) => ({
           ...category,
-          tasks: category.tasks.filter(task => !task.isBuddyTask)
-        })).filter(category => category.tasks.length > 0)
+          tasks: category.tasks.filter((task: Task) => !task.isBuddyTask)
+        })).filter((category: Category) => category.tasks.length > 0)
       };
 
       setChecklist(filteredData);

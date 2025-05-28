@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Hämta inloggad användare och kontrollera behörighet
@@ -27,7 +27,7 @@ export async function GET(
       );
     }
 
-    const { id: organizationId } = params;
+    const { id: organizationId } = await params;
 
     // Kontrollera att organisationen finns
     const organizationExists = await prisma.organization.findUnique({

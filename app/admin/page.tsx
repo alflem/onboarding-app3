@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -13,12 +13,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+
   DialogClose
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,30 +95,19 @@ export default function AdminPage() {
 
   // State för dialog-kontroll
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
-  const [deleteEmployeeDialogOpen, setDeleteEmployeeDialogOpen] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<string | null>(null);
+
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
-  const [employeeDetails, setEmployeeDetails] = useState<any>(null);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      // Kontrollera att användaren är admin
-      if (session?.user.role !== "ADMIN" && session?.user.role !== "SUPER_ADMIN") {
-        router.push("/");
-        return;
-      }
-
-      // Hämta data
-      fetchOrganizationSettings();
-      fetchChecklist();
-      fetchEmployees();
-      fetchBuddies();
-    }
-  }, [status, session, router]);
+  const [employeeDetails, setEmployeeDetails] = useState<{
+    name: string;
+    createdAt: string;
+    progress: number;
+    categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
+    buddy?: { name: string; email: string; id: string };
+  } | null>(null);
 
   // Funktion för att hämta organisationsinställningar
-  const fetchOrganizationSettings = async () => {
+  const fetchOrganizationSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/organization/settings');
 
@@ -133,36 +122,10 @@ export default function AdminPage() {
       // Sätt default till true om det inte går att hämta
       setBuddyEnabled(true);
     }
-  };
-
-  // Funktion för att hämta eller skapa en checklista
-  const fetchChecklist = async () => {
-    try {
-      const response = await fetch('/api/templates');
-
-      if (!response.ok) {
-        throw new Error('Kunde inte hämta checklista');
-      }
-
-      const data = await response.json();
-      if (data.length > 0) {
-        setChecklist(data[0]);
-      } else {
-        // Om ingen checklista finns, skapa en
-        await createChecklist();
-      }
-    } catch (error) {
-      console.error("Fel vid hämtning av checklista:", error);
-      toast.error("Kunde inte ladda checklista", {
-        description: "Ett fel uppstod vid hämtning av checklista."
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, []);
 
   // Funktion för att skapa en checklista om ingen finns
-  const createChecklist = async () => {
+  const createChecklist = useCallback(async () => {
     try {
       const response = await fetch('/api/templates', {
         method: 'POST',
@@ -187,10 +150,36 @@ export default function AdminPage() {
         description: "Ett fel uppstod vid skapande av checklista."
       });
     }
-  };
+  }, []);
+
+  // Funktion för att hämta eller skapa en checklista
+  const fetchChecklist = useCallback(async () => {
+    try {
+      const response = await fetch('/api/templates');
+
+      if (!response.ok) {
+        throw new Error('Kunde inte hämta checklista');
+      }
+
+      const data = await response.json();
+      if (data.length > 0) {
+        setChecklist(data[0]);
+      } else {
+        // Om ingen checklista finns, skapa en
+        await createChecklist();
+      }
+    } catch (error) {
+      console.error("Fel vid hämtning av checklista:", error);
+      toast.error("Kunde inte ladda checklista", {
+        description: "Ett fel uppstod vid hämtning av checklista."
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [createChecklist]);
 
   // Funktion för att hämta medarbetare från API
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const response = await fetch('/api/employees');
 
@@ -206,10 +195,10 @@ export default function AdminPage() {
         description: "Ett fel uppstod vid hämtning av medarbetare."
       });
     }
-  };
+  }, []);
 
   // Funktion för att hämta möjliga buddies från API
-  const fetchBuddies = async () => {
+  const fetchBuddies = useCallback(async () => {
     try {
       const response = await fetch('/api/buddies');
 
@@ -225,7 +214,23 @@ export default function AdminPage() {
         description: "Ett fel uppstod vid hämtning av möjliga buddies."
       });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      // Kontrollera att användaren är admin
+      if (session?.user.role !== "ADMIN" && session?.user.role !== "SUPER_ADMIN") {
+        router.push("/");
+        return;
+      }
+
+      // Hämta data
+      fetchOrganizationSettings();
+      fetchChecklist();
+      fetchEmployees();
+      fetchBuddies();
+    }
+  }, [status, session, router, fetchOrganizationSettings, fetchChecklist, fetchEmployees, fetchBuddies]);
 
   // Funktion för att hämta detaljerad information om en medarbetare
   const fetchEmployeeDetails = async (employeeId: string) => {
@@ -256,8 +261,6 @@ export default function AdminPage() {
     await fetchEmployeeDetails(employeeId);
   };
 
-
-
   // Funktion för att ta bort en medarbetare
   const handleDeleteEmployee = async (id: string) => {
     setSubmitting(true);
@@ -272,8 +275,6 @@ export default function AdminPage() {
       }
 
       setEmployees(employees.filter(e => e.id !== id));
-      setDeleteEmployeeDialogOpen(false);
-      setEmployeeToDelete(null);
 
       toast.success("Medarbetare borttagen", {
         description: "Medarbetaren har tagits bort från systemet."
@@ -542,7 +543,6 @@ export default function AdminPage() {
                                   className="h-8 w-8 text-destructive"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setEmployeeToDelete(employee.id);
                                   }}
                                 >
                                   <User className="h-4 w-4" />
@@ -585,8 +585,6 @@ export default function AdminPage() {
           </Card>
         </div>
       </div>
-
-
 
       {/* Dialog för att tilldela buddy */}
       {buddyEnabled && (
@@ -693,7 +691,7 @@ export default function AdminPage() {
                     {employeeDetails.categories && (
                       <div className="space-y-2 mt-4">
                         <h4 className="text-sm font-medium">Kategorier</h4>
-                        {employeeDetails.categories.map((category: any) => (
+                        {employeeDetails.categories.map((category: { id: string; name: string; completedTasks: number; totalTasks: number }) => (
                           <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
                             <span className="text-sm">{category.name}</span>
                             <div className="flex items-center gap-2">

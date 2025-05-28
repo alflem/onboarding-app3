@@ -56,7 +56,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         access_token: data.access_token,
         id_token: data.id_token,
         expires_at: data.expires_at,
-        ext_expires_in: (data as any).ext_expires_in,
+        ext_expires_in: (data as { ext_expires_in?: number }).ext_expires_in,
         // Lägg till eventuella andra fält från data som inte finns i ditt schema
       };
 

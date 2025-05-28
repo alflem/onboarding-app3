@@ -8,7 +8,7 @@ import { Role } from "@prisma/client";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
   try {
     // Hämta inloggad användare och kontrollera behörighet
@@ -28,7 +28,7 @@ export async function PATCH(
       );
     }
 
-    const { id: organizationId, userId } = params;
+    const { id: organizationId, userId } = await params;
     const { role } = await request.json();
 
     // Validera role

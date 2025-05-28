@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
@@ -32,7 +32,7 @@ import {
   Save,
   User,
   ArrowLeft,
-  UserCheck,
+
   Users
 } from "lucide-react";
 
@@ -69,7 +69,7 @@ export default function OrganizationDetails() {
   const [buddyEnabled, setBuddyEnabled] = useState(true);
 
   // Hämta organisationsdetaljer
-  const fetchOrganizationDetails = async () => {
+  const fetchOrganizationDetails = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -97,7 +97,7 @@ export default function OrganizationDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId]);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -109,7 +109,7 @@ export default function OrganizationDetails() {
 
       fetchOrganizationDetails();
     }
-  }, [status, session, organizationId, router]);
+  }, [status, session, router, fetchOrganizationDetails]);
 
   // Uppdatera organisationsnamn
   const handleUpdateOrganization = async () => {

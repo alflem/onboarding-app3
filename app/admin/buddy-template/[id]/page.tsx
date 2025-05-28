@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Card,
   CardContent,
@@ -42,7 +42,7 @@ import {
   GripVertical,
   ArrowLeft,
   Save,
-  ClipboardCheck,
+
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -59,7 +59,7 @@ import {
   DragStartEvent,
   DragEndEvent,
   UniqueIdentifier,
-  DragOverEvent,
+
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -220,7 +220,7 @@ function SortableBuddyCategory({
   setEditingCategory,
   handleUpdateCategory,
   handleDeleteCategory,
-  editingTaskId,
+  _editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
@@ -236,7 +236,7 @@ function SortableBuddyCategory({
   setEditingCategory: (category: { id: string; name: string }) => void;
   handleUpdateCategory: () => Promise<void>;
   handleDeleteCategory: (id: string) => Promise<void>;
-  editingTaskId: string | null;
+  _editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
@@ -508,7 +508,7 @@ export default function BuddyTemplatePage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { data: session, status } = useSession({ required: true });
+  const { data: session } = useSession({ required: true });
 
   // State for drag-and-drop
   const [draggedId, setDraggedId] = useState<UniqueIdentifier | null>(null);
@@ -1204,7 +1204,7 @@ export default function BuddyTemplatePage() {
                           setEditingCategory={setEditingCategory}
                           handleUpdateCategory={handleUpdateCategory}
                           handleDeleteCategory={handleDeleteCategory}
-                          editingTaskId={editingTaskId}
+                          _editingTaskId={editingTaskId}
                           setEditingTaskId={setEditingTaskId}
                           setEditingTask={setEditingTask}
                           handleDeleteTask={handleDeleteTask}

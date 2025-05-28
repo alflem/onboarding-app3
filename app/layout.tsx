@@ -1,5 +1,5 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
+import PWAInstaller from "@/components/pwa-installer";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -22,6 +23,27 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: "Onboarding App",
   description: "En app för onboarding av nyanställda",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Onboarding App",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icon-192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -48,6 +70,7 @@ export default function RootLayout({
             <Footer />
           </AuthProvider>
           <Toaster />
+          <PWAInstaller />
         </ThemeProvider>
       </body>
     </html>

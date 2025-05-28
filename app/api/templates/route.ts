@@ -83,7 +83,7 @@ export async function GET() {
 }
 
 // POST /api/templates - Skapa eller uppdatera organisationens checklista
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Hämta användarsession
     const session = await getServerSession(authOptions);
