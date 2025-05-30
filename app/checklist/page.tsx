@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Info, Users, HelpCircle } from "lucide-react";
+import { Info, Users, HelpCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 // // Typdeklarationer baserade på Prisma-schemat
@@ -38,6 +38,7 @@ interface Task {
   id: string;
   title: string;
   description: string | null;
+  link: string | null;
   isBuddyTask: boolean;
   order: number;
   completed: boolean; // Detta fält läggs till från TaskProgress
@@ -59,6 +60,24 @@ export default function ChecklistPage() {
   const [checklist, setChecklist] = useState<ChecklistData>({ categories: [] });
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [buddyTasksCount, setBuddyTasksCount] = useState(0);
+  const [buddyTasksCompleted, setBuddyTasksCompleted] = useState(0);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
+
+  // Kontrollera om buddy-funktionen är aktiverad
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch('/api/user/is-buddy')
+        .then(response => response.json())
+        .then(data => {
+          setBuddyEnabled(data.buddyEnabled);
+        })
+        .catch(error => {
+          console.error("Kunde inte kontrollera buddy-status:", error);
+          setBuddyEnabled(false);
+        });
+    }
+  }, [session?.user?.id]);
 
   const fetchChecklist = useCallback(async () => {
     try {
@@ -70,21 +89,49 @@ export default function ChecklistPage() {
       }
 
       const data = await response.json();
-      setChecklist(data);
-      calculateProgress(data.categories);
+
+      // Count buddy tasks only if buddy is enabled
+      let buddyTotal = 0;
+      let buddyCompleted = 0;
+      if (buddyEnabled) {
+        data.categories.forEach((category: Category) => {
+          category.tasks.forEach((task: Task) => {
+            if (task.isBuddyTask) {
+              buddyTotal++;
+              if (task.completed) {
+                buddyCompleted++;
+              }
+            }
+          });
+        });
+      }
+
+      setBuddyTasksCount(buddyTotal);
+      setBuddyTasksCompleted(buddyCompleted);
+
+      // Filter out buddy tasks from the main checklist
+      const filteredData = {
+        categories: data.categories.map((category: Category) => ({
+          ...category,
+          tasks: category.tasks.filter((task: Task) => !task.isBuddyTask)
+        })).filter((category: Category) => category.tasks.length > 0)
+      };
+
+      setChecklist(filteredData);
+      calculateProgress(filteredData.categories);
     } catch (error) {
       console.error('Error fetching checklist:', error);
       toast.error('Ett fel uppstod när checklistan skulle hämtas');
     } finally {
       setIsLoading(false);
     }
-  }, []); // Lägg till dependencies här om fetchChecklist behöver dem
+  }, [buddyEnabled]);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
+    if (status === "authenticated" && session?.user?.id && buddyEnabled !== null) {
       fetchChecklist();
     }
-  }, [status, session, fetchChecklist]);
+  }, [status, session, buddyEnabled, fetchChecklist]);
 
   const calculateProgress = (categories: Category[]) => {
     let completed = 0;
@@ -92,11 +139,9 @@ export default function ChecklistPage() {
 
     categories.forEach(category => {
       category.tasks.forEach(task => {
-        if (!task.isBuddyTask) {
-          total++;
-          if (task.completed) {
-            completed++;
-          }
+        total++;
+        if (task.completed) {
+          completed++;
         }
       });
     });
@@ -122,15 +167,18 @@ export default function ChecklistPage() {
 
       // Skicka uppdatering till servern
       const response = await fetch(`/api/tasks/${taskId}/progress`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ completed }),
       });
 
-      if (!response.ok) {
-        throw new Error('Kunde inte uppdatera uppgiftsstatus');
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        throw new Error('Kunde inte uppdatera uppgiftsstatusen');
       }
 
       // Uppdatering lyckades
@@ -158,33 +206,49 @@ export default function ChecklistPage() {
       </section>
 
       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
-        <Card className="w-full md:w-64 lg:w-80">
-          <CardHeader className="pb-2">
-            <CardTitle>Din progress</CardTitle>
-            <CardDescription>
-              Du har slutfört {progress}% av din checklista
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Progress value={progress} className="h-4" />
+        <div className="w-full md:w-64 lg:w-80 space-y-4">
+          <Card className="w-full">
+            <CardHeader className="pb-2">
+              <CardTitle>Din progress</CardTitle>
+              <CardDescription>
+                Du har slutfört {progress}% av din checklista
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={progress} className="h-4" />
 
-            <div className="mt-6 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Slutförda uppgifter</span>
-                <Badge variant="outline" className="bg-primary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => !t.isBuddyTask && t.completed).length} av {checklist.categories.flatMap(c => c.tasks).filter(t => !t.isBuddyTask).length}
-                </Badge>
+              <div className="mt-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Slutförda uppgifter</span>
+                  <Badge variant="outline" className="bg-primary/10">
+                    {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
+                  </Badge>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-center justify-between text-sm">
-                <span>Buddy-uppgifter</span>
-                <Badge variant="outline" className="bg-secondary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => t.isBuddyTask && t.completed).length} av {checklist.categories.flatMap(c => c.tasks).filter(t => t.isBuddyTask).length}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {buddyEnabled && buddyTasksCount > 0 && (
+            <Card className="w-full">
+              <CardHeader className="pb-2">
+                <CardTitle>Buddy-uppgifter</CardTitle>
+                <CardDescription>
+                  Uppgifter som ska utföras av din buddy
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Status</span>
+                    <Badge variant="outline" className="bg-secondary/10">
+                      {buddyTasksCompleted} av {buddyTasksCount}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         <div className="w-full space-y-4">
           <Accordion type="multiple" defaultValue={["cat1"]} className="w-full">
@@ -215,16 +279,24 @@ export default function ChecklistPage() {
                           >
                             <div className="flex items-center gap-2">
                               {task.title}
-                              {task.isBuddyTask && (
-                                <Badge className="bg-secondary text-secondary-foreground">
-                                  Buddy
-                                </Badge>
-                              )}
                             </div>
                           </label>
                           <p className="text-sm text-muted-foreground">
                             {task.description}
                           </p>
+                          {task.link && (
+                            <div className="mt-2">
+                              <a
+                                href={task.link.startsWith('http') ? task.link : `https://${task.link}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
+                              >
+                                <ExternalLink className="h-3 w-3 group-hover:scale-110 transition-transform" />
+                                Öppna länk
+                              </a>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

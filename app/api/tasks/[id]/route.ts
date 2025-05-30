@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       include: {
         category: {
           include: {
-            template: {
+            checklist: {
               select: {
                 organizationId: true
               }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till uppgiften
-    if (task.category.template.organizationId !== session.user.organization.id) {
+    if (task.category.checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -105,7 +105,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       include: {
         category: {
           include: {
-            template: {
+            checklist: {
               select: {
                 organizationId: true
               }
@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till uppgiften
-    if (existingTask.category.template.organizationId !== session.user.organization.id) {
+    if (existingTask.category.checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -142,6 +142,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       data: {
         title: body.title ? body.title.trim() : undefined,
         description: body.description !== undefined ? body.description : undefined,
+        link: body.link !== undefined ? body.link : undefined,
         isBuddyTask: body.isBuddyTask !== undefined ? body.isBuddyTask : undefined,
         order: body.order !== undefined ? body.order : undefined
       }
@@ -192,7 +193,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       include: {
         category: {
           include: {
-            template: {
+            checklist: {
               select: {
                 organizationId: true
               }
@@ -211,7 +212,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till uppgiften
-    if (existingTask.category.template.organizationId !== session.user.organization.id) {
+    if (existingTask.category.checklist.organizationId !== session.user.organization.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

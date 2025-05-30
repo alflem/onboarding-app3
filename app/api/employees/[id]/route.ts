@@ -98,7 +98,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
         acc[categoryId] = {
           id: categoryId,
           name: progress.task.category.name,
-          tasks: []
+          tasks: [],
+          completedTasks: 0,
+          totalTasks: 0
         };
       }
 
@@ -111,8 +113,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
         progressId: progress.id
       });
 
+      acc[categoryId].totalTasks++;
+      if (progress.completed) {
+        acc[categoryId].completedTasks++;
+      }
+
       return acc;
-    }, {} as Record<string, { id: string; name: string; tasks: EmployeeTask[] }>);
+    }, {} as Record<string, { id: string; name: string; tasks: EmployeeTask[]; completedTasks: number; totalTasks: number }>);
 
     // Konvertera till array
     const categories = Object.values(progressByCategory);
@@ -123,6 +130,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       name: employee.name,
       email: employee.email,
       organizationId: employee.organizationId,
+      createdAt: employee.createdAt,
       progress: progressPercentage,
       hasBuddy: employee.buddyId !== null,
       buddy: employee.buddy,

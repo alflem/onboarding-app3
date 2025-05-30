@@ -46,13 +46,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     console.log(`Found organization: ${organization.name}`);
 
-    const adminCount = organization.users.filter(user =>
+    const adminCount = organization.users.filter((user: { id: string; role: string }) =>
       user.role === 'ADMIN'
     ).length;
 
     return NextResponse.json({
       id: organization.id,
       name: organization.name,
+      buddyEnabled: organization.buddyEnabled,
       adminCount,
       userCount: organization.users.length,
       createdAt: organization.createdAt.toISOString().split('T')[0],
@@ -85,17 +86,32 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     console.log(`Updating organization ${id}...`);
 
     const body = await request.json();
-    const { name } = body;
+    const { name, buddyEnabled } = body;
 
-    if (!name || typeof name !== 'string' || name.trim() === '') {
-      return NextResponse.json({ error: "Organization name is required" }, { status: 400 });
+    // Prepare update data
+    const updateData: { name?: string; buddyEnabled?: boolean } = {};
+
+    if (name !== undefined) {
+      if (!name || typeof name !== 'string' || name.trim() === '') {
+        return NextResponse.json({ error: "Organization name is required" }, { status: 400 });
+      }
+      updateData.name = name.trim();
+    }
+
+    if (buddyEnabled !== undefined) {
+      if (typeof buddyEnabled !== 'boolean') {
+        return NextResponse.json({ error: "buddyEnabled must be a boolean" }, { status: 400 });
+      }
+      updateData.buddyEnabled = buddyEnabled;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
     const updatedOrganization = await prisma.organization.update({
       where: { id },
-      data: {
-        name: name.trim(),
-      },
+      data: updateData,
       include: {
         users: {
           select: {
@@ -108,13 +124,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     console.log(`Updated organization: ${updatedOrganization.name}`);
 
-    const adminCount = updatedOrganization.users.filter(user =>
+    const adminCount = updatedOrganization.users.filter((user: { id: string; role: string }) =>
       user.role === 'ADMIN'
     ).length;
 
     return NextResponse.json({
       id: updatedOrganization.id,
       name: updatedOrganization.name,
+      buddyEnabled: updatedOrganization.buddyEnabled,
       adminCount,
       userCount: updatedOrganization.users.length,
       createdAt: updatedOrganization.createdAt.toISOString().split('T')[0],

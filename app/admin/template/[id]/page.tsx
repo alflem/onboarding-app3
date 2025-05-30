@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Card,
   CardContent,
@@ -59,7 +59,7 @@ import {
   DragStartEvent,
   DragEndEvent,
   UniqueIdentifier,
-  DragOverEvent,
+
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -74,13 +74,12 @@ import {
   restrictToWindowEdges,
 } from "@dnd-kit/modifiers";
 
-
-
 // Typdefinitioner
 type Task = {
   id: string;
   title: string;
   description: string;
+  link: string | null;
   order: number;
   isBuddyTask: boolean;
 };
@@ -92,11 +91,14 @@ type Category = {
   tasks: Task[];
 };
 
-type Template = {
+type Checklist = {
   id: string;
-  name: string;
+  name?: string; // Name is from the organization
   organizationId: string;
   categories: Category[];
+  organization: {
+    name: string;
+  };
 };
 
 // Sortable Category Component
@@ -108,6 +110,7 @@ function SortableCategory({
   setEditingCategory,
   handleUpdateCategory,
   handleDeleteCategory,
+  _editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
@@ -123,32 +126,33 @@ function SortableCategory({
   setEditingCategory: (category: { id: string; name: string }) => void;
   handleUpdateCategory: () => Promise<void>;
   handleDeleteCategory: (id: string) => Promise<void>;
-  editingTaskId: string | null;
+  _editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
   }) => void;
   handleDeleteTask: (categoryId: string, taskId: string) => Promise<void>;
   newTask: {
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
     categoryId: string;
   };
   setNewTask: (task: {
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
     categoryId: string;
   }) => void;
   handleAddTask: () => Promise<void>;
   saving: boolean;
 }) {
-
-
   // Hämta sortable-props för kategorin
   const {
     attributes,
@@ -166,13 +170,14 @@ function SortableCategory({
     zIndex: isDragging ? 1 : 0,
   };
 
-
-
   // Skapa en sorterad lista av uppgifts-IDs för SortableContext
   const taskIds = useMemo(
     () => category.tasks.map((task) => task.id),
     [category.tasks]
   );
+
+  // Create a local copy to avoid the linter confusion
+  const editingTaskIdProp = _editingTaskId;
 
   return (
     <div
@@ -263,16 +268,20 @@ function SortableCategory({
       {/* Uppgifter inom kategorin */}
       <div className="space-y-2 ml-6 mt-2">
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {category.tasks.map((task) => (
-            <SortableTask
-              key={task.id}
-              task={task}
-              categoryId={category.id}
-              setEditingTaskId={setEditingTaskId}
-              setEditingTask={setEditingTask}
-              handleDeleteTask={handleDeleteTask}
-            />
-          ))}
+          {category.tasks
+            .filter((task) => !task.isBuddyTask)
+            .sort((a, b) => a.order - b.order)
+            .map((task) => (
+              <SortableTask
+                key={task.id}
+                task={task}
+                categoryId={category.id}
+                _editingTaskId={editingTaskIdProp}
+                setEditingTaskId={setEditingTaskId}
+                setEditingTask={setEditingTask}
+                handleDeleteTask={handleDeleteTask}
+              />
+            ))}
         </SortableContext>
 
         {/* Lägg till uppgift i denna kategori */}
@@ -320,52 +329,48 @@ function SortableCategory({
                       ...newTask,
                       description: e.target.value,
                       categoryId: category.id,
+                      isBuddyTask: false,
                     })
                   }
                   placeholder="Ange en beskrivning (valfritt)"
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="buddy-task"
-                  checked={newTask.isBuddyTask}
-                  onCheckedChange={(checked) =>
+              <div className="grid gap-2">
+                <Label htmlFor="task-link">Länk (valfritt)</Label>
+                <Input
+                  id="task-link"
+                  value={newTask.link}
+                  onChange={(e) =>
                     setNewTask({
                       ...newTask,
-                      isBuddyTask: !!checked,
+                      link: e.target.value,
                       categoryId: category.id,
                     })
                   }
+                  placeholder="https://exempel.se"
+                  type="url"
                 />
-                <Label
-                  htmlFor="buddy-task"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Detta är en buddy-uppgift
-                </Label>
               </div>
             </div>
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">Avbryt</Button>
               </DialogClose>
-              <Button
-                onClick={() => {
-                  handleAddTask();
-                  const closeButton = document.querySelector(
-                    '[data-state="open"] button[aria-label="Close"]'
-                  ) as HTMLButtonElement;
-                  closeButton?.click();
-                }}
-                disabled={!newTask.title.trim() || saving}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
-                Lägg till
-              </Button>
+              <DialogClose asChild>
+                <Button
+                  onClick={async () => {
+                    await handleAddTask();
+                  }}
+                  disabled={!newTask.title.trim() || saving}
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4 mr-2" />
+                  )}
+                  Lägg till
+                </Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -378,17 +383,20 @@ function SortableCategory({
 function SortableTask({
   task,
   categoryId,
+  _editingTaskId,
   setEditingTaskId,
   setEditingTask,
   handleDeleteTask,
 }: {
   task: Task;
   categoryId: string;
+  _editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
   setEditingTask: (task: {
     id: string;
     title: string;
     description: string;
+    link: string;
     isBuddyTask: boolean;
   }) => void;
   handleDeleteTask: (categoryId: string, taskId: string) => Promise<void>;
@@ -403,21 +411,22 @@ function SortableTask({
     isDragging,
   } = useSortable({
     id: task.id,
-    data: { type: 'task', categoryId: categoryId },
   });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 120ms ease',
+    transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
+    zIndex: isDragging ? 999 : "auto",
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`border rounded-md p-3 ${isDragging ? 'border-primary bg-accent/5' : 'bg-background'}`}
+      className={`border rounded-md p-3 ${
+        isDragging ? "border-primary bg-accent/5" : "bg-background"
+      }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -433,7 +442,7 @@ function SortableTask({
             )}
             {task.isBuddyTask && (
               <div className="flex items-center mt-1">
-                <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
+                <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full flex items-center">
                   <ClipboardCheck className="h-3 w-3 mr-1" />
                   Buddy-uppgift
                 </span>
@@ -451,6 +460,7 @@ function SortableTask({
                 id: task.id,
                 title: task.title,
                 description: task.description,
+                link: task.link || "",
                 isBuddyTask: task.isBuddyTask,
               });
             }}
@@ -501,7 +511,6 @@ export default function TemplateEditPage() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [isDraggingTask, setIsDraggingTask] = useState(false);
-  const [isDragDelayed, setIsDragDelayed] = useState(false);
   const dragDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Sensorer för drag-and-drop
@@ -509,7 +518,7 @@ export default function TemplateEditPage() {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 10,
-        delay: 150,
+        delay: 0,
         tolerance: 5,
       },
     }),
@@ -521,7 +530,7 @@ export default function TemplateEditPage() {
   // Övrig state
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [template, setTemplate] = useState<Template | null>(null);
+  const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [newCategory, setNewCategory] = useState({ name: "" });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -530,6 +539,7 @@ export default function TemplateEditPage() {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
+    link: "",
     isBuddyTask: false,
     categoryId: "",
   });
@@ -538,17 +548,17 @@ export default function TemplateEditPage() {
     id: "",
     title: "",
     description: "",
+    link: "",
     isBuddyTask: false,
   });
 
   // Skapa en sorterad lista av kategori-IDs för SortableContext
   const categoryIds = useMemo(
-    () => template?.categories.map((category) => category.id) || [],
-    [template]
+    () => checklist?.categories.map((category) => category.id) || [],
+    [checklist]
   );
 
-
-  const fetchTemplate = useCallback(async () => {
+  const fetchChecklist = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/templates/${id}`);
@@ -558,7 +568,14 @@ export default function TemplateEditPage() {
       }
 
       const data = await response.json();
-      setTemplate(data);
+
+      // Ensure the organization is always present
+      if (!data.organization) {
+        // If for some reason the organization is missing, create a placeholder
+        data.organization = { name: "Onboarding Checklista" };
+      }
+
+      setChecklist(data);
     } catch (error) {
       console.error("Fel vid hämtning av mall:", error);
       toast.error("Ett fel inträffade", {
@@ -580,9 +597,9 @@ export default function TemplateEditPage() {
         return;
       }
 
-      fetchTemplate();
+      fetchChecklist();
     }
-  }, [status, session, router, id, fetchTemplate]);
+  }, [status, session, router, id, fetchChecklist]);
 
   // Funktion för att hantera drag-start
   const handleDragStart = (event: DragStartEvent) => {
@@ -590,7 +607,7 @@ export default function TemplateEditPage() {
     setActiveId(active.id);
 
     // Kolla om vi drar en kategori
-    const draggedCategory = template?.categories.find(
+    const draggedCategory = checklist?.categories.find(
       (cat) => cat.id === active.id
     );
     if (draggedCategory) {
@@ -600,7 +617,7 @@ export default function TemplateEditPage() {
     }
 
     // Kolla om vi drar en uppgift (task)
-    for (const category of template?.categories || []) {
+    for (const category of checklist?.categories || []) {
       const draggedTask = category.tasks.find((task) => task.id === active.id);
       if (draggedTask) {
         setActiveTask(draggedTask);
@@ -618,30 +635,29 @@ export default function TemplateEditPage() {
       clearTimeout(dragDelayTimeoutRef.current);
       dragDelayTimeoutRef.current = null;
     }
-    setIsDragDelayed(false);
 
     setActiveId(null);
     setActiveCategory(null);
     setActiveTask(null);
     setIsDraggingTask(false);
 
-    if (!over || !template) return;
+    if (!over || !checklist) return;
 
     // Om aktivt och över-element är samma, gör ingenting
     if (active.id === over.id) return;
 
     // Om vi drar en kategori
     if (!isDraggingTask) {
-      const oldIndex = template.categories.findIndex(
+      const oldIndex = checklist.categories.findIndex(
         (cat) => cat.id === active.id
       );
-      const newIndex = template.categories.findIndex(
+      const newIndex = checklist.categories.findIndex(
         (cat) => cat.id === over.id
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
         const updatedCategories = arrayMove(
-          template.categories,
+          checklist.categories,
           oldIndex,
           newIndex
         ).map((cat, index) => ({
@@ -649,8 +665,8 @@ export default function TemplateEditPage() {
           order: index,
         }));
 
-        setTemplate({
-          ...template,
+        setChecklist({
+          ...checklist,
           categories: updatedCategories,
         });
 
@@ -660,11 +676,11 @@ export default function TemplateEditPage() {
     }
     // Om vi drar en uppgift inom samma kategori
     else {
-      const sourceCategory = template.categories.find((cat) =>
+      const sourceCategory = checklist.categories.find((cat) =>
         cat.tasks.some((task) => task.id === active.id)
       );
 
-      const targetCategory = template.categories.find((cat) =>
+      const targetCategory = checklist.categories.find((cat) =>
         cat.tasks.some((task) => task.id === over.id)
       );
 
@@ -687,14 +703,14 @@ export default function TemplateEditPage() {
             order: index,
           }));
 
-          const updatedCategories = template.categories.map((cat) =>
+          const updatedCategories = checklist.categories.map((cat) =>
             cat.id === sourceCategory.id
               ? { ...cat, tasks: reorderedTasks }
               : cat
           );
 
-          setTemplate({
-            ...template,
+          setChecklist({
+            ...checklist,
             categories: updatedCategories,
           });
 
@@ -703,122 +719,6 @@ export default function TemplateEditPage() {
         }
       }
     }
-  };
-
-  // Funktion för att hantera uppgift som dras över en annan kategori
-  const handleDragOver = (event: DragOverEvent) => {
-    if (!isDraggingTask || !template || isDragDelayed) return;
-
-    const { active, over } = event;
-    if (!over) return;
-
-    setIsDragDelayed(true);
-    dragDelayTimeoutRef.current = setTimeout(() => {
-      setIsDragDelayed(false);
-    }, 100);
-
-
-    const activeData = active.data.current;
-    if (!activeData || active.id === over.id) return;
-
-    // Hitta källkategori för uppgiften som dras
-    let sourceCategory: Category | undefined;
-    let draggedTask: Task | undefined;
-
-    for (const category of template.categories) {
-      const task = category.tasks.find((t) => t.id === active.id);
-      if (task) {
-        sourceCategory = category;
-        draggedTask = task;
-        break;
-      }
-    }
-
-    if (!sourceCategory || !draggedTask) return;
-
-    // Hitta målkategorin (kan vara samma eller annan kategori)
-    let targetCategory: Category | undefined;
-    let targetIndex = -1;
-
-    // Kontrollera om över-elementet är en kategori
-    targetCategory = template.categories.find((cat) => cat.id === over.id);
-    if (targetCategory) {
-      // Drar till en tom kategori eller slutet av en kategori
-      targetIndex = targetCategory.tasks.length;
-    } else {
-      // Kontrollera om över-elementet är en uppgift
-      for (const category of template.categories) {
-        const taskIndex = category.tasks.findIndex((t) => t.id === over.id);
-        if (taskIndex !== -1) {
-          targetCategory = category;
-          targetIndex = taskIndex;
-          break;
-        }
-      }
-    }
-
-    if (!targetCategory) return;
-
-    // Om vi redan har dragit till samma ställe, gör ingenting
-    if (
-      sourceCategory.id === targetCategory.id &&
-      sourceCategory.tasks.findIndex((t) => t.id === draggedTask?.id) ===
-        targetIndex
-    ) {
-      return;
-    }
-
-    // Om vi drar till en annan kategori eller en annan position i samma kategori
-    const sourceTasks = [...sourceCategory.tasks];
-    const sourceIndex = sourceTasks.findIndex((t) => t.id === draggedTask.id);
-
-    // Ta bort uppgiften från källkategorin
-    sourceTasks.splice(sourceIndex, 1);
-
-    // Förbered uppgiften för dess nya kategori
-    const taskToMove = {
-      ...draggedTask,
-      categoryId: targetCategory.id,
-    };
-
-    // Lägg till uppgiften i målkategorin
-    const targetTasks = [...targetCategory.tasks];
-    targetTasks.splice(targetIndex, 0, taskToMove);
-
-    // Uppdatera order för både käll- och målkategori
-    const updatedSourceTasks = sourceTasks.map((task, index) => ({
-      ...task,
-      order: index,
-    }));
-
-    const updatedTargetTasks = targetTasks.map((task, index) => ({
-      ...task,
-      order: index,
-    }));
-
-
-    // Uppdatera mall
-    setTemplate({
-      ...template,
-      categories: template.categories.map((cat) => {
-        if (cat.id === sourceCategory?.id) {
-          return { ...cat, tasks: updatedSourceTasks };
-        }
-        if (cat.id === targetCategory?.id) {
-          return { ...cat, tasks: updatedTargetTasks };
-        }
-        return cat;
-      }),
-    });
-
-    // Spara ändringar till databasen
-    handleMoveTask(
-      taskToMove,
-      targetCategory.id,
-      targetIndex,
-      updatedSourceTasks,
-      updatedTargetTasks
-    );
   };
 
   // Funktion för att spara kategoriordning till databasen
@@ -847,7 +747,7 @@ export default function TemplateEditPage() {
         description: "Kunde inte spara den nya ordningen. Försök igen senare.",
       });
       // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
+      fetchChecklist();
     } finally {
       setSaving(false);
     }
@@ -862,7 +762,7 @@ export default function TemplateEditPage() {
         order: task.order,
       }));
 
-      const response = await fetch("/api/tasks/reorder", {
+      const response = await fetch("../../api/tasks/reorder", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -879,82 +779,7 @@ export default function TemplateEditPage() {
         description: "Kunde inte spara den nya ordningen. Försök igen senare.",
       });
       // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Funktion för att hantera flyttning av uppgift mellan kategorier
-  const handleMoveTask = async (
-    task: Task,
-    newCategoryId: string,
-    newOrder: number,
-    updatedSourceTasks: Task[],
-    updatedTargetTasks: Task[]
-  ) => {
-    setSaving(true);
-    try {
-      // Uppdatera uppgiften med ny kategori och ordning
-      const moveResponse = await fetch(`/api/tasks/${task.id}/move`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          categoryId: newCategoryId,
-          order: newOrder,
-        }),
-      });
-
-      if (!moveResponse.ok) {
-        throw new Error("Kunde inte flytta uppgiften");
-      }
-
-      // Uppdatera ordningen för uppgifter i källkategorin om det finns några
-      if (updatedSourceTasks.length > 0) {
-        const sourceUpdates = updatedSourceTasks.map((task) => ({
-          id: task.id,
-          order: task.order,
-        }));
-
-        const sourceResponse = await fetch("/api/tasks/reorder", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tasks: sourceUpdates }),
-        });
-
-        if (!sourceResponse.ok) {
-          throw new Error("Kunde inte uppdatera källordningen");
-        }
-      }
-
-      // Uppdatera ordningen för uppgifter i målkategorin
-      const destUpdates = updatedTargetTasks.map((task) => ({
-        id: task.id,
-        order: task.order,
-      }));
-
-      const destResponse = await fetch("/api/tasks/reorder", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tasks: destUpdates }),
-      });
-
-      if (!destResponse.ok) {
-        throw new Error("Kunde inte uppdatera målordningen");
-      }
-    } catch (error) {
-      console.error("Fel vid flyttning av uppgift mellan kategorier:", error);
-      toast.error("Ett fel inträffade", {
-        description: "Kunde inte flytta uppgiften. Försök igen senare.",
-      });
-      // Återställ till tidigare tillstånd vid fel genom att hämta mallen igen
-      fetchTemplate();
+      fetchChecklist();
     } finally {
       setSaving(false);
     }
@@ -962,14 +787,14 @@ export default function TemplateEditPage() {
 
   // Funktioner för att hantera kategorier
   const handleAddCategory = async () => {
-    if (newCategory.name.trim() && template) {
+    if (newCategory.name.trim() && checklist) {
       setSaving(true);
 
       try {
         const newCategoryObj = {
           name: newCategory.name,
-          order: template.categories.length,
-          templateId: template.id,
+          order: checklist.categories.length,
+          checklistId: checklist.id,
         };
 
         const response = await fetch("/api/categories", {
@@ -986,12 +811,24 @@ export default function TemplateEditPage() {
 
         const addedCategory = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: [...template.categories, { ...addedCategory, tasks: [] }],
+        setChecklist({
+          ...checklist,
+          categories: [
+            ...checklist.categories,
+            { ...addedCategory, tasks: [] },
+          ],
         });
 
         setNewCategory({ name: "" });
+
+        // Stäng alla öppna dialoger
+        const dialogs = document.querySelectorAll('[data-state="open"]');
+        dialogs.forEach(dialog => {
+          const closeButton = dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          }
+        });
 
         toast.success("Kategori skapad", {
           description: "Kategorin har lagts till i mallen.",
@@ -1008,7 +845,7 @@ export default function TemplateEditPage() {
   };
 
   const handleUpdateCategory = async () => {
-    if (editingCategory.name.trim() && editingCategoryId && template) {
+    if (editingCategory.name.trim() && editingCategoryId && checklist) {
       setSaving(true);
 
       try {
@@ -1026,9 +863,9 @@ export default function TemplateEditPage() {
 
         const updatedCategory = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === editingCategoryId
               ? { ...cat, name: updatedCategory.name }
               : cat
@@ -1036,6 +873,14 @@ export default function TemplateEditPage() {
         });
 
         setEditingCategoryId(null);
+
+        // Stäng eventuell dialog/formulär programmatiskt
+        const closeButton = document.querySelector(
+          '[data-state="open"] button[aria-label="Close"]'
+        ) as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.click();
+        }
 
         toast.success("Kategori uppdaterad", {
           description: "Kategorin har uppdaterats i mallen.",
@@ -1052,7 +897,7 @@ export default function TemplateEditPage() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (template) {
+    if (checklist) {
       setSaving(true);
 
       try {
@@ -1064,9 +909,9 @@ export default function TemplateEditPage() {
           throw new Error("Kunde inte ta bort kategori");
         }
 
-        setTemplate({
-          ...template,
-          categories: template.categories.filter(
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.filter(
             (cat) => cat.id !== categoryId
           ),
         });
@@ -1087,11 +932,11 @@ export default function TemplateEditPage() {
 
   // Funktioner för att hantera uppgifter
   const handleAddTask = async () => {
-    if (newTask.title.trim() && newTask.categoryId && template) {
+    if (newTask.title.trim() && newTask.categoryId && checklist) {
       setSaving(true);
 
       try {
-        const category = template.categories.find(
+        const category = checklist.categories.find(
           (cat) => cat.id === newTask.categoryId
         );
 
@@ -1102,6 +947,7 @@ export default function TemplateEditPage() {
         const newTaskObj = {
           title: newTask.title,
           description: newTask.description,
+          link: newTask.link,
           isBuddyTask: newTask.isBuddyTask,
           order: category.tasks.length,
           categoryId: newTask.categoryId,
@@ -1121,9 +967,9 @@ export default function TemplateEditPage() {
 
         const addedTask = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === newTask.categoryId
               ? { ...cat, tasks: [...cat.tasks, addedTask] }
               : cat
@@ -1133,8 +979,18 @@ export default function TemplateEditPage() {
         setNewTask({
           title: "",
           description: "",
+          link: "",
           isBuddyTask: false,
           categoryId: "",
+        });
+
+        // Stäng alla öppna dialoger
+        const dialogs = document.querySelectorAll('[data-state="open"]');
+        dialogs.forEach(dialog => {
+          const closeButton = dialog.querySelector('button[aria-label="Close"]') as HTMLButtonElement;
+          if (closeButton) {
+            closeButton.click();
+          }
         });
 
         toast.success("Uppgift skapad", {
@@ -1152,14 +1008,15 @@ export default function TemplateEditPage() {
   };
 
   const handleUpdateTask = async () => {
-    if (editingTask.title.trim() && editingTaskId && template) {
+    if (editingTask.title.trim() && editingTaskId && checklist) {
       setSaving(true);
 
       try {
         const updateData = {
           title: editingTask.title,
           description: editingTask.description,
-          isBuddyTask: editingTask.isBuddyTask,
+          link: editingTask.link,
+          isBuddyTask: false, // Always false in the regular template page
         };
 
         const response = await fetch(`/api/tasks/${editingTaskId}`, {
@@ -1176,9 +1033,9 @@ export default function TemplateEditPage() {
 
         const updatedTask = await response.json();
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) => ({
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) => ({
             ...cat,
             tasks: cat.tasks.map((task) =>
               task.id === editingTaskId
@@ -1186,6 +1043,7 @@ export default function TemplateEditPage() {
                     ...task,
                     title: updatedTask.title,
                     description: updatedTask.description,
+                    link: updatedTask.link,
                     isBuddyTask: updatedTask.isBuddyTask,
                   }
                 : task
@@ -1194,6 +1052,12 @@ export default function TemplateEditPage() {
         });
 
         setEditingTaskId(null);
+
+        // Stäng dialogen programmatiskt
+        const closeButton = document.querySelector(
+          '[data-state="open"] button[aria-label="Close"]'
+        ) as HTMLButtonElement;
+        closeButton?.click();
 
         toast.success("Uppgift uppdaterad", {
           description: "Uppgiften har uppdaterats i mallen.",
@@ -1210,7 +1074,7 @@ export default function TemplateEditPage() {
   };
 
   const handleDeleteTask = async (categoryId: string, taskId: string) => {
-    if (template) {
+    if (checklist) {
       setSaving(true);
 
       try {
@@ -1222,9 +1086,9 @@ export default function TemplateEditPage() {
           throw new Error("Kunde inte ta bort uppgift");
         }
 
-        setTemplate({
-          ...template,
-          categories: template.categories.map((cat) =>
+        setChecklist({
+          ...checklist,
+          categories: checklist.categories.map((cat) =>
             cat.id === categoryId
               ? {
                   ...cat,
@@ -1248,67 +1112,6 @@ export default function TemplateEditPage() {
     }
   };
 
-  // Funktion för att spara mallen
-  const handleSaveTemplate = async () => {
-    if (template) {
-      setSaving(true);
-
-      try {
-        const response = await fetch(`/api/templates/${template.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name: template.name }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Kunde inte spara mallen");
-        }
-
-        toast.success("Mall sparad", {
-          description: "Mallen har sparats framgångsrikt.",
-        });
-      } catch (error) {
-        console.error("Fel vid sparande av mall:", error);
-        toast.error("Ett fel inträffade", {
-          description: "Kunde inte spara mallen. Försök igen senare.",
-        });
-      } finally {
-        setSaving(false);
-      }
-    }
-  };
-
-  // Funktion för att ta bort mallen
-  const handleDeleteTemplate = async () => {
-    if (template) {
-      setSaving(true);
-
-      try {
-        const response = await fetch(`/api/templates/${template.id}`, {
-          method: "DELETE",
-        });
-
-        if (!response.ok) {
-          throw new Error("Kunde inte ta bort mallen");
-        }
-
-        toast.success("Mall borttagen", {
-          description: "Mallen har tagits bort framgångsrikt.",
-        });
-
-        router.push("/admin");
-      } catch (error) {
-        console.error("Fel vid borttagning av mall:", error);
-        toast.error("Ett fel inträffade", {
-          description: "Kunde inte ta bort mallen. Försök igen senare.",
-        });
-        setSaving(false);
-      }
-    }
-  };
-
   // Render-logik för laddningsstatus
   if (status === "loading" || loading) {
     return (
@@ -1320,7 +1123,7 @@ export default function TemplateEditPage() {
   }
 
   // Render-logik om mallen inte kunde hittas
-  if (!template) {
+  if (!checklist) {
     return (
       <div className="container p-8 flex flex-col items-center justify-center min-h-[60vh]">
         <p className="text-xl font-semibold mb-2">Mallen kunde inte hittas</p>
@@ -1337,60 +1140,32 @@ export default function TemplateEditPage() {
 
   // Huvudrenderingen av mallen
   return (
-    <div className="container p-4 md:p-8 space-y-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container p-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Tillbaka
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/admin")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Tillbaka
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{template.name}</h1>
+            <h1 className="text-2xl font-bold">Onboarding Checklista</h1>
             <p className="text-muted-foreground">
-              Redigera mall och checklista
+              Hantera mallen för nyanställda
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleSaveTemplate}
-            disabled={saving}
-          >
-            {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Spara
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Ta bort mall
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Är du säker?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Denna åtgärd kan inte ångras. Detta kommer permanent ta bort
-                  mallen och alla dess kategorier och uppgifter.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteTemplate}>
-                  {saving ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="mr-2 h-4 w-4" />
-                  )}
-                  Ta bort
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/admin/buddy-template/${id}`)}
+        >
+          <ClipboardCheck className="h-4 w-4 mr-2" />
+          Hantera Buddy-uppgifter
+        </Button>
       </div>
 
       {/* Mallinställningar */}
@@ -1401,21 +1176,6 @@ export default function TemplateEditPage() {
             Anpassa grundinställningar för mallen
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="template-name">Mallnamn</Label>
-              <Input
-                id="template-name"
-                value={template?.name || ""}
-                onChange={(e) =>
-                  setTemplate({ ...template, name: e.target.value })
-                }
-                placeholder="Ange ett namn för mallen"
-              />
-            </div>
-          </div>
-        </CardContent>
       </Card>
 
       {/* Kategorier och uppgifter */}
@@ -1433,7 +1193,6 @@ export default function TemplateEditPage() {
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
             modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
           >
             <SortableContext
@@ -1441,7 +1200,7 @@ export default function TemplateEditPage() {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-4">
-                {template.categories.map((category) => (
+                {checklist.categories.map((category) => (
                   <SortableCategory
                     key={category.id}
                     category={category}
@@ -1451,7 +1210,7 @@ export default function TemplateEditPage() {
                     setEditingCategory={setEditingCategory}
                     handleUpdateCategory={handleUpdateCategory}
                     handleDeleteCategory={handleDeleteCategory}
-                    editingTaskId={editingTaskId}
+                    _editingTaskId={editingTaskId}
                     setEditingTaskId={setEditingTaskId}
                     setEditingTask={setEditingTask}
                     handleDeleteTask={handleDeleteTask}
@@ -1472,7 +1231,7 @@ export default function TemplateEditPage() {
                 easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)", // Mjukare, lätt studsa-effekt
               }}
             >
-              {activeId && activeCategory && !isDraggingTask ? (
+              {activeId && activeCategory ? (
                 // Visa kategori om en kategori dras
                 <div className="border rounded-lg p-4 bg-background shadow-lg opacity-90">
                   <div className="flex items-center space-x-2">
@@ -1496,7 +1255,7 @@ export default function TemplateEditPage() {
                       )}
                       {activeTask.isBuddyTask && (
                         <div className="flex items-center mt-1">
-                          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full flex items-center">
                             <ClipboardCheck className="h-3 w-3 mr-1" />
                             Buddy-uppgift
                           </span>
@@ -1525,7 +1284,9 @@ export default function TemplateEditPage() {
                     onChange={(e) => setNewCategory({ name: e.target.value })}
                   />
                   <Button
-                    onClick={handleAddCategory}
+                    onClick={async () => {
+                      await handleAddCategory();
+                    }}
                     disabled={!newCategory.name.trim() || saving}
                   >
                     {saving ? (
@@ -1582,23 +1343,20 @@ export default function TemplateEditPage() {
                   placeholder="Ange en beskrivning (valfritt)"
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="edit-buddy-task"
-                  checked={editingTask.isBuddyTask}
-                  onCheckedChange={(checked) =>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-task-link">Länk (valfritt)</Label>
+                <Input
+                  id="edit-task-link"
+                  value={editingTask.link}
+                  onChange={(e) =>
                     setEditingTask({
                       ...editingTask,
-                      isBuddyTask: !!checked,
+                      link: e.target.value,
                     })
                   }
+                  placeholder="https://exempel.se"
+                  type="url"
                 />
-                <Label
-                  htmlFor="edit-buddy-task"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Detta är en buddy-uppgift
-                </Label>
               </div>
             </div>
             <DialogFooter>

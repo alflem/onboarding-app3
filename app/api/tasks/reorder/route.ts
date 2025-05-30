@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest) {
             include: {
                 category: {
                     include: {
-                        template: {
+                        checklist: {
                             select: {
                                 organizationId: true
                             }
@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest) {
         const hasAccess =
         session.user.role === 'SUPER_ADMIN' ||
         existingTasks.every(
-            task => task.category.template.organizationId === session.user.organization.id
+            task => task.category.checklist.organizationId === session.user.organization.id
         );
 
         if (!hasAccess) {

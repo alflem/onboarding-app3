@@ -1,23 +1,49 @@
 // app/layout.tsx
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Toaster } from "sonner";
+import PWAInstaller from "@/components/pwa-installer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmMono = DM_Mono({
+  variable: "--font-dm-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
   title: "Onboarding App",
   description: "En app för onboarding av nyanställda",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Onboarding App",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/icon-192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -26,16 +52,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv">
+    <html lang="sv" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dmSans.variable} ${dmMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <AuthProvider>
-          <Header />
-          <main className="container mx-auto px-4 py-6">
-            {children}
-          </main>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <Header />
+            <main className="container mx-auto px-4 py-6 flex-1">
+              {children}
+            </main>
+            <Footer />
+          </AuthProvider>
+          <Toaster />
+          <PWAInstaller />
+        </ThemeProvider>
       </body>
     </html>
   );

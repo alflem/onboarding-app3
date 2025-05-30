@@ -1,7 +1,7 @@
 // components/Header.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, CheckSquare, Settings, Building, Menu, X } from "lucide-react";
+import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucide-react";
 import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
+import Image from 'next/image';
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Typdeklarationer som matchar Prisma-schemat
 enum Role {
@@ -29,6 +30,25 @@ const Header: React.FC = () => {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isBuddy, setIsBuddy] = useState<boolean>(false);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Kontrollera om användaren är buddy för någon
+    if (session?.user?.id) {
+      fetch('/api/user/is-buddy')
+        .then(response => response.json())
+        .then(data => {
+          setIsBuddy(data.isBuddy);
+          setBuddyEnabled(data.buddyEnabled);
+        })
+        .catch(error => {
+          console.error("Kunde inte kontrollera buddy-status:", error);
+          setIsBuddy(false);
+          setBuddyEnabled(false);
+        });
+    }
+  }, [session?.user?.id]);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -56,15 +76,23 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* App logo and title */}
-          <div className="flex-1">
-            <Link href="/" className="text-gray-800 font-medium text-lg">
-              Onboarding
-            </Link>
-          </div>
+        <div className="flex-1">
+          <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg">
+            <Image
+              src="/logo.svg"
+              alt="Company Logo"
+              width={28}
+              height={28}
+              className="h-7 w-auto"
+              style={{ width: 'auto', height: '28px' }}
+            />
+            Onboarding
+          </Link>
+        </div>
 
           {/* Desktop navigation - alla knappar samlade på högersidan */}
           <nav className="hidden md:flex items-center space-x-1">
@@ -72,7 +100,6 @@ const Header: React.FC = () => {
               <Button
                 variant={isActive("/") ? "default" : "ghost"}
                 size="sm"
-                className="text-gray-600"
                 aria-current={isActive("/") ? "page" : undefined}
               >
                 <Home className="mr-1 h-4 w-4" />
@@ -85,11 +112,23 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/checklist") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
                   aria-current={isActive("/checklist") ? "page" : undefined}
                 >
                   <CheckSquare className="mr-1 h-4 w-4" />
                   Checklista
+                </Button>
+              </Link>
+            )}
+
+            {session?.user && isBuddy && buddyEnabled && (
+              <Link href="/checklist/buddy" passHref>
+                <Button
+                  variant={isActive("/checklist/buddy") ? "default" : "ghost"}
+                  size="sm"
+                  aria-current={isActive("/checklist/buddy") ? "page" : undefined}
+                >
+                  <UserCheck className="mr-1 h-4 w-4" />
+                  Buddy-Checklista
                 </Button>
               </Link>
             )}
@@ -99,7 +138,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
                   aria-current={isActive("/admin") ? "page" : undefined}
                 >
                   <Settings className="mr-1 h-4 w-4" />
@@ -113,7 +151,6 @@ const Header: React.FC = () => {
                 <Button
                   variant={isActive("/super-admin") ? "default" : "ghost"}
                   size="sm"
-                  className="text-gray-600"
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
@@ -122,9 +159,12 @@ const Header: React.FC = () => {
               </Link>
             )}
 
+            {/* Theme toggle */}
+            <ThemeToggle />
+
             {/* User authentication */}
             {status === "loading" ? (
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse ml-2"></div>
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse ml-2"></div>
             ) : status === "authenticated" && session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -133,8 +173,8 @@ const Header: React.FC = () => {
                     size="sm"
                     className="flex items-center ml-2"
                   >
-                    <Avatar className="h-8 w-8 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                    <Avatar className="h-8 w-8 border border-border">
+                      <AvatarFallback className="bg-muted text-foreground">
                         {session.user.name
                           ?.split(" ")
                           .map((n) => n[0])
@@ -146,16 +186,11 @@ const Header: React.FC = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
-                  <DropdownMenuLabel className="text-xs text-gray-500">
-                    {session.user.organization?.name}
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">
+                    {session.user.organization.name}
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">Min profil</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600"
+                    className="text-destructive focus:text-destructive"
                     onClick={() => signOut()}
                   >
                     Logga ut
@@ -195,14 +230,14 @@ const Header: React.FC = () => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100">
+        <div className="md:hidden bg-background border-t border-border">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <Link
               href="/"
               className={`block px-3 py-2 rounded-md text-base font-medium ${
                 isActive("/")
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50"
               }`}
               onClick={toggleMenu}
             >
@@ -217,8 +252,8 @@ const Header: React.FC = () => {
                 href="/checklist"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/checklist")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -229,13 +264,30 @@ const Header: React.FC = () => {
               </Link>
             )}
 
+            {session?.user && isBuddy && buddyEnabled && (
+              <Link
+                href="/checklist/buddy"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  isActive("/checklist/buddy")
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
+                }`}
+                onClick={toggleMenu}
+              >
+                <div className="flex items-center">
+                  <UserCheck className="mr-2 h-4 w-4" />
+                  Buddy-Checklista
+                </div>
+              </Link>
+            )}
+
             {hasRole(Role.ADMIN) && (
               <Link
                 href="/admin"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/admin")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -251,8 +303,8 @@ const Header: React.FC = () => {
                 href="/super-admin"
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   isActive("/super-admin")
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent/50"
                 }`}
                 onClick={toggleMenu}
               >
@@ -264,17 +316,17 @@ const Header: React.FC = () => {
             )}
 
             {/* User authentication for mobile */}
-            <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="pt-4 pb-3 border-t border-border">
               {status === "loading" ? (
-                <div className="flex items-center px-5">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
-                  <div className="ml-3 w-24 h-4 bg-gray-200 animate-pulse rounded"></div>
-                </div>
+                                  <div className="flex items-center px-5">
+                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                    <div className="ml-3 w-24 h-4 bg-muted animate-pulse rounded"></div>
+                  </div>
               ) : status === "authenticated" && session?.user ? (
                 <>
                   <div className="flex items-center px-5">
-                    <Avatar className="h-8 w-8 border border-gray-200">
-                      <AvatarFallback className="bg-gray-100 text-gray-800">
+                    <Avatar className="h-8 w-8 border border-border">
+                      <AvatarFallback className="bg-muted text-foreground">
                         {session.user.name
                           ?.split(" ")
                           .map((n) => n[0])
@@ -282,24 +334,24 @@ const Header: React.FC = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="ml-3">
-                      <div className="text-base font-medium text-gray-800">
+                      <div className="text-base font-medium text-foreground">
                         {session.user.name}
                       </div>
-                      <div className="text-sm font-medium text-gray-500">
-                        {session.user.organization?.name}
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {session.user.organization.name}
                       </div>
                     </div>
                   </div>
                   <div className="mt-3 px-2 space-y-1">
-                    <Link
-                      href="/profile"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                      onClick={toggleMenu}
-                    >
-                      Min profil
-                    </Link>
+                    <div className="px-3 py-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-medium">Tema</span>
+                        <ThemeToggle />
+                      </div>
+                    </div>
+
                     <button
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-gray-50"
+                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-accent/50"
                       onClick={() => {
                         signOut();
                         toggleMenu();
