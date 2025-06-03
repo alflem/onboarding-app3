@@ -3,11 +3,26 @@ const { parse } = require('url')
 const next = require('next')
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
+const hostname = '0.0.0.0'
 const port = process.env.PORT || 3000
 
-const app = next({ dev, hostname, port })
+// Disable tracing to avoid trace file issues
+process.env.NEXT_TELEMETRY_DISABLED = '1'
+
+const app = next({
+  dev,
+  hostname,
+  port,
+  conf: {
+    // Disable tracing
+    experimental: {
+      instrumentationHook: false
+    }
+  }
+})
 const handle = app.getRequestHandler()
+
+console.log(`Starting Next.js app on ${hostname}:${port}...`)
 
 app.prepare().then(() => {
   createServer(async (req, res) => {
@@ -21,10 +36,13 @@ app.prepare().then(() => {
     }
   })
     .once('error', (err) => {
-      console.error(err)
+      console.error('Server error:', err)
       process.exit(1)
     })
-    .listen(port, () => {
+    .listen(port, hostname, () => {
       console.log(`> Ready on http://${hostname}:${port}`)
     })
+}).catch((err) => {
+  console.error('Failed to start Next.js app:', err)
+  process.exit(1)
 })
