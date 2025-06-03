@@ -4,7 +4,7 @@ const next = require('next')
 
 const dev = process.env.NODE_ENV !== 'production'
 const hostname = '0.0.0.0'
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 8080;
 
 // Disable tracing to avoid trace file issues
 process.env.NEXT_TELEMETRY_DISABLED = '1'
