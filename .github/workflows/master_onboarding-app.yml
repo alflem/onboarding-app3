@@ -29,13 +29,6 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      - name: Clean up for deployment
-        run: |
-          # Remove node_modules - Azure will reinstall them fresh
-          rm -rf node_modules
-          # Keep package files for Azure to reinstall
-          echo "Cleaned up for deployment"
-
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
 
