@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
         select: {
           id: true
         }
-      })).map(user => ({
+      })).map((user: { id: string }) => ({
         userId: user.id,
         taskId: newTask.id,
         completed: false

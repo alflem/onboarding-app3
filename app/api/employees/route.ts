@@ -48,9 +48,9 @@ export async function GET() {
     });
 
     // Beräkna progress för varje medarbetare
-    const employeesWithProgress = employees.map(employee => {
+    const employeesWithProgress = employees.map((employee: typeof employees[0]) => {
       // Räkna ut progress-procent
-      const completedTasks = employee.progress.filter(p => p.completed).length;
+      const completedTasks = employee.progress.filter((p: typeof employee.progress[0]) => p.completed).length;
       const totalTasks = employee.progress.length;
       const progressPercentage = totalTasks > 0
         ? Math.round((completedTasks / totalTasks) * 100)

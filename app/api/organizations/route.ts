@@ -1,7 +1,7 @@
 // app/api/organizations/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/auth-options"; 
+import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma"; // Använder din befintliga prisma-export
 
 export async function GET() {
@@ -35,8 +35,8 @@ export async function GET() {
     console.log(`Found ${organizations.length} organizations`);
 
     // Formatera data för frontend
-    const formattedOrganizations = organizations.map(org => {
-      const adminCount = org.users.filter(user =>
+    const formattedOrganizations = organizations.map((org: typeof organizations[0]) => {
+      const adminCount = org.users.filter((user: typeof org.users[0]) =>
         user.role === 'ADMIN'
       ).length;
 

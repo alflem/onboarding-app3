@@ -61,7 +61,7 @@ export async function GET(
     });
 
     // Formatera datum för frontend-presentation
-    const formattedUsers = users.map(user => ({
+    const formattedUsers = users.map((user: typeof users[0]) => ({
       ...user,
       createdAt: user.createdAt.toISOString().split('T')[0], // Format: YYYY-MM-DD
     }));

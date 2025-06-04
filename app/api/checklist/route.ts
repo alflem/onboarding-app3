@@ -3,12 +3,31 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
-import { Checklist, Category, Task } from "@prisma/client";
 
-type ChecklistWithRelations = Checklist & {
-  categories: (Category & {
-    tasks: Task[];
-  })[];
+type ChecklistWithRelations = {
+  id: string;
+  organizationId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  categories: {
+    id: string;
+    name: string;
+    checklistId: string;
+    order: number;
+    createdAt: Date;
+    updatedAt: Date;
+    tasks: {
+      id: string;
+      title: string;
+      description: string | null;
+      link: string | null;
+      categoryId: string;
+      order: number;
+      isBuddyTask: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }[];
+  }[];
 };
 
 export async function GET() {
@@ -62,7 +81,7 @@ export async function GET() {
 
     // Skapa en map för enkel lookup av task completion status
     const progressMap = new Map();
-    taskProgress.forEach(progress => {
+    taskProgress.forEach((progress: typeof taskProgress[0]) => {
       progressMap.set(progress.taskId, progress.completed);
     });
 

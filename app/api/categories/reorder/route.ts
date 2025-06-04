@@ -52,11 +52,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    interface CategoryOrder {
-      id: string;
-      order: number;
-    }
-
     // Hämta alla kategorier som ska uppdateras för att verifiera ägarskap
     const categoryIds = body.categories.map((cat: CategoryOrder) => cat.id);
 
@@ -85,7 +80,7 @@ export async function PATCH(request: NextRequest) {
 
     // Kontrollera om användaren har tillgång till alla kategorier
     const hasAccess = existingCategories.every(
-      cat => cat.checklist.organizationId === session.user.organization.id
+      (cat: typeof existingCategories[0]) => cat.checklist.organizationId === session.user.organization.id
     );
 
     if (!hasAccess) {
@@ -93,11 +88,6 @@ export async function PATCH(request: NextRequest) {
         { error: 'Forbidden' },
         { status: 403 }
       );
-    }
-
-    interface CategoryOrder {
-      id: string;
-      order: number;
     }
 
     // Uppdatera kategoriernas ordning i databasen

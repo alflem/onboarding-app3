@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest) {
         const hasAccess =
         session.user.role === 'SUPER_ADMIN' ||
         existingTasks.every(
-            task => task.category.checklist.organizationId === session.user.organization.id
+            (task: typeof existingTasks[0]) => task.category.checklist.organizationId === session.user.organization.id
         );
 
         if (!hasAccess) {

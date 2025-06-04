@@ -50,13 +50,13 @@ export async function GET(_req: NextRequest) {
     let completedTasks = 0;
 
     if (checklist) {
-      checklist.categories.forEach(category => {
-        category.tasks.forEach(task => {
+      checklist.categories.forEach((category: typeof checklist.categories[0]) => {
+        category.tasks.forEach((task: typeof category.tasks[0]) => {
           // Exkludera buddy-uppgifter från progress-beräkningen
           if (!task.isBuddyTask) {
             totalTasks++;
             // Kontrollera om denna uppgift är avklarad av användaren
-            const taskProgress = user.progress.find(p => p.taskId === task.id);
+            const taskProgress = user.progress.find((p: typeof user.progress[0]) => p.taskId === task.id);
             if (taskProgress && taskProgress.completed) {
               completedTasks++;
             }
@@ -79,10 +79,10 @@ export async function GET(_req: NextRequest) {
       completedTasks,
       totalTasks,
       recentTasks: user.progress
-        .filter(p => p.completed)
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .filter((p: typeof user.progress[0]) => p.completed)
+        .sort((a: typeof user.progress[0], b: typeof user.progress[0]) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         .slice(0, 3) // Hämta de 3 senast avklarade uppgifterna
-        .map(p => ({
+        .map((p: typeof user.progress[0]) => ({
           id: p.taskId,
           title: p.task.title,
           description: p.task.description,

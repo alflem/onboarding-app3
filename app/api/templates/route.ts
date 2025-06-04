@@ -57,7 +57,7 @@ export async function GET() {
 
     // Beräkna antalet uppgifter
     const tasksCount = checklist.categories.reduce(
-      (sum, category) => sum + category._count.tasks,
+      (sum: number, category: typeof checklist.categories[0]) => sum + category._count.tasks,
       0
     );
 

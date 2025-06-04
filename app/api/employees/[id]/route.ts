@@ -84,14 +84,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Beräkna progress
-    const completedTasks = employee.progress.filter(p => p.completed).length;
+    const completedTasks = employee.progress.filter((p: typeof employee.progress[0]) => p.completed).length;
     const totalTasks = employee.progress.length;
     const progressPercentage = totalTasks > 0
       ? Math.round((completedTasks / totalTasks) * 100)
       : 0;
 
     // Organisera progress efter kategori
-    const progressByCategory = employee.progress.reduce((acc, progress) => {
+    const progressByCategory = employee.progress.reduce((acc: Record<string, { id: string; name: string; tasks: EmployeeTask[]; completedTasks: number; totalTasks: number }>, progress: typeof employee.progress[0]) => {
       const categoryId = progress.task.category.id;
 
       if (!acc[categoryId]) {
