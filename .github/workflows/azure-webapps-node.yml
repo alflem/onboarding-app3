@@ -87,7 +87,7 @@ jobs:
       run: npx prisma generate
 
     - name: Reset database (clear all data)
-      run: npx prisma migrate reset --force
+      run: npx prisma migrate reset --skip-seed --force
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
