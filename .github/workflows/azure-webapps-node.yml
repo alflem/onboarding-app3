@@ -75,6 +75,46 @@ jobs:
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
+    - name: Configure Azure App Service settings
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        app-settings-json: |
+          [
+            {
+              "name": "DATABASE_URL",
+              "value": "${{ secrets.DATABASE_URL }}",
+              "slotSetting": false
+            },
+            {
+              "name": "NEXTAUTH_SECRET",
+              "value": "${{ secrets.NEXTAUTH_SECRET }}",
+              "slotSetting": false
+            },
+            {
+              "name": "NEXTAUTH_URL",
+              "value": "https://onboarding-app-bnb2bdhsasc3a6d4.swedencentral-01.azurewebsites.net",
+              "slotSetting": false
+            },
+            {
+              "name": "AZURE_AD_CLIENT_ID",
+              "value": "${{ secrets.AZURE_AD_CLIENT_ID }}",
+              "slotSetting": false
+            },
+            {
+              "name": "AZURE_AD_CLIENT_SECRET",
+              "value": "${{ secrets.AZURE_AD_CLIENT_SECRET }}",
+              "slotSetting": false
+            },
+            {
+              "name": "AZURE_AD_TENANT_ID",
+              "value": "${{ secrets.AZURE_AD_TENANT_ID }}",
+              "slotSetting": false
+            }
+          ]
+      env:
+        AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Set up Node.js for migrations
       uses: actions/setup-node@v4
       with:
