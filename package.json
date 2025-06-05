@@ -1,11 +1,11 @@
 {
-  "name": "onboarding-app3",
+  "name": "onboarding-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start -p ${PORT:=3000}",
+    "start": "node ./node_modules/next/dist/bin/next start -p $PORT",
     "lint": "next lint"
   },
   "dependencies": {

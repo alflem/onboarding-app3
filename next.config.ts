@@ -1,6 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Disable telemetry completely
-}
+// import type { NextConfig } from "next";
 
-module.exports = nextConfig
+// const nextConfig: NextConfig = {
+//   output: 'standalone'
+// }
+
+// module.exports = nextConfig
