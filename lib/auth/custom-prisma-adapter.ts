@@ -12,7 +12,24 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
     // Anpassa createUser för att hantera obligatoriska fält i ditt schema
     createUser: async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
       try {
-        // Skapa användare med obligatoriska fält för din modell
+        // Hitta eller skapa "Demo Company" organisation
+        let demoOrganization = await prisma.organization.findFirst({
+          where: {
+            name: "Demo Company"
+          }
+        });
+
+        if (!demoOrganization) {
+          console.log("Creating Demo Company organization...");
+          demoOrganization = await prisma.organization.create({
+            data: {
+              name: "Demo Company",
+              buddyEnabled: true,
+            }
+          });
+        }
+
+        // Skapa användare med obligatoriska fält och tilldela till Demo Company
         const newUser = await prisma.user.create({
           data: {
             name: user.name || user.email?.split('@')[0] || "Namnlös användare",
@@ -20,10 +37,11 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             // Obligatoriska fält i din User-modell
             password: "", // Tom sträng om det är obligatoriskt
             role: "EMPLOYEE", // Standard roll för nya användare
-            // Om organizationId är obligatoriskt och du vill skapa en användare utan,
-            // kan du antingen ändra schema eller hitta en "default" org
+            organizationId: demoOrganization.id, // Tilldela till Demo Company
           },
         });
+
+        console.log(`New user ${newUser.email} created and assigned to Demo Company`);
 
         return {
           id: newUser.id,

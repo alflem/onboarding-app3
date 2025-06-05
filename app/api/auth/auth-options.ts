@@ -30,10 +30,13 @@ export const authOptions: NextAuthOptions = {
 
         // Om det är första inloggningen via OAuth
         if (account?.provider === "azure-ad") {
-          // Hämta användarens roll från databasen istället för att använda Azure AD-roller
+          // Hämta användarens roll och organisation från databasen
           try {
             const dbUser = await prisma.user.findUnique({
-              where: { id: user.id }
+              where: { id: user.id },
+              include: {
+                organization: true
+              }
             });
 
             if (dbUser?.role) {
@@ -43,6 +46,12 @@ export const authOptions: NextAuthOptions = {
               // Fallback till EMPLOYEE om rollen inte finns i databasen
               token.role = "EMPLOYEE";
             }
+
+            // Lägg till organisation-info
+            if (dbUser?.organization) {
+              token.organizationId = dbUser.organization.id;
+              token.organizationName = dbUser.organization.name;
+            }
           } catch (error) {
             console.error("Fel vid hämtning av användarroll:", error);
             // Fallback till EMPLOYEE vid fel
@@ -50,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        // Lägg till organization-info om det finns
+        // Lägg till organization-info om det finns (för befintliga tokens)
         if ('organizationId' in user && user.organizationId) {
           token.organizationId = user.organizationId;
           token.organizationName = (user as { organizationName?: string }).organizationName;
@@ -68,23 +77,38 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Ensure organization is always set
-        if (token.organizationId) {
+        if (token.organizationId && token.organizationName) {
           session.user.organizationId = token.organizationId as string;
-          if (token.organizationName) {
-            session.user.organizationName = token.organizationName as string;
-            session.user.organization = {
-              id: token.organizationId as string,
-              name: token.organizationName as string
-            };
-          } else {
-            session.user.organization = {
-              id: token.organizationId as string,
-              name: "Unknown Organization"
-            };
-          }
+          session.user.organizationName = token.organizationName as string;
+          session.user.organization = {
+            id: token.organizationId as string,
+            name: token.organizationName as string
+          };
         } else {
-          // If no organization is associated, provide a default or throw an error
-          throw new Error("User must have an organization");
+          // If no organization is found in token, try to fetch from database
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: session.user.id },
+              include: {
+                organization: true
+              }
+            });
+
+            if (dbUser?.organization) {
+              session.user.organizationId = dbUser.organization.id;
+              session.user.organizationName = dbUser.organization.name;
+              session.user.organization = {
+                id: dbUser.organization.id,
+                name: dbUser.organization.name
+              };
+            } else {
+              // If still no organization, this shouldn't happen with our fix
+              throw new Error("User must have an organization");
+            }
+          } catch (error) {
+            console.error("Error fetching user organization:", error);
+            throw new Error("User must have an organization");
+          }
         }
       }
       return session;
