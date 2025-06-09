@@ -11,8 +11,10 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
 
     // Anpassa createUser för att hantera obligatoriska fält i ditt schema
     createUser: async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
+      console.log("CustomPrismaAdapter.createUser called for:", user.email);
       try {
         // Hitta eller skapa "Demo Company" organisation
+        console.log("Looking for Demo Company organization...");
         let demoOrganization = await prisma.organization.findFirst({
           where: {
             name: "Demo Company"
@@ -27,9 +29,13 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
               buddyEnabled: true,
             }
           });
+          console.log("Demo Company created with ID:", demoOrganization.id);
+        } else {
+          console.log("Demo Company found with ID:", demoOrganization.id);
         }
 
         // Skapa användare med obligatoriska fält och tilldela till Demo Company
+        console.log("Creating user with Demo Company assignment...");
         const newUser = await prisma.user.create({
           data: {
             name: user.name || user.email?.split('@')[0] || "Namnlös användare",
@@ -41,7 +47,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           },
         });
 
-        console.log(`New user ${newUser.email} created and assigned to Demo Company`);
+        console.log(`New user ${newUser.email} created and assigned to Demo Company (${demoOrganization.id})`);
 
         return {
           id: newUser.id,

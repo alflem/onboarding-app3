@@ -70,12 +70,18 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log('Session callback called for user:', session.user?.email);
+
       if (session.user) {
         session.user.id = token.id as string;
 
         if (token.role) {
           session.user.role = token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
         }
+
+        console.log('Checking organization for user:', session.user.id);
+        console.log('Token organizationId:', token.organizationId);
+        console.log('Token organizationName:', token.organizationName);
 
         // Ensure organization is always set
         if (token.organizationId && token.organizationName) {
@@ -85,8 +91,10 @@ export const authOptions: NextAuthOptions = {
             id: token.organizationId as string,
             name: token.organizationName as string
           };
+          console.log('Organization set from token:', token.organizationName);
         } else {
           // If no organization is found in token, try to fetch from database
+          console.log('No organization in token, fetching from database...');
           try {
             const dbUser = await prisma.user.findUnique({
               where: { id: session.user.id },
@@ -95,6 +103,9 @@ export const authOptions: NextAuthOptions = {
               }
             });
 
+            console.log('Database user found:', !!dbUser);
+            console.log('Database user organization:', dbUser?.organization?.name);
+
             if (dbUser?.organization) {
               session.user.organizationId = dbUser.organization.id;
               session.user.organizationName = dbUser.organization.name;
@@ -102,22 +113,29 @@ export const authOptions: NextAuthOptions = {
                 id: dbUser.organization.id,
                 name: dbUser.organization.name
               };
+              console.log('Organization set from database:', dbUser.organization.name);
             } else {
               // Fallback: Create Demo Company and assign user if they don't have an organization
+              console.log('Creating Demo Company fallback...');
               let demoOrganization = await prisma.organization.findFirst({
                 where: { name: "Demo Company" }
               });
 
               if (!demoOrganization) {
+                console.log('Demo Company not found, creating...');
                 demoOrganization = await prisma.organization.create({
                   data: {
                     name: "Demo Company",
                     buddyEnabled: true,
                   }
                 });
+                console.log('Demo Company created:', demoOrganization.id);
+              } else {
+                console.log('Demo Company found:', demoOrganization.id);
               }
 
               // Assign user to Demo Company
+              console.log('Assigning user to Demo Company...');
               await prisma.user.update({
                 where: { id: session.user.id },
                 data: { organizationId: demoOrganization.id }
@@ -129,6 +147,7 @@ export const authOptions: NextAuthOptions = {
                 id: demoOrganization.id,
                 name: demoOrganization.name
               };
+              console.log('User assigned to Demo Company successfully');
             }
           } catch (error) {
             console.error("Error fetching user organization:", error);
@@ -136,6 +155,7 @@ export const authOptions: NextAuthOptions = {
           }
         }
       }
+      console.log('Session callback completed successfully');
       return session;
     }
   },
