@@ -6,6 +6,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Updated to trigger database reset and Demo Company creation
 export const authOptions: NextAuthOptions = {
   adapter: CustomPrismaAdapter(prisma),
   providers: [
