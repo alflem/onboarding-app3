@@ -187,7 +187,7 @@ const Header: React.FC = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs text-muted-foreground">
-                    {session.user.organization.name}
+                    {session.user.organization?.name || 'Loading organization...'}
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
@@ -338,7 +338,7 @@ const Header: React.FC = () => {
                         {session.user.name}
                       </div>
                       <div className="text-sm font-medium text-muted-foreground">
-                        {session.user.organization.name}
+                        {session.user.organization?.name || 'Loading organization...'}
                       </div>
                     </div>
                   </div>

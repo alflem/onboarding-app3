@@ -7,7 +7,8 @@ export const config = {
     "/dashboard/:path*",
     "/admin/:path*",
     "/checklist/:path*",
-    // Exkludera API-rutter och publika rutter
-    "/((?!api|_next/static|_next/image|favicon.ico|auth/signin|.*\\.svg|.*\\.jpg|.*\\.jpeg|.*\\.png|.*\\.gif|.*\\.ico|.*\\.webp).*)",
+    "/super-admin/:path*",
+    // Exkludera API-rutter, publika rutter och hemside
+    "/((?!api|_next/static|_next/image|favicon.ico|auth/signin|auth/signout|auth/error|/$|$|.*\\.svg|.*\\.jpg|.*\\.jpeg|.*\\.png|.*\\.gif|.*\\.ico|.*\\.webp).*)",
   ],
 };
