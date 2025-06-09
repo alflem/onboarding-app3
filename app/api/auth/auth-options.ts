@@ -103,8 +103,32 @@ export const authOptions: NextAuthOptions = {
                 name: dbUser.organization.name
               };
             } else {
-              // If still no organization, this shouldn't happen with our fix
-              throw new Error("User must have an organization");
+              // Fallback: Create Demo Company and assign user if they don't have an organization
+              let demoOrganization = await prisma.organization.findFirst({
+                where: { name: "Demo Company" }
+              });
+
+              if (!demoOrganization) {
+                demoOrganization = await prisma.organization.create({
+                  data: {
+                    name: "Demo Company",
+                    buddyEnabled: true,
+                  }
+                });
+              }
+
+              // Assign user to Demo Company
+              await prisma.user.update({
+                where: { id: session.user.id },
+                data: { organizationId: demoOrganization.id }
+              });
+
+              session.user.organizationId = demoOrganization.id;
+              session.user.organizationName = demoOrganization.name;
+              session.user.organization = {
+                id: demoOrganization.id,
+                name: demoOrganization.name
+              };
             }
           } catch (error) {
             console.error("Error fetching user organization:", error);
