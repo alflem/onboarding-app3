@@ -72,98 +72,123 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       console.log('Session callback called for user:', session.user?.email);
 
-      if (session.user) {
-        session.user.id = token.id as string;
+      try {
+        if (session.user) {
+          session.user.id = token.id as string;
 
-        if (token.role) {
-          session.user.role = token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
-        }
+          if (token.role) {
+            session.user.role = token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
+          }
 
-        console.log('Checking organization for user:', session.user.id);
-        console.log('Token organizationId:', token.organizationId);
-        console.log('Token organizationName:', token.organizationName);
+          console.log('Checking organization for user:', session.user.id);
+          console.log('Token organizationId:', token.organizationId);
+          console.log('Token organizationName:', token.organizationName);
 
-        // Ensure organization is always set
-        if (token.organizationId && token.organizationName) {
-          session.user.organizationId = token.organizationId as string;
-          session.user.organizationName = token.organizationName as string;
-          session.user.organization = {
-            id: token.organizationId as string,
-            name: token.organizationName as string
-          };
-          console.log('Organization set from token:', token.organizationName);
-        } else {
-          // If no organization is found in token, try to fetch from database
-          console.log('No organization in token, fetching from database...');
-          try {
-            const dbUser = await prisma.user.findUnique({
-              where: { id: session.user.id },
-              include: {
-                organization: true
-              }
-            });
-
-            console.log('Database user found:', !!dbUser);
-            console.log('Database user organization:', dbUser?.organization?.name);
-
-            if (dbUser?.organization) {
-              session.user.organizationId = dbUser.organization.id;
-              session.user.organizationName = dbUser.organization.name;
-              session.user.organization = {
-                id: dbUser.organization.id,
-                name: dbUser.organization.name
-              };
-              console.log('Organization set from database:', dbUser.organization.name);
-            } else {
-              // Fallback: Create Demo Company and assign user if they don't have an organization
-              console.log('Creating Demo Company fallback...');
-              let demoOrganization = await prisma.organization.findFirst({
-                where: { name: "Demo Company" }
-              });
-
-              if (!demoOrganization) {
-                console.log('Demo Company not found, creating...');
-                demoOrganization = await prisma.organization.create({
-                  data: {
-                    name: "Demo Company",
-                    buddyEnabled: true,
-                  }
-                });
-                console.log('Demo Company created:', demoOrganization.id);
-              } else {
-                console.log('Demo Company found:', demoOrganization.id);
-              }
-
-              // Assign user to Demo Company
-              console.log('Assigning user to Demo Company...');
-              await prisma.user.update({
+          // Ensure organization is always set
+          if (token.organizationId && token.organizationName) {
+            session.user.organizationId = token.organizationId as string;
+            session.user.organizationName = token.organizationName as string;
+            session.user.organization = {
+              id: token.organizationId as string,
+              name: token.organizationName as string
+            };
+            console.log('Organization set from token:', token.organizationName);
+          } else {
+            // If no organization is found in token, try to fetch from database
+            console.log('No organization in token, fetching from database...');
+            try {
+              const dbUser = await prisma.user.findUnique({
                 where: { id: session.user.id },
-                data: { organizationId: demoOrganization.id }
+                include: {
+                  organization: true
+                }
               });
 
-              session.user.organizationId = demoOrganization.id;
-              session.user.organizationName = demoOrganization.name;
+              console.log('Database user found:', !!dbUser);
+              console.log('Database user organization:', dbUser?.organization?.name);
+
+              if (dbUser?.organization) {
+                session.user.organizationId = dbUser.organization.id;
+                session.user.organizationName = dbUser.organization.name;
+                session.user.organization = {
+                  id: dbUser.organization.id,
+                  name: dbUser.organization.name
+                };
+                console.log('Organization set from database:', dbUser.organization.name);
+              } else {
+                // Fallback: Create Demo Company and assign user if they don't have an organization
+                console.log('Creating Demo Company fallback...');
+                let demoOrganization = await prisma.organization.findFirst({
+                  where: { name: "Demo Company" }
+                });
+
+                if (!demoOrganization) {
+                  console.log('Demo Company not found, creating...');
+                  demoOrganization = await prisma.organization.create({
+                    data: {
+                      name: "Demo Company",
+                      buddyEnabled: true,
+                    }
+                  });
+                  console.log('Demo Company created:', demoOrganization.id);
+                } else {
+                  console.log('Demo Company found:', demoOrganization.id);
+                }
+
+                // Assign user to Demo Company
+                console.log('Assigning user to Demo Company...');
+                await prisma.user.update({
+                  where: { id: session.user.id },
+                  data: { organizationId: demoOrganization.id }
+                });
+
+                session.user.organizationId = demoOrganization.id;
+                session.user.organizationName = demoOrganization.name;
+                session.user.organization = {
+                  id: demoOrganization.id,
+                  name: demoOrganization.name
+                };
+                console.log('User assigned to Demo Company successfully');
+              }
+            } catch (error) {
+              console.error("Error fetching user organization:", error);
+              // Don't throw error, provide fallback values instead
+              session.user.organizationId = "demo";
+              session.user.organizationName = "Demo Company";
               session.user.organization = {
-                id: demoOrganization.id,
-                name: demoOrganization.name
+                id: "demo",
+                name: "Demo Company"
               };
-              console.log('User assigned to Demo Company successfully');
+              console.log('Fallback organization assigned due to error');
             }
-          } catch (error) {
-            console.error("Error fetching user organization:", error);
-            // Don't throw error, provide fallback values instead
+          }
+
+          // Final validation - ensure organization is always present
+          if (!session.user.organizationId || !session.user.organizationName) {
+            console.warn('Session organization still missing after all attempts, applying final fallback');
             session.user.organizationId = "demo";
             session.user.organizationName = "Demo Company";
             session.user.organization = {
               id: "demo",
               name: "Demo Company"
             };
-            console.log('Fallback organization assigned due to error');
           }
         }
+        console.log('Session callback completed successfully');
+        return session;
+      } catch (error) {
+        console.error('Critical error in session callback:', error);
+        // Ensure we always return a valid session, even on error
+        if (session.user) {
+          session.user.organizationId = "demo";
+          session.user.organizationName = "Demo Company";
+          session.user.organization = {
+            id: "demo",
+            name: "Demo Company"
+          };
+        }
+        return session;
       }
-      console.log('Session callback completed successfully');
-      return session;
     }
   },
   pages: {

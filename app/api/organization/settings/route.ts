@@ -1,26 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from "@/app/api/auth/auth-options";
+import { requireAdmin } from '@/lib/auth/session-utils';
 import { prisma } from "@/lib/prisma";
 
 // GET /api/organization/settings - Hämta organisationsinställningar
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const sessionOrResponse = await requireAdmin();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Kontrollera att användaren är admin eller super_admin
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (sessionOrResponse instanceof NextResponse) {
+      return sessionOrResponse;
     }
 
     // Hämta organisationsinställningar
     const organization = await prisma.organization.findUnique({
       where: {
-        id: session.user.organization.id
+        id: sessionOrResponse.user.organization.id
       },
       select: {
         id: true,
@@ -44,15 +38,10 @@ export async function GET() {
 // PATCH /api/organization/settings - Uppdatera organisationsinställningar
 export async function PATCH(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const sessionOrResponse = await requireAdmin();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Kontrollera att användaren är admin eller super_admin
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (sessionOrResponse instanceof NextResponse) {
+      return sessionOrResponse;
     }
 
     const body = await request.json();
@@ -66,7 +55,7 @@ export async function PATCH(request: Request) {
     // Uppdatera organisationsinställningar
     const updatedOrganization = await prisma.organization.update({
       where: {
-        id: session.user.organization.id
+        id: sessionOrResponse.user.organization.id
       },
       data: {
         buddyEnabled: buddyEnabled
