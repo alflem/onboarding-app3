@@ -29,6 +29,19 @@ DATABASE_URL=your-database-connection-string
 WEBSITE_NODE_DEFAULT_VERSION=~20
 ```
 
+### 5. Azure App Service Startup Command
+In Azure Portal → App Service → Configuration → General Settings:
+
+**Startup Command:**
+```
+npm start
+```
+
+Or alternatively:
+```
+node server.js
+```
+
 ## Azure AD App Registration Configuration
 
 In Azure Portal → Azure Active Directory → App Registrations:
