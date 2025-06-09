@@ -29,17 +29,24 @@ DATABASE_URL=your-database-connection-string
 WEBSITE_NODE_DEFAULT_VERSION=~20
 ```
 
-### 5. Azure App Service Startup Command
+### 5. Azure App Service Configuration
 In Azure Portal → App Service → Configuration → General Settings:
 
 **Startup Command:**
 ```
-npm start
+node server.js
 ```
 
-Or alternatively:
+**Stack Settings:**
+- Stack: Node
+- Major Version: 20
+- Minor Version: 20 LTS
+
+### 6. Additional Azure Settings
+**Build Settings (if using CI/CD):**
 ```
-node server.js
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+ENABLE_ORYX_BUILD=true
 ```
 
 ## Azure AD App Registration Configuration
