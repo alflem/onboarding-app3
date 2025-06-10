@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "node .next/standalone/server.js",
-    "start:azure": "node .next/standalone/server.js",
+    "start": "node server.js",
+    "start:azure": "node server.js",
     "start:next": "next start -p ${PORT:-3000}",
     "lint": "next lint"
   },
