@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "start:azure": "npx prisma generate && npx prisma migrate deploy && npx prisma db seed && node server.js",
+    "start:azure": "node server.js",
     "start:next": "next start -p ${PORT:-3000}",
     "lint": "next lint"
   },
