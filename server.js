@@ -1,0 +1,1 @@
+require('./build/standalone/server.js');
