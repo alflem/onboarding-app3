@@ -49,6 +49,7 @@ jobs:
         npm install
         npx prisma generate
         npm run build
+        
 
     - name: Run database migrations and seeding
       run: |
