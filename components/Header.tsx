@@ -191,7 +191,7 @@ const Header: React.FC = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => signOut()}
+                    onClick={() => signOut({ callbackUrl: "/auth/signin" })}
                   >
                     Logga ut
                   </DropdownMenuItem>
@@ -353,7 +353,7 @@ const Header: React.FC = () => {
                     <button
                       className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-accent/50"
                       onClick={() => {
-                        signOut();
+                        signOut({ callbackUrl: "/auth/signin" });
                         toggleMenu();
                       }}
                     >
