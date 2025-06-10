@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "start:azure": "test -f .next/standalone/server.js && node .next/standalone/server.js || node server.js",
+    "start:azure": "HOSTNAME=0.0.0.0 PORT=${PORT:-8080} node server.js",
     "start:next": "next start -p ${PORT:-3000}",
     "lint": "next lint"
   },

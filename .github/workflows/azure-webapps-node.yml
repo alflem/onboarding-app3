@@ -74,6 +74,8 @@ jobs:
         # Copy standalone build files (this is the main app)
         if [ -d ".next/standalone" ]; then
           echo "Using standalone build"
+          echo "Contents of .next/standalone:"
+          ls -la .next/standalone/
           cp -r .next/standalone/* deployment-package/
           # Create .next directory structure for static files
           mkdir -p deployment-package/.next
@@ -82,6 +84,8 @@ jobs:
           cp -r public deployment-package/public
           # For standalone, we use the built-in server.js from Next.js
           echo "Using Next.js standalone server"
+          echo "Contents of deployment-package:"
+          ls -la deployment-package/
         else
           echo "Using regular build"
           cp -r .next deployment-package/.next
