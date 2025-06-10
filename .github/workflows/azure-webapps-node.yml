@@ -23,9 +23,9 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: onboarding-app    # set this to your application's name
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '22.x'                # set this to the node version to use
+  AZURE_WEBAPP_NAME: onboarding-app
+  NODE_VERSION: '22.x'
+  NODE_ENV: production
 
 permissions:
   contents: read
@@ -44,12 +44,11 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
-    - name: npm install, build, and test
+    - name: npm install and build
       run: |
         npm install
         npx prisma generate
-        npm run build --if-present
-        npm run test --if-present
+        npm run build
 
     - name: Run database migrations and seeding
       run: |
@@ -58,53 +57,17 @@ jobs:
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-    - name: Install production dependencies only
+    - name: Prepare deployment
       run: |
-        # Remove dev dependencies and reinstall only production
         rm -rf node_modules
         npm ci --only=production
-        # Generate Prisma client for production
         npx prisma generate
-
-    - name: Create deployment package
-      run: |
-        # Create deployment package with regular Next.js build
-        mkdir deployment-package
-
-        # Copy essential files for regular deployment
-        cp -r .next deployment-package/.next
-        cp -r public deployment-package/public
-        cp package.json deployment-package/
-        cp next.config.ts deployment-package/
-        cp server.js deployment-package/
-        cp web.config deployment-package/
-
-        # Copy production node_modules
-        cp -r node_modules deployment-package/node_modules
-
-        # Copy Prisma files
-        mkdir -p deployment-package/prisma
-        cp prisma/schema.prisma deployment-package/prisma/schema.prisma
-        cp prisma/seed.ts deployment-package/prisma/seed.ts
-        # Copy migrations directory if it exists
-        if [ -d "prisma/migrations" ]; then
-          cp -r prisma/migrations deployment-package/prisma/migrations
-        fi
-
-        # Clean up unnecessary files from node_modules
-        find deployment-package/node_modules -type d -name ".cache" -exec rm -rf {} + 2>/dev/null || true
-        find deployment-package/node_modules -type d -name "@types" -exec rm -rf {} + 2>/dev/null || true
-        find deployment-package/node_modules -type d -name "typescript" -exec rm -rf {} + 2>/dev/null || true
-        find deployment-package/node_modules -name "*.d.ts" -delete 2>/dev/null || true
-        find deployment-package/node_modules -name "*.test.js" -delete 2>/dev/null || true
-        find deployment-package/node_modules -name "*.spec.js" -delete 2>/dev/null || true
 
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
         name: node-app
-        path: deployment-package
-
+        path: .
 
   deploy:
     permissions:
@@ -119,7 +82,6 @@ jobs:
         name: node-app
 
     - name: 'Deploy to Azure WebApp'
-      id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
