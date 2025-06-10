@@ -21,6 +21,13 @@ self.addEventListener('install', (event) => {
 
 // Fetch event - serve from cache when offline
 self.addEventListener('fetch', (event) => {
+  // Skip service worker for auth requests and API calls
+  if (event.request.url.includes('/api/auth/') ||
+      event.request.url.includes('/_next/') ||
+      event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -28,9 +35,17 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-        return fetch(event.request);
-      }
-    )
+        // Use proper fetch options to handle redirects
+        return fetch(event.request, {
+          redirect: 'follow',
+          credentials: 'same-origin'
+        }).catch(() => {
+          // Return a fallback response if offline
+          if (event.request.destination === 'document') {
+            return caches.match('/');
+          }
+        });
+      })
   );
 });
 

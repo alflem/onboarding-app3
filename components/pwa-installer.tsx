@@ -16,19 +16,32 @@ export default function PWAInstaller() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
 
-  useEffect(() => {
-    // Register service worker
+    useEffect(() => {
+    // Unregister any existing service workers to fix auth issues
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('SW registered: ', registration);
-          })
-          .catch((registrationError) => {
-            console.log('SW registration failed: ', registrationError);
-          });
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          registration.unregister();
+          console.log('Service worker unregistered:', registration);
+        });
       });
     }
+
+    // Temporarily disable service worker registration to fix auth issues
+    // TODO: Re-enable after authentication is working properly
+
+    // Register service worker
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker.register('/sw.js')
+    //       .then((registration) => {
+    //         console.log('SW registered: ', registration);
+    //       })
+    //       .catch((registrationError) => {
+    //         console.log('SW registration failed: ', registrationError);
+    //       });
+    //   });
+    // }
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
