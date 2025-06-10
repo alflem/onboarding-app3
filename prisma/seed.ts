@@ -5,14 +5,18 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Create or find super admin organization
-  const adminOrg = await prisma.organization.upsert({
-    where: { name: 'System Administration' },
-    update: {},
-    create: {
-      name: 'System Administration',
-      buddyEnabled: true,
-    },
+  let adminOrg = await prisma.organization.findFirst({
+    where: { name: 'System Administration' }
   });
+
+  if (!adminOrg) {
+    adminOrg = await prisma.organization.create({
+      data: {
+        name: 'System Administration',
+        buddyEnabled: true,
+      },
+    });
+  }
 
   // Create or find super admin user
   const hashedPassword = await hash('adminpassword', 10);
@@ -29,14 +33,18 @@ async function main() {
   });
 
   // Create or find demo organization
-  const demoOrg = await prisma.organization.upsert({
-    where: { name: 'Demo Company' },
-    update: {},
-    create: {
-      name: 'Demo Company',
-      buddyEnabled: true,
-    },
+  let demoOrg = await prisma.organization.findFirst({
+    where: { name: 'Demo Company' }
   });
+
+  if (!demoOrg) {
+    demoOrg = await prisma.organization.create({
+      data: {
+        name: 'Demo Company',
+        buddyEnabled: true,
+      },
+    });
+  }
 
   // Create or find demo admin user
   const demoAdminPassword = await hash('password', 10);
@@ -119,17 +127,22 @@ async function main() {
     },
   ];
 
-  // Create categories and tasks
-  for (const categoryData of categories) {
-    const { name, order, tasks } = categoryData;
+  // Create categories and tasks only if checklist is empty
+  const existingCategories = await prisma.category.findMany({
+    where: { checklistId: demoChecklist.id }
+  });
 
-    const category = await prisma.category.create({
-      data: {
-        name,
-        order,
-        checklistId: demoChecklist.id,
-      },
-    });
+  if (existingCategories.length === 0) {
+    for (const categoryData of categories) {
+      const { name, order, tasks } = categoryData;
+
+      const category = await prisma.category.create({
+        data: {
+          name,
+          order,
+          checklistId: demoChecklist.id,
+        },
+      });
 
     // Create tasks for this category
     for (const taskData of tasks) {
@@ -152,6 +165,9 @@ async function main() {
         },
       });
     }
+  }
+  } else {
+    console.log('Categories already exist, skipping checklist creation');
   }
 
   console.log('Database has been seeded');
