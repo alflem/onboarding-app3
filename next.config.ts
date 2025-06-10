@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable standalone output for better Azure deployment
-  output: 'standalone',
+  // Disable standalone output for regular deployment
+  // output: 'standalone',
   // External packages for server components
   serverExternalPackages: ['prisma', '@prisma/client'],
   // Optimize bundle size
