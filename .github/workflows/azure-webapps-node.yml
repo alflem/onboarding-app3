@@ -68,6 +68,8 @@ jobs:
         if [ -d ".next/standalone" ]; then
           echo "Using standalone build"
           cp -r .next/standalone/* deployment-package/
+          # Create .next directory structure for static files
+          mkdir -p deployment-package/.next
           # Copy static files to the correct location for standalone
           cp -r .next/static deployment-package/.next/static
           cp -r public deployment-package/public
