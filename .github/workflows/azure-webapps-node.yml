@@ -29,6 +29,8 @@ env:
 
 permissions:
   contents: read
+  id-token: write
+  actions: read
 
 jobs:
   build:
@@ -75,28 +77,4 @@ jobs:
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
-    - name: Set up Node.js for migrations
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
 
-    - name: Install dependencies for migrations
-      run: npm install --production=false
-
-    - name: Generate Prisma Client
-      run: npx prisma generate
-
-    - name: Reset database (clear all data)
-      run: npx prisma migrate reset --skip-seed --force
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-    - name: Run database migrations
-      run: npx prisma migrate deploy
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-    - name: Seed database (required)
-      run: npx prisma db seed
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
