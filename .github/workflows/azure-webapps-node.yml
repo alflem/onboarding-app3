@@ -25,7 +25,6 @@ on:
 env:
   AZURE_WEBAPP_NAME: onboarding-app
   NODE_VERSION: '22.x'
-  NODE_ENV: production
 
 permissions:
   contents: read
@@ -49,7 +48,7 @@ jobs:
         npm install
         npx prisma generate
         npm run build
-        
+
 
     - name: Run database migrations and seeding
       run: |
