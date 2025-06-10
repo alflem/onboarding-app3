@@ -44,14 +44,25 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (status === "authenticated") {
+      if (status === "authenticated" && session?.user) {
         setLoading(true);
         setError(null);
 
         try {
-          const response = await fetch("/api/user-dashboard");
+          const response = await fetch("/api/user-dashboard", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
           if (!response.ok) {
-            throw new Error("Kunde inte hämta användardata");
+            if (response.status === 401) {
+              // Session expired, redirect to signin
+              window.location.href = "/auth/signin";
+              return;
+            }
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
 
           const data = await response.json();
@@ -62,17 +73,22 @@ export default function Home() {
         } finally {
           setLoading(false);
         }
+      } else if (status === "unauthenticated") {
+        // Clear any stale data
+        setDashboardData(null);
+        setError(null);
       }
     }
 
     fetchDashboardData();
-  }, [status]);
+  }, [status, session?.user?.id]);
 
-  if (status === "loading" || loading) {
+  // Show loading only when NextAuth is still determining session status
+  if (status === "loading") {
     return (
       <div className="container p-8 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin mb-4" />
-        <p className="text-muted-foreground">Laddar dashboard...</p>
+        <p className="text-muted-foreground">Laddar...</p>
       </div>
     );
   }
@@ -92,16 +108,18 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center text-white space-y-4 px-4">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
-              {status === "authenticated"
-                ? `Välkommen, ${session?.user?.name || 'användare'}!`
+              {status === "authenticated" && session?.user
+                ? `Välkommen, ${session.user.name || 'användare'}!`
                 : "Välkommen till Onboarding-plattformen!"}
             </h1>
-            {status === "authenticated" && dashboardData?.organization && (
+            {status === "authenticated" && session?.user && (
               <div className="text-lg md:text-xl text-white/90">
-                Du är inloggad på <span className="font-medium">{dashboardData.organization.name}</span>
+                Du är inloggad på <span className="font-medium">
+                  {session.user.organization?.name || dashboardData?.organization?.name || 'Laddar organisation...'}
+                </span>
               </div>
             )}
-            {status !== "authenticated" && (
+            {status === "unauthenticated" && (
               <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
                 En sömlös och strukturerad onboarding för nya medarbetare
               </p>
@@ -120,11 +138,23 @@ export default function Home() {
         </div>
       )}
 
-            {status === "authenticated" ? (
+            {status === "authenticated" && session?.user ? (
         <div className="space-y-6">
-          <Card>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
+          {loading ? (
+            <Card>
+              <CardContent className="p-8">
+                <div className="flex items-center justify-center min-h-[200px]">
+                  <div className="text-center space-y-4">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                    <p className="text-muted-foreground">Laddar dina uppgifter...</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
                 {/* Progress Circle & Title */}
                 <div className="flex flex-col items-center lg:items-start space-y-4">
                   <div className="relative">
@@ -225,8 +255,9 @@ export default function Home() {
 
           {/* Du kan lägga till fler kort här, t.ex. information om buddy, kommande möten, etc. */}
           </div>
+          )}
         </div>
-      ) : (
+      ) : status === "unauthenticated" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -272,6 +303,11 @@ export default function Home() {
               </ul>
             </CardContent>
           </Card>
+        </div>
+      ) : (
+        // Fallback for unknown states
+        <div className="text-center p-8">
+          <p className="text-muted-foreground">Laddar...</p>
         </div>
       )}
       </div>
