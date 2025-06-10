@@ -7,7 +7,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
-import PWAInstaller from "@/components/pwa-installer";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -70,7 +69,6 @@ export default function RootLayout({
             <Footer />
           </AuthProvider>
           <Toaster />
-          <PWAInstaller />
         </ThemeProvider>
       </body>
     </html>
