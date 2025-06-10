@@ -1,22 +1,8 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  distDir: 'build',
+  output: 'standalone',
+};
 
-const nextConfig: NextConfig = {
-  // Disable standalone output for regular deployment
-  // output: 'standalone',
-  // External packages for server components
-  serverExternalPackages: ['prisma', '@prisma/client'],
-  // Optimize bundle size
-  experimental: {
-    // Optimize package imports
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons']
-  },
-  // Exclude source maps in production
-  productionBrowserSourceMaps: false,
-  // Optimize images
-  images: {
-    unoptimized: false,
-    formats: ['image/webp', 'image/avif'],
-  }
-}
-
-export default nextConfig
+export default nextConfig;
