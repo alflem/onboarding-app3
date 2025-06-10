@@ -16,18 +16,19 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
-      - name: Clean install and build
-        run: |
-          npm ci --only=production
-          npm run build
+      - name: Clean install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
 
       - name: Create deployment package
         run: |
-          # Include only necessary files for production
-          zip -r release.zip .next node_modules package.json next.config.js public -x "node_modules/.cache/*"
+          # Create a clean package without node_modules (Azure will install them)
+          zip -r release.zip .next package*.json next.config.ts server.js public web.config prisma -x "**/.git/*" "**/.env*" "**/node_modules/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
