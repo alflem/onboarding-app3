@@ -51,6 +51,13 @@ jobs:
         npm run build --if-present
         npm run test --if-present
 
+    - name: Run database migrations and seeding
+      run: |
+        npx prisma migrate deploy
+        npx prisma db seed
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     - name: Install production dependencies only
       run: |
         # Remove dev dependencies and reinstall only production
@@ -89,6 +96,11 @@ jobs:
         # Copy Prisma schema
         mkdir -p deployment-package/prisma
         cp prisma/schema.prisma deployment-package/prisma/schema.prisma
+        cp prisma/seed.ts deployment-package/prisma/seed.ts
+        # Copy migrations directory if it exists
+        if [ -d "prisma/migrations" ]; then
+          cp -r prisma/migrations deployment-package/prisma/migrations
+        fi
 
         # For standalone builds, the node_modules are already included
         # Remove unnecessary files from node_modules if they exist
@@ -127,26 +139,5 @@ jobs:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: .
-
-    - name: Set up Node.js for migrations
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-
-    - name: Install dependencies for migrations
-      run: npm install --production=false
-
-    - name: Generate Prisma Client
-      run: npx prisma generate
-
-    - name: Run database migrations
-      run: npx prisma migrate deploy
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-    - name: Seed database
-      run: npx prisma db seed
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 
