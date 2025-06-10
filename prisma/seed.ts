@@ -4,18 +4,22 @@ import { hash } from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create a super admin organization
-  const adminOrg = await prisma.organization.create({
-    data: {
+  // Create or find super admin organization
+  const adminOrg = await prisma.organization.upsert({
+    where: { name: 'System Administration' },
+    update: {},
+    create: {
       name: 'System Administration',
       buddyEnabled: true,
     },
   });
 
-  // Create a super admin user
+  // Create or find super admin user
   const hashedPassword = await hash('adminpassword', 10);
-  await prisma.user.create({
-    data: {
+  await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
       name: 'Super Admin',
       email: 'admin@example.com',
       password: hashedPassword,
@@ -24,18 +28,22 @@ async function main() {
     },
   });
 
-  // Create a demo organization
-  const demoOrg = await prisma.organization.create({
-    data: {
+  // Create or find demo organization
+  const demoOrg = await prisma.organization.upsert({
+    where: { name: 'Demo Company' },
+    update: {},
+    create: {
       name: 'Demo Company',
       buddyEnabled: true,
     },
   });
 
-  // Create a demo admin user
+  // Create or find demo admin user
   const demoAdminPassword = await hash('password', 10);
-  const demoAdmin = await prisma.user.create({
-    data: {
+  const demoAdmin = await prisma.user.upsert({
+    where: { email: 'demo-admin@example.com' },
+    update: {},
+    create: {
       name: 'Demo Admin',
       email: 'demo-admin@example.com',
       password: demoAdminPassword,
@@ -44,10 +52,12 @@ async function main() {
     },
   });
 
-  // Create a demo employee
+  // Create or find demo employee
   const demoEmployeePassword = await hash('password', 10);
-  const demoEmployee = await prisma.user.create({
-    data: {
+  const demoEmployee = await prisma.user.upsert({
+    where: { email: 'employee@example.com' },
+    update: {},
+    create: {
       name: 'Demo Employee',
       email: 'employee@example.com',
       password: demoEmployeePassword,
@@ -57,9 +67,11 @@ async function main() {
     },
   });
 
-  // Create a checklist for the demo organization
-  const demoChecklist = await prisma.checklist.create({
-    data: {
+  // Create or find checklist for the demo organization
+  const demoChecklist = await prisma.checklist.upsert({
+    where: { organizationId: demoOrg.id },
+    update: {},
+    create: {
       organizationId: demoOrg.id,
     },
   });
