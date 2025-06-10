@@ -51,11 +51,59 @@ jobs:
         npm run build --if-present
         npm run test --if-present
 
+    - name: Install production dependencies only
+      run: |
+        # Remove dev dependencies and reinstall only production
+        rm -rf node_modules
+        npm ci --only=production
+        # Generate Prisma client for production
+        npx prisma generate
+
+    - name: Create optimized deployment package
+      run: |
+        # Create deployment package with only necessary files
+        mkdir deployment-package
+
+        # Copy standalone build files (this is the main app)
+        if [ -d ".next/standalone" ]; then
+          echo "Using standalone build"
+          cp -r .next/standalone/* deployment-package/
+          # Copy static files to the correct location for standalone
+          cp -r .next/static deployment-package/.next/static
+          cp -r public deployment-package/public
+          # For standalone, we use the built-in server.js from Next.js
+          echo "Using Next.js standalone server"
+        else
+          echo "Using regular build"
+          cp -r .next deployment-package/.next
+          cp -r public deployment-package/public
+          cp package.json deployment-package/
+          cp next.config.ts deployment-package/
+          cp server.js deployment-package/
+          # Copy only production node_modules (much smaller)
+          cp -r node_modules deployment-package/node_modules
+        fi
+
+        # Copy Prisma schema
+        mkdir -p deployment-package/prisma
+        cp prisma/schema.prisma deployment-package/prisma/schema.prisma
+
+        # For standalone builds, the node_modules are already included
+        # Remove unnecessary files from node_modules if they exist
+        if [ -d "deployment-package/node_modules" ]; then
+          find deployment-package/node_modules -type d -name ".cache" -exec rm -rf {} + 2>/dev/null || true
+          find deployment-package/node_modules -type d -name "@types" -exec rm -rf {} + 2>/dev/null || true
+          find deployment-package/node_modules -type d -name "typescript" -exec rm -rf {} + 2>/dev/null || true
+          find deployment-package/node_modules -name "*.d.ts" -delete 2>/dev/null || true
+          find deployment-package/node_modules -name "*.test.js" -delete 2>/dev/null || true
+          find deployment-package/node_modules -name "*.spec.js" -delete 2>/dev/null || true
+        fi
+
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v4
       with:
         name: node-app
-        path: .
+        path: deployment-package
 
 
   deploy:
@@ -76,7 +124,7 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        package: .
 
     - name: Set up Node.js for migrations
       uses: actions/setup-node@v4

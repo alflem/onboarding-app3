@@ -1,0 +1,51 @@
+# Development dependencies
+node_modules/@types/
+node_modules/typescript/
+node_modules/eslint*/
+node_modules/@eslint/
+node_modules/ts-node/
+node_modules/@typescript-eslint/
+
+# Build cache and temp files
+.next/cache/
+.next/trace/
+.vercel/
+.turbo/
+
+# Development files
+*.log
+*.test.*
+*.spec.*
+__tests__/
+coverage/
+.nyc_output/
+
+# Source maps
+*.map
+
+# Environment files
+.env*
+!.env.example
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Prisma dev files
+prisma/migrations/
+prisma/dev.db*
