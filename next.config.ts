@@ -1,7 +1,13 @@
-// import type { NextConfig } from "next";
+import type { NextConfig } from "next";
 
-// const nextConfig: NextConfig = {
-//   output: 'standalone'
-// }
+const nextConfig: NextConfig = {
+  // Enable standalone output for better Azure deployment
+  output: 'standalone',
+  // Ensure experimental features work with Azure
+  experimental: {
+    // Enable server components
+    serverComponentsExternalPackages: ['prisma']
+  }
+}
 
-// module.exports = nextConfig
+export default nextConfig
