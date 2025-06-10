@@ -28,7 +28,7 @@ jobs:
       - name: Create deployment package
         run: |
           # Create a clean package without node_modules (Azure will install them)
-          zip -r release.zip .next package*.json next.config.ts server.js public web.config prisma -x "**/.git/*" "**/.env*" "**/node_modules/*"
+          zip -r release.zip .next app package*.json next.config.ts server.js public web.config prisma -x "**/.git/*" "**/.env*" "**/node_modules/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
