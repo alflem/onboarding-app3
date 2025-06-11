@@ -1,36 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create or find super admin organization
-  let adminOrg = await prisma.organization.findFirst({
-    where: { name: 'System Administration' }
-  });
-
-  if (!adminOrg) {
-    adminOrg = await prisma.organization.create({
-      data: {
-        name: 'System Administration',
-        buddyEnabled: true,
-      },
-    });
-  }
-
-  // Create or find super admin user
-  const hashedPassword = await hash('adminpassword', 10);
-  await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: {},
-    create: {
-      name: 'Super Admin',
-      email: 'admin@example.com',
-      password: hashedPassword,
-      role: 'SUPER_ADMIN',
-      organizationId: adminOrg.id,
-    },
-  });
 
   // Create or find demo organization
   let demoOrg = await prisma.organization.findFirst({
@@ -46,34 +18,7 @@ async function main() {
     });
   }
 
-  // Create or find demo admin user
-  const demoAdminPassword = await hash('password', 10);
-  const demoAdmin = await prisma.user.upsert({
-    where: { email: 'demo-admin@example.com' },
-    update: {},
-    create: {
-      name: 'Demo Admin',
-      email: 'demo-admin@example.com',
-      password: demoAdminPassword,
-      role: 'ADMIN',
-      organizationId: demoOrg.id,
-    },
-  });
-
-  // Create or find demo employee
-  const demoEmployeePassword = await hash('password', 10);
-  const demoEmployee = await prisma.user.upsert({
-    where: { email: 'employee@example.com' },
-    update: {},
-    create: {
-      name: 'Demo Employee',
-      email: 'employee@example.com',
-      password: demoEmployeePassword,
-      role: 'EMPLOYEE',
-      organizationId: demoOrg.id,
-      buddyId: demoAdmin.id, // Set the admin as the buddy for this employee
-    },
-  });
+  // Note: Demo users will be created automatically when they log in via Azure AD
 
   // Create or find checklist for the demo organization
   const demoChecklist = await prisma.checklist.upsert({
@@ -156,14 +101,7 @@ async function main() {
         },
       });
 
-      // Create task progress for the demo employee
-      await prisma.taskProgress.create({
-        data: {
-          userId: demoEmployee.id,
-          taskId: task.id,
-          completed: Math.random() > 0.7, // Randomly mark some tasks as completed
-        },
-      });
+      // Task progress will be created when users interact with tasks
     }
   }
   } else {

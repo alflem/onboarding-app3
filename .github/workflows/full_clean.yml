@@ -1,0 +1,81 @@
+name: Full Clean - Reset DB and Deploy Next.js app to Azure Web App
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_reset:
+        description: 'Type "RESET" to confirm database reset'
+        required: true
+        default: ''
+
+env:
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+  WEBAPP_NAME: "onboarding-app"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+  AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+  AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+
+jobs:
+  full-clean-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate reset confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm_reset }}" != "RESET" ]; then
+            echo "Error: You must type 'RESET' to confirm database reset"
+            exit 1
+          fi
+          echo "Database reset confirmed"
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Reset Database (Push Schema)
+        run: |
+          echo "🗑️ Resetting database schema..."
+          npx prisma db push --force-reset --accept-data-loss
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Seed Database
+        run: |
+          echo "🌱 Seeding database..."
+          npx prisma db seed || echo "No seed script found, skipping..."
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Build application
+        run: |
+          echo "🏗️ Building Next.js application..."
+          npm run build
+          cp -r ./public ./.next/standalone/ || true
+          cp -r ./.next/static ./.next/standalone/.next/ || true
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          slot-name: "Production"
+          publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
+          package: ./.next/standalone
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Full clean deployment completed!"
+          echo "- Database schema reset"
+          echo "- Database seeded (if seed script exists)"
+          echo "- Application built and deployed"

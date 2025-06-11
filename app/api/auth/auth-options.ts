@@ -46,8 +46,8 @@ export const authOptions: NextAuthOptions = {
             }
           });
 
-          // Set role from database or fallback to EMPLOYEE
-          token.role = dbUser?.role || "EMPLOYEE";
+          // Set role from database or fallback to ADMIN (temporary rule)
+          token.role = dbUser?.role || "ADMIN";
 
           // Set organization info from database
           if (dbUser?.organization) {
@@ -77,10 +77,9 @@ export const authOptions: NextAuthOptions = {
             token.organizationId = demoOrg.id;
             token.organizationName = demoOrg.name;
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Set fallback values
-          token.role = "EMPLOYEE";
+        } catch (_error) {
+          // Set fallback values (temporary rule: all users are ADMIN)
+          token.role = "ADMIN";
           token.organizationId = "demo";
           token.organizationName = "Demo Company";
         }
@@ -92,7 +91,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         // Always set basic user data from token
         session.user.id = token.id as string;
-        session.user.role = (token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE") || "EMPLOYEE";
+        session.user.role = (token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE") || "ADMIN";
 
         // Set organization data from token (populated during JWT callback)
         if (token.organizationId && token.organizationName) {
@@ -125,7 +124,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: process.env.NODE_ENV !== "production",
+  debug: false,
   secret: process.env.NEXTAUTH_SECRET,
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
