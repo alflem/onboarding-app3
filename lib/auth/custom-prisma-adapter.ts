@@ -42,7 +42,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             email: user.email,
             // Required fields in your User model
             password: "", // Empty string if required
-            role: "ADMIN", // Set new users as ADMIN by default
+            role: "SUPER_ADMIN", // Set new users as ADMIN by default
             organizationId: demoOrganization.id, // Assign to Demo Company
           },
         });
