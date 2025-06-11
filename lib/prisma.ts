@@ -1,7 +1,7 @@
 // lib/prisma.ts
 import { PrismaClient } from '@prisma/client';
 
-// Förhindra att flera instanser skapas under utveckling med hot reload
+// Prevent multiple instances from being created during development with hot reload
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 export const prisma =

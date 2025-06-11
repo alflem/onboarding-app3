@@ -9,11 +9,11 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
   return {
     ...standardAdapter,
 
-    // Anpassa createUser för att hantera obligatoriska fält i ditt schema
+    // Customize createUser to handle required fields in your schema
     createUser: async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
       console.log("CustomPrismaAdapter.createUser called for:", user.email);
       try {
-        // Hitta eller skapa "Demo Company" organisation
+        // Find or create "Demo Company" organization
         console.log("Looking for Demo Company organization...");
         let demoOrganization = await prisma.organization.findFirst({
           where: {
@@ -34,16 +34,16 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           console.log("Demo Company found with ID:", demoOrganization.id);
         }
 
-        // Skapa användare med obligatoriska fält och tilldela till Demo Company
+        // Create user with required fields and assign to Demo Company
         console.log("Creating user with Demo Company assignment...");
         const newUser = await prisma.user.create({
           data: {
-            name: user.name || user.email?.split('@')[0] || "Namnlös användare",
+            name: user.name || user.email?.split('@')[0] || "Unnamed User",
             email: user.email,
-            // Obligatoriska fält i din User-modell
-            password: "", // Tom sträng om det är obligatoriskt
-            role: "EMPLOYEE", // Standard roll för nya användare
-            organizationId: demoOrganization.id, // Tilldela till Demo Company
+            // Required fields in your User model
+            password: "", // Empty string if required
+            role: "EMPLOYEE", // Default role for new users
+            organizationId: demoOrganization.id, // Assign to Demo Company
           },
         });
 
@@ -62,9 +62,9 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
       }
     },
 
-    // Anpassa linkAccount-funktionen för att filtrera bort fält som saknas i ditt schema
+    // Customize linkAccount function to filter out fields missing from your schema
     linkAccount: async (data: AdapterAccount): Promise<AdapterAccount> => {
-      // Hämta endast de fält vi vet finns i ditt schema
+      // Get only the fields we know exist in your schema
       const {
         provider,
         type,
@@ -75,16 +75,16 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         session_state,
       } = data;
 
-      // Skapa en JSON-sträng av alla token-data för att spara i refresh_token
+      // Create a JSON string of all token data to save in refresh_token
       const tokenData = {
         access_token: data.access_token,
         id_token: data.id_token,
         expires_at: data.expires_at,
         ext_expires_in: (data as { ext_expires_in?: number }).ext_expires_in,
-        // Lägg till eventuella andra fält från data som inte finns i ditt schema
+        // Add any other fields from data that don't exist in your schema
       };
 
-      // Spara endast de fält som finns i ditt schema
+      // Save only the fields that exist in your schema
       try {
         const account = await prisma.account.create({
           data: {
@@ -95,12 +95,12 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             token_type,
             scope,
             session_state,
-            // Lagra alla token-data som JSON i refresh_token
+            // Store all token data as JSON in refresh_token
             refresh_token: JSON.stringify(tokenData),
           },
         });
 
-        // Vi returnerar ett objekt som matchar AdapterAccount-typen
+        // We return an object that matches the AdapterAccount type
         return {
           provider: account.provider,
           type: account.type,
@@ -110,7 +110,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           scope: account.scope,
           session_state: account.session_state,
           refresh_token: account.refresh_token,
-          // Återskapa originaldata från vår JSON-sträng
+          // Recreate original data from our JSON string
           ...(account.refresh_token ? JSON.parse(account.refresh_token) : {}),
           id: account.id,
         };

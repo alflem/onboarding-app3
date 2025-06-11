@@ -55,7 +55,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-// Utöka AdapterAccount för Azure AD-specifika fält (alternativt)
+// Extend AdapterAccount for Azure AD-specific fields (alternative)
 declare module "next-auth/adapters" {
   interface AdapterAccount {
     ext_expires_in?: number;

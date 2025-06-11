@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/user/is-buddy - Kontrollera om inloggad användare är buddy för någon
+// GET /api/user/is-buddy - Check if logged-in user is a buddy for someone
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Hämta användarens organisation för att kontrollera buddy-inställningar
+    // Get user's organization to check buddy settings
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
@@ -32,7 +32,7 @@ export async function GET() {
       });
     }
 
-    // Om buddy-funktionen är inaktiverad för organisationen
+    // If buddy function is disabled for the organization
     if (!user.organization.buddyEnabled) {
       return NextResponse.json({
         isBuddy: false,
@@ -41,7 +41,7 @@ export async function GET() {
       });
     }
 
-    // Kontrollera om användaren är buddy för någon
+    // Check if user is a buddy for someone
     const employeesWithThisBuddy = await prisma.user.findMany({
       where: {
         buddyId: session.user.id
