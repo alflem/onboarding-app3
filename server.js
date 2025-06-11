@@ -1,1 +1,1 @@
-require('./build/standalone/server.js');
+require('./.next/standalone/server.js');
