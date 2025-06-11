@@ -32,42 +32,183 @@ async function main() {
   // Create categories for the checklist
   const categories = [
     {
-      name: 'Före första dagen',
+      name: 'Din digitala setup',
       order: 1,
       tasks: [
-        { title: 'Skicka välkomstmail', description: 'Skicka ett välkomstmail med praktisk information om första dagen.', order: 1, isBuddyTask: true },
-        { title: 'Förbereda arbetsplats', description: 'Se till att arbetsplats med dator och tillbehör är förberedd.', order: 2, isBuddyTask: true },
-        { title: 'Skapa användarkonton', description: 'Skapa konton för de system som den nyanställda behöver.', order: 3, isBuddyTask: true },
+        {
+          title: 'Dator och mobil',
+          description: 'Se till att installera och få igång din dator och telefon.',
+          order: 1,
+          isBuddyTask: true
+        },
+        {
+          title: 'Kollegor i telefonboken (frivillig)',
+          description: 'Lägg till XLENT koncern...',
+          order: 2,
+          isBuddyTask: false
+        },
+        {
+          title: 'Har du all utrustning du behöver?',
+          description: 'Har du all utrustning du behöver? Om inte – kontakta IT-ansvarig Christian!',
+          order: 3,
+          isBuddyTask: false
+        },
       ]
     },
     {
-      name: 'Första dagen',
+      name: 'Ekonomi och affärssystem',
       order: 2,
       tasks: [
-        { title: 'Välkomnande', description: 'Ta emot och hälsa den nyanställda välkommen.', order: 1, isBuddyTask: true },
-        { title: 'Rundvandring', description: 'Visa runt på kontoret och presentera viktiga platser.', order: 2, isBuddyTask: true },
-        { title: 'Systemintroduktion', description: 'Genomgång av de viktigaste systemen som används.', order: 3, isBuddyTask: true },
-        { title: 'Säkerhet och rutiner', description: 'Gå igenom säkerhetsrutiner, nycklar och passerkort.', order: 4, isBuddyTask: false },
+        {
+          title: 'Medarbetarresan',
+          description: 'Här kan du få en samlad bild över våra delprocesser för dig som anställd.',
+          order: 1,
+          isBuddyTask: false,
+          link: 'https://example.com/medarbetarresan'
+        },
+        {
+          title: 'XLU Teams',
+          description: 'Teams används för internkommunikation inom XLENT Luleå och med kollegor i andra bolag.',
+          order: 2,
+          isBuddyTask: false,
+          link: 'https://example.com/xlu-teams'
+        },
+        {
+          title: 'Intranät',
+          description: 'Workplace är XLENTs intranät med nyheter, kultur och samverkansforum. Klicka runt en stund så ser du vad som finns.',
+          order: 3,
+          isBuddyTask: false,
+          link: 'https://example.com/intranet'
+        },
+        {
+          title: 'XLUs arbetssätt',
+          description: 'Under kunskapsidan hittar du beskrivningar av olika arbetssätt som vi har inom XLU. Titta igenom och fråga din buddy eller någon kollega om det är något du undrar över.',
+          order: 4,
+          isBuddyTask: true
+        },
+        {
+          title: 'Bra länkar under din onboarding',
+          description: 'Under länksidan hittar du länkar som kan vara bra under din onboarding.',
+          order: 5,
+          isBuddyTask: false
+        },
+        {
+          title: 'CSF Support och service',
+          description: 'XLENTs centrala support kallas CSF. Här hittar du frågor och svar om deras stöd.',
+          order: 6,
+          isBuddyTask: false,
+          link: 'https://example.com/csf-support'
+        },
+        {
+          title: 'Varumärkessidan',
+          description: 'XLENT koncernen består av många olika bolag och varumärken. På den här sidan hittar du info om varumärke, logotyper, mallar etc.',
+          order: 7,
+          isBuddyTask: false,
+          link: 'https://example.com/varumarkessidan'
+        },
+        {
+          title: 'Ekonomi och affärssystem',
+          description: 'Vi använder Maconomy för tidrapportering, attestering, reseräkningar mm. Här hittar du lathundar mm.',
+          order: 8,
+          isBuddyTask: false
+        },
       ]
     },
     {
-      name: 'Första veckan',
+      name: 'Praktiskt att fixa',
       order: 3,
       tasks: [
-        { title: 'Presentationsrunda', description: 'Presentera medarbetare och viktiga kontaktpersoner.', order: 1, isBuddyTask: true },
-        { title: 'Personalmöte', description: 'Delta i personalmöte för att få en bild av organisationen.', order: 2, isBuddyTask: false },
-        { title: 'IT-säkerhetsutbildning', description: 'Genomgå grundläggande IT-säkerhetsutbildning.', order: 3, isBuddyTask: false },
-        { title: 'Inställning av verktyg', description: 'Anpassa verktyg och inställningar efter egna preferenser.', order: 4, isBuddyTask: false },
+        {
+          title: 'Presentation Workplace',
+          description: 'Presentera dig på Workplace, i gruppen "Hej jag är ny". Är du osäker så prata med någon kollega.',
+          order: 1,
+          isBuddyTask: true,
+          link: 'https://example.com/presentation-workplace'
+        },
+        {
+          title: 'Presentation webbsida',
+          description: 'Skicka din bild till Tove Lejding som är centralt varumärkesansvarig så ordnar hon så att den läggs upp på XLENTs webbsida för Luleåkontoret.',
+          order: 2,
+          isBuddyTask: false,
+          link: 'https://example.com/presentation-webbsida'
+        },
+        {
+          title: 'Presentation Instagram',
+          description: 'Be Sofia Flodmark skicka frågor för en presentation till Instagram. Skriv sedan en presentation och skicka den tillsammans med din bild till henne så lägger hon upp det på vår Instagram',
+          order: 3,
+          isBuddyTask: false,
+          link: 'https://example.com/presentation-instagram'
+        },
+        {
+          title: 'Uppdatera personlig information i HR-system',
+          description: 'Se över ICE kontakten och ev. kontonummer. (My profile samt Manage personalinfo)',
+          order: 4,
+          isBuddyTask: false
+        },
+        {
+          title: 'Email signatur',
+          description: 'Skapa en signatur till email på dator och mobil',
+          order: 5,
+          isBuddyTask: false,
+          link: 'https://example.com/email-signatur'
+        },
+        {
+          title: 'Foto till kontoret',
+          description: 'Vi sätter upp foton på våra anställda på kontoret. Se till att skriva ut ditt foto, sätt i ram och fixa så den kommer på plats på kontoret.',
+          order: 6,
+          isBuddyTask: false
+        },
+        {
+          title: 'Ange chef på Workplace',
+          description: 'Ange Veronica som chef (under Redigera profil). Du får då åtkomst till flera grupper välj drefter ytterligare grupper att gå med i.',
+          order: 7,
+          isBuddyTask: false
+        },
+        {
+          title: 'Foto till digitala plattformar',
+          description: 'Ladda upp foto: • I Office365 • På Workplace • I Cinode • I kanalen XLENT Luleå på Teams, under Files/Media/Bilder/Porträtt',
+          order: 8,
+          isBuddyTask: false
+        },
+        {
+          title: 'Sjukvårdsförsäkring (frivillig)',
+          description: 'Anmäl till Söderberg & Partners om sjukvårdsförsäkring (om aktuellt)',
+          order: 9,
+          isBuddyTask: false,
+          link: 'https://example.com/sjukvardsforsakring'
+        },
+        {
+          title: 'Kontaktuppgifter',
+          description: 'Säkerställ att ditt telefonnummer och kostavtiklelser finns på vår Wiki-sida "Anteckningsbok-XLU" i Teams',
+          order: 10,
+          isBuddyTask: false
+        },
+        {
+          title: 'Gå med i grupper på Workplace',
+          description: 'Rekommenderade grupper: • XLENT syns och hörs • Försäljning inom XLENT • Kompetensluncher • CSF informerar • Har du hört • Fråga XLENT',
+          order: 11,
+          isBuddyTask: false
+        },
       ]
     },
     {
-      name: 'Första månaden',
+      name: 'Din konsultprofil',
       order: 4,
       tasks: [
-        { title: 'Uppföljningsmöte', description: 'Genomför ett uppföljningsmöte med närmaste chef.', order: 1, isBuddyTask: true },
-        { title: 'Fördjupad utbildning', description: 'Genomgå fördjupad utbildning inom arbetsområdet.', order: 2, isBuddyTask: false },
-        { title: 'Projektintroduktion', description: 'Introduktion till pågående projekt och ansvarsområden.', order: 3, isBuddyTask: false },
-        { title: 'Feedback', description: 'Ge feedback på onboardingprocessen.', order: 4, isBuddyTask: false },
+        {
+          title: 'Information konsultprofil',
+          description: 'Läs om vad en konsultprofil är och hur du skapar en sådan',
+          order: 1,
+          isBuddyTask: false,
+          link: 'https://example.com/information-konsultprofil'
+        },
+        {
+          title: 'Skapa konsultprofil',
+          description: 'Skapa din konsultprofil/ditt konsultcv i Cinode • Lösen första inloggning: xlent123. Ordinarie lösenord till Cinode kommer i mejl',
+          order: 2,
+          isBuddyTask: false,
+          link: 'https://example.com/skapa-konsultprofil'
+        },
       ]
     },
   ];
@@ -98,6 +239,7 @@ async function main() {
           order: taskData.order,
           isBuddyTask: taskData.isBuddyTask,
           categoryId: category.id,
+          ...(taskData.link && { link: taskData.link })
         },
       });
 
