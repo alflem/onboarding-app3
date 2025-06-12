@@ -9,7 +9,6 @@ import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
-import DebugAuthInfo from "@/components/DebugAuthInfo";
 
 interface Organization {
   id: string;
@@ -96,9 +95,6 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
-      {/* Debug Component - Remove after testing */}
-      {status === "authenticated" && <DebugAuthInfo />}
-
       {/* Hero Section with Company Image */}
       <section className="relative h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
         <Image

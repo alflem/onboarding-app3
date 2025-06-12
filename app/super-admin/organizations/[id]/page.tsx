@@ -217,6 +217,45 @@ const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
   }
 };
 
+// Ändra användare till SUPER_ADMIN
+const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean) => {
+  try {
+    setSavingUsers(prev => ({ ...prev, [userId]: true }));
+
+    const newRole = isSuperAdmin ? "SUPER_ADMIN" : "EMPLOYEE";
+
+    console.log(`Ändrar användare ${userId} till roll: ${newRole}`);
+
+    const response = await fetch(`/api/organizations/${organizationId}/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ role: newRole })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Kunde inte uppdatera användarroll");
+    }
+
+    const updatedUser = await response.json();
+
+    // Uppdatera användarlistan
+    setUsers(users.map(user =>
+      user.id === userId ? { ...user, role: updatedUser.role } : user
+    ));
+
+    toast.success(`${updatedUser.name} är nu ${updatedUser.role === "SUPER_ADMIN" ? "superadministratör" : "medarbetare"}`);
+
+  } catch (error) {
+    console.error("Fel vid uppdatering av användarroll:", error);
+    toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera användarroll");
+  } finally {
+    setSavingUsers(prev => ({ ...prev, [userId]: false }));
+  }
+};
+
   if (status === "loading" || loading) {
     return (
       <div className="container flex items-center justify-center h-[70vh]">
@@ -355,6 +394,7 @@ const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
                   <TableHead>E-post</TableHead>
                   <TableHead>Skapad</TableHead>
                   <TableHead>Administratör</TableHead>
+                  <TableHead>Superadmin</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -369,11 +409,25 @@ const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
                           id={`admin-${user.id}`}
                           checked={user.role === "ADMIN"}
                           onCheckedChange={(checked) => handleChangeUserRole(user.id, checked as boolean)}
-                          disabled={savingUsers[user.id]}
+                          disabled={savingUsers[user.id] || user.role === "SUPER_ADMIN"}
                           className="data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
                         />
                         {savingUsers[user.id] && (
                           <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`super-admin-${user.id}`}
+                          checked={user.role === "SUPER_ADMIN"}
+                          onCheckedChange={(checked) => handleChangeSuperAdminRole(user.id, checked as boolean)}
+                          disabled={savingUsers[user.id]}
+                          className="data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+                        />
+                        {savingUsers[user.id] && (
+                          <Loader2 className="h-4 w-4 animate-spin text-red-500" />
                         )}
                       </div>
                     </TableCell>
