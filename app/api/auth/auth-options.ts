@@ -23,6 +23,8 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+      console.log("JWT Callback - Provider:", account?.provider, "User Email:", user?.email || token.email);
+
       // Set basic user data on first login
       if (user) {
         token.id = user.id;
@@ -36,62 +38,108 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      // On first Azure AD login, fetch user data from database
-      if (account?.provider === "azure-ad" && user) {
+      // Always fetch user data from database to ensure correct role
+      // This is important for Safari which might not preserve JWT tokens properly
+      if (token.id) {
+        console.log("Fetching user data from database for token refresh...");
         try {
           const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
+            where: { id: token.id as string },
             include: {
               organization: true
             }
           });
 
-          // Set role from database or fallback to ADMIN (temporary rule)
-          token.role = dbUser?.role || "ADMIN";
+          if (dbUser) {
+            console.log(`Database user found: ${dbUser.email} with role: ${dbUser.role}`);
+            // Always update role from database to ensure accuracy
+            token.role = dbUser.role;
 
-          // Set organization info from database
-          if (dbUser?.organization) {
-            token.organizationId = dbUser.organization.id;
-            token.organizationName = dbUser.organization.name;
-          } else {
-            // Ensure Demo Company exists and assign user to it
-            let demoOrg = await prisma.organization.findFirst({
-              where: { name: "Demo Company" }
-            });
-
-            if (!demoOrg) {
-              demoOrg = await prisma.organization.create({
-                data: {
-                  name: "Demo Company",
-                  buddyEnabled: true,
-                }
+            // Set organization info from database
+            if (dbUser.organization) {
+              token.organizationId = dbUser.organization.id;
+              token.organizationName = dbUser.organization.name;
+            } else {
+              // Ensure Demo Company exists and assign user to it
+              let demoOrg = await prisma.organization.findFirst({
+                where: { name: "Demo Company" }
               });
+
+              if (!demoOrg) {
+                demoOrg = await prisma.organization.create({
+                  data: {
+                    name: "Demo Company",
+                    buddyEnabled: true,
+                  }
+                });
+              }
+
+              // Update user with Demo Company
+              await prisma.user.update({
+                where: { id: token.id as string },
+                data: { organizationId: demoOrg.id }
+              });
+
+              token.organizationId = demoOrg.id;
+              token.organizationName = demoOrg.name;
             }
-
-            // Update user with Demo Company
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { organizationId: demoOrg.id }
-            });
-
-            token.organizationId = demoOrg.id;
-            token.organizationName = demoOrg.name;
+          } else {
+            console.error(`Database user not found for ID: ${token.id}, this should not happen`);
+            // If database user not found, something went wrong - keep existing role or use fallback
+            token.role = token.role || "ADMIN";
+            token.organizationId = token.organizationId || "demo";
+            token.organizationName = token.organizationName || "Demo Company";
           }
-        } catch (_error) {
-          // Set fallback values (temporary rule: all users are ADMIN)
-          token.role = "ADMIN";
-          token.organizationId = "demo";
-          token.organizationName = "Demo Company";
+        } catch (error) {
+          console.error("Error fetching user from database:", error);
+          // On database error, keep existing token role or use fallback
+          token.role = token.role || "ADMIN";
+          token.organizationId = token.organizationId || "demo";
+          token.organizationName = token.organizationName || "Demo Company";
         }
       }
 
+      // For subsequent requests (when user is already in token), maintain the role
+      console.log(`Final token role: ${token.role} for user: ${token.email}`);
       return token;
     },
     async session({ session, token }) {
+      console.log("Session Callback - Token:", {
+        id: token.id,
+        email: token.email,
+        role: token.role,
+        organizationId: token.organizationId
+      });
+
       if (session.user) {
         // Always set basic user data from token
         session.user.id = token.id as string;
-        session.user.role = (token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE") || "ADMIN";
+
+        // If no role in token, fetch from database as fallback
+        if (!token.role && token.id) {
+          console.log("No role in token, fetching from database...");
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { role: true }
+            });
+
+            if (dbUser) {
+              console.log(`Fetched role from database: ${dbUser.role}`);
+              session.user.role = dbUser.role;
+            } else {
+              console.log("No database user found, using ADMIN fallback");
+              session.user.role = "ADMIN";
+            }
+          } catch (error) {
+            console.error("Error fetching role from database in session callback:", error);
+            session.user.role = "ADMIN";
+          }
+        } else {
+          session.user.role = (token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE") || "ADMIN";
+        }
+
+        console.log(`Final session role: ${session.user.role} for user: ${session.user.id}`);
 
         // Set organization data from token (populated during JWT callback)
         if (token.organizationId && token.organizationName) {
@@ -112,6 +160,12 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      console.log("Final session:", {
+        userId: session.user?.id,
+        role: session.user?.role,
+        organizationId: session.user?.organizationId
+      });
+
       return session;
     }
   },
@@ -124,7 +178,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: false,
+  debug: process.env.NODE_ENV === "development", // Enable debug in development
   secret: process.env.NEXTAUTH_SECRET,
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
@@ -132,9 +186,31 @@ export const authOptions: NextAuthOptions = {
       name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production"
+        secure: process.env.NODE_ENV === "production",
+        // Add domain explicitly for better Safari compatibility
+        domain: process.env.NODE_ENV === "production" ? undefined : undefined,
+      }
+    },
+    // Add explicit callback URL cookie for Safari
+    callbackUrl: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      options: {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      }
+    },
+    // Add CSRF token cookie for Safari
+    csrfToken: {
+      name: process.env.NODE_ENV === "production" ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
       }
     }
   },
