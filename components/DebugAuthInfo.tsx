@@ -36,7 +36,6 @@ interface DebugData {
       accounts: Array<{
         provider: string;
         accountId: string;
-        createdAt: string;
       }>;
       createdAt: string;
     };

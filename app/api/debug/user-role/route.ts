@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
           select: {
             provider: true,
             providerAccountId: true,
-            createdAt: true,
           }
         }
       }
@@ -72,7 +71,6 @@ export async function GET(request: NextRequest) {
           accounts: dbUser?.accounts?.map(acc => ({
             provider: acc.provider,
             accountId: acc.providerAccountId,
-            createdAt: acc.createdAt
           })),
           createdAt: dbUser?.createdAt,
         },
