@@ -163,7 +163,7 @@ export default function Home() {
                       </div>
                       <div className="text-center lg:text-left">
                         <h3 className="text-xl font-semibold">Onboarding Progress</h3>
-                        <p className="text-sm text-muted-foreground">Din framsteg hittills</p>
+                        <p className="text-sm text-muted-foreground">Dina framsteg hittills</p>
                       </div>
                     </div>
 

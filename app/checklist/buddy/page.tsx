@@ -49,6 +49,29 @@ export default function BuddyChecklistPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBuddy, setIsBuddy] = useState<boolean | null>(null);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
+
+  // Load accordion state from localStorage on component mount
+  useEffect(() => {
+    const savedAccordionState = localStorage.getItem('buddy-checklist-accordion-state');
+    if (savedAccordionState) {
+      try {
+        const parsedState = JSON.parse(savedAccordionState);
+        setOpenAccordionItems(parsedState);
+      } catch (error) {
+        console.error('Error parsing accordion state from localStorage:', error);
+        setOpenAccordionItems(["cat1"]); // fallback to default
+      }
+    } else {
+      setOpenAccordionItems(["cat1"]); // default state
+    }
+  }, []);
+
+  // Save accordion state to localStorage whenever it changes
+  const handleAccordionChange = (value: string[]) => {
+    setOpenAccordionItems(value);
+    localStorage.setItem('buddy-checklist-accordion-state', JSON.stringify(value));
+  };
 
   // Kontrollera om användaren är buddy
   useEffect(() => {
@@ -224,7 +247,7 @@ export default function BuddyChecklistPage() {
 
         <div className="w-full space-y-4">
           {checklist.categories.length > 0 ? (
-            <Accordion type="multiple" defaultValue={["cat1"]} className="w-full">
+            <Accordion type="multiple" value={openAccordionItems} className="w-full" onValueChange={handleAccordionChange}>
               {checklist.categories.map((category) => (
                 <AccordionItem key={category.id} value={category.id} className="border rounded-lg px-2 mb-4">
                   <AccordionTrigger className="py-4 hover:no-underline">
