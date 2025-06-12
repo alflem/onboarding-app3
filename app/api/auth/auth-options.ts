@@ -16,13 +16,23 @@ export const authOptions: NextAuthOptions = {
       tenantId: process.env.AZURE_AD_TENANT_ID!,
       authorization: {
         params: {
-          scope: "openid profile email"
+          scope: "openid profile email User.Read"
         }
-      }
+      },
+      profile(profile) {
+        console.log("Azure AD Profile:", profile);
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          companyName: profile.companyName || profile.company_name,
+        };
+      },
     })
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, profile }) {
       console.log("JWT Callback - Provider:", account?.provider, "User Email:", user?.email || token.email);
 
       // Set basic user data on first login
@@ -31,10 +41,25 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.name = user.name;
 
+        // Store company name from Azure AD profile
+        if ('companyName' in user && user.companyName) {
+          token.companyName = user.companyName as string;
+          console.log("Company name from profile:", user.companyName);
+        }
+
         // Store organization info if available from user object
         if ('organizationId' in user && user.organizationId) {
           token.organizationId = user.organizationId;
           token.organizationName = (user as { organizationName?: string }).organizationName;
+        }
+      }
+
+      // On Azure AD login, also check the profile for company information
+      if (account?.provider === "azure-ad" && profile) {
+        const azureProfile = profile as any;
+        if (azureProfile.companyName || azureProfile.company_name) {
+          token.companyName = azureProfile.companyName || azureProfile.company_name;
+          console.log("Company name from Azure AD profile:", token.companyName);
         }
       }
 
@@ -157,6 +182,12 @@ export const authOptions: NextAuthOptions = {
             id: "demo",
             name: "Demo Company"
           };
+        }
+
+        // Set company name from token if available
+        if (token.companyName) {
+          session.user.companyName = token.companyName as string;
+          console.log("Setting company name in session:", token.companyName);
         }
       }
 

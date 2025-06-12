@@ -14,6 +14,7 @@ declare module "next-auth" {
     role?: Role;
     organizationId?: string | null;
     organizationName?: string | null;
+    companyName?: string | null;
   }
 
   /**
@@ -28,6 +29,7 @@ declare module "next-auth" {
       role?: Role;
       organizationId?: string;
       organizationName?: string;
+      companyName?: string;
       organization: {
         id: string;
         name: string;
@@ -36,10 +38,12 @@ declare module "next-auth" {
   }
 
   /**
-   * Utöka Profile-interfacet för att hantera Azure AD-roller
+   * Utöka Profile-interfacet för att hantera Azure AD-roller och företagsinformation
    */
   interface Profile {
     roles?: string[];
+    companyName?: string;
+    company_name?: string;
   }
 }
 
@@ -52,6 +56,7 @@ declare module "next-auth/jwt" {
     role?: Role;
     organizationId?: string;
     organizationName?: string;
+    companyName?: string;
   }
 }
 
