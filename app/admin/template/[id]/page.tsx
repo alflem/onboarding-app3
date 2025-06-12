@@ -531,6 +531,7 @@ export default function TemplateEditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [checklist, setChecklist] = useState<Checklist | null>(null);
+  const [buddyEnabled, setBuddyEnabled] = useState<boolean>(false);
   const [newCategory, setNewCategory] = useState({ name: "" });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -586,6 +587,24 @@ export default function TemplateEditPage() {
     }
   }, [id]);
 
+  // Hämta organisationsinställningar
+  const fetchOrganizationSettings = useCallback(async () => {
+    try {
+      const response = await fetch('/api/organization/settings');
+
+      if (!response.ok) {
+        throw new Error('Kunde inte hämta organisationsinställningar');
+      }
+
+      const data = await response.json();
+      setBuddyEnabled(data.buddyEnabled);
+    } catch (error) {
+      console.error("Fel vid hämtning av organisationsinställningar:", error);
+      // Sätt default till false om det inte går att hämta
+      setBuddyEnabled(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (status === "authenticated" && id) {
       // Kontrollera att användaren är admin
@@ -598,8 +617,9 @@ export default function TemplateEditPage() {
       }
 
       fetchChecklist();
+      fetchOrganizationSettings();
     }
-  }, [status, session, router, id, fetchChecklist]);
+  }, [status, session, router, id, fetchChecklist, fetchOrganizationSettings]);
 
   // Funktion för att hantera drag-start
   const handleDragStart = (event: DragStartEvent) => {
@@ -1159,13 +1179,15 @@ export default function TemplateEditPage() {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/admin/buddy-template/${id}`)}
-        >
-          <ClipboardCheck className="h-4 w-4 mr-2" />
-          Hantera Buddy-uppgifter
-        </Button>
+        {buddyEnabled && (
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/admin/buddy-template/${id}`)}
+          >
+            <ClipboardCheck className="h-4 w-4 mr-2" />
+            Hantera Buddy-uppgifter
+          </Button>
+        )}
       </div>
 
       {/* Mallinställningar */}
