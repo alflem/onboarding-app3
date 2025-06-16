@@ -20,6 +20,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Info, Users, HelpCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 // // Typdeklarationer baserade på Prisma-schemat
 // interface Organization {
@@ -64,6 +66,10 @@ export default function ChecklistPage() {
   const [buddyTasksCompleted, setBuddyTasksCompleted] = useState(0);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   // Load accordion state from localStorage on component mount
   useEffect(() => {
@@ -216,15 +222,15 @@ export default function ChecklistPage() {
   };
 
   if (status === "loading" || isLoading) {
-    return <div className="container p-8 flex justify-center">Laddar...</div>;
+    return <div className="container p-8 flex justify-center">{t('loading')}</div>;
   }
 
   return (
     <div className="container p-4 md:p-8 space-y-6">
       <section className="space-y-2">
-        <h1 className="text-3xl font-bold">Din onboarding-checklista</h1>
+        <h1 className="text-3xl font-bold">{t('your_onboarding_checklist')}</h1>
         <p className="text-muted-foreground">
-          Följ dessa steg för en smidig start på ditt nya jobb.
+          {t('follow_steps_desc')}
         </p>
       </section>
 
@@ -232,9 +238,9 @@ export default function ChecklistPage() {
         <div className="w-full md:w-64 lg:w-80 space-y-4">
           <Card className="w-full">
             <CardHeader className="pb-2">
-              <CardTitle>Din progress</CardTitle>
+              <CardTitle>{t('your_progress')}</CardTitle>
               <CardDescription>
-                Du har slutfört {progress}% av din checklista
+                {t('completed_progress_desc', { progress: progress.toString() })}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -242,9 +248,9 @@ export default function ChecklistPage() {
 
               <div className="mt-6 space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span>Slutförda uppgifter</span>
+                  <span>{t('completed_tasks')}</span>
                   <Badge variant="outline" className="bg-primary/10">
-                    {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
+                    {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} {t('of')} {checklist.categories.flatMap(c => c.tasks).length}
                   </Badge>
                 </div>
               </div>
@@ -316,7 +322,7 @@ export default function ChecklistPage() {
                                 className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
                               >
                                 <ExternalLink className="h-3 w-3 group-hover:scale-110 transition-transform" />
-                                Öppna länk
+                                {t('open_link')}
                               </a>
                             </div>
                           )}
@@ -335,7 +341,7 @@ export default function ChecklistPage() {
   <CardHeader>
     <CardTitle className="flex items-center gap-2">
       <Info className="h-5 w-5 text-primary" />
-      Behöver du hjälp?
+      {t('need_help')}
     </CardTitle>
   </CardHeader>
   <CardContent className="flex justify-center items-center gap-4">
@@ -345,8 +351,8 @@ export default function ChecklistPage() {
     >
       <HelpCircle className="h-5 w-5 text-primary" />
       <div className="text-left">
-        <div className="font-medium">Support</div>
-        <div className="text-xs text-muted-foreground">Kontakta ITsupport</div>
+        <div className="font-medium">{t('support')}</div>
+        <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
       </div>
     </Button>
     <Button
@@ -355,8 +361,8 @@ export default function ChecklistPage() {
     >
       <Users className="h-5 w-5 text-primary" />
       <div className="text-left">
-        <div className="font-medium">Kontakta HR</div>
-        <div className="text-xs text-muted-foreground">Frågor om din anställning</div>
+        <div className="font-medium">{t('contact_hr')}</div>
+        <div className="text-xs text-muted-foreground">{t('employment_questions')}</div>
       </div>
     </Button>
   </CardContent>

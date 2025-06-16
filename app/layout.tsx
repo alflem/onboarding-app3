@@ -4,6 +4,7 @@ import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/lib/language-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
@@ -61,13 +62,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <Header />
-            <main className="container mx-auto px-4 py-6 flex-1">
-              {children}
-            </main>
-            <Footer />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <Header />
+              <main className="container mx-auto px-4 py-6 flex-1">
+                {children}
+              </main>
+              <Footer />
+            </AuthProvider>
+          </LanguageProvider>
           <Toaster />
         </ThemeProvider>
       </body>

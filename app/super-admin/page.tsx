@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 import {
   Card,
   CardContent,
@@ -53,6 +55,10 @@ interface User {
 export default function SuperAdminOrganization() {
   const { data: session, status } = useSession({ required: true });
   const router = useRouter();
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   // Tillstånd
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -255,11 +261,11 @@ export default function SuperAdminOrganization() {
   };
 
   if (status === "loading") {
-    return <div className="flex items-center justify-center min-h-screen">Laddar...</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t('loading')}</div>;
   }
 
   if (session?.user?.role !== "SUPER_ADMIN") {
-    return <div className="flex items-center justify-center min-h-screen">Åtkomst nekad</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t('access_denied')}</div>;
   }
 
   if (loading) {
@@ -277,9 +283,9 @@ export default function SuperAdminOrganization() {
       <div className="container p-4 md:p-8 space-y-6">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold">Ingen organisation hittades</h2>
+            <h2 className="text-2xl font-semibold">{t('no_organization_found')}</h2>
             <p className="text-muted-foreground mt-2">
-              Du verkar inte vara kopplad till någon organisation.
+              {t('not_linked_to_org')}
             </p>
           </div>
         </div>
@@ -291,35 +297,35 @@ export default function SuperAdminOrganization() {
     <div className="container p-4 md:p-8 space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <Building className="h-6 w-6" />
-        <h1 className="text-3xl font-bold">Organisationshantering</h1>
+        <h1 className="text-3xl font-bold">{t('organization_management')}</h1>
       </div>
 
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Grundläggande information</CardTitle>
+          <CardTitle>{t('basic_information')}</CardTitle>
           <CardDescription>
-            Hantera organisationens grundläggande inställningar
+            {t('manage_org_settings')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="orgName">Organisationsnamn</Label>
+              <Label htmlFor="orgName">{t('organization_name')}</Label>
               <Input
                 id="orgName"
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
-                placeholder="Organisationsnamn"
+                placeholder={t('organization_name')}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Organisation ID</Label>
+              <Label>{t('organization_id')}</Label>
               <div className="bg-muted p-2 rounded-md text-muted-foreground text-sm font-mono">
                 {organization.id}
               </div>
             </div>
             <div className="grid gap-2">
-              <Label>Skapad</Label>
+              <Label>{t('created')}</Label>
               <div className="text-muted-foreground">
                 {new Date(organization.createdAt).toLocaleDateString("sv-SE")}
               </div>
@@ -334,12 +340,12 @@ export default function SuperAdminOrganization() {
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sparar...
+                {t('saving')}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Spara ändringar
+                {t('save_changes')}
               </>
             )}
           </Button>
@@ -348,19 +354,19 @@ export default function SuperAdminOrganization() {
 
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Buddy-inställningar</CardTitle>
+          <CardTitle>{t('buddy_system_settings')}</CardTitle>
           <CardDescription>
-            Konfigurera buddy-funktionen för din organisation
+            {t('configure_buddy')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label className="text-base">
-                Aktivera buddy-funktionen
+                {t('enable_buddy_system')}
               </Label>
               <div className="text-sm text-muted-foreground">
-                Låt nya användare få en buddy för att hjälpa dem igenom onboarding-processen
+                {t('buddy_help_new_employees')}
               </div>
             </div>
             <Switch
@@ -378,12 +384,12 @@ export default function SuperAdminOrganization() {
             {isSavingBuddy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sparar...
+                {t('saving')}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                Spara buddy-inställningar
+                {t('save_buddy_settings')}
               </>
             )}
           </Button>
@@ -394,22 +400,22 @@ export default function SuperAdminOrganization() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Användare ({organization.users.length})
+            {t('users_in_organization')} ({organization.users.length})
           </CardTitle>
           <CardDescription>
-            Hantera användarroller inom organisationen
+            {t('manage_user_roles')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Namn</TableHead>
-                <TableHead>E-post</TableHead>
-                <TableHead>Roll</TableHead>
-                <TableHead>Admin</TableHead>
-                <TableHead>Super Admin</TableHead>
-                <TableHead>Medlem sedan</TableHead>
+                <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('email')}</TableHead>
+                <TableHead>{t('role')}</TableHead>
+                <TableHead>{t('admin')}</TableHead>
+                <TableHead>{t('super_admin')}</TableHead>
+                <TableHead>{t('member_since')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -458,7 +464,7 @@ export default function SuperAdminOrganization() {
           </Table>
           {organization.users.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              Inga användare hittades i denna organisation.
+              {t('no_users_found')}
             </div>
           )}
         </CardContent>

@@ -12,6 +12,8 @@ import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, User
 import { useRouter } from "next/navigation";
 import OrganizationForm from "./components/OrganizationForm";
 import UserForm from "./components/UserForm";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 interface Organization {
   id: string;
@@ -113,6 +115,10 @@ interface BuddyData {
 export default function DatabaseManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -281,11 +287,11 @@ export default function DatabaseManagementPage() {
   };
 
   if (status === "loading") {
-    return <div className="flex items-center justify-center min-h-screen">Laddar...</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t('loading')}</div>;
   }
 
   if (session?.user?.role !== "SUPER_ADMIN") {
-    return <div className="flex items-center justify-center min-h-screen">Åtkomst nekad</div>;
+    return <div className="flex items-center justify-center min-h-screen">{t('access_denied')}</div>;
   }
 
   return (
@@ -293,7 +299,7 @@ export default function DatabaseManagementPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Building className="h-8 w-8" />
-          <h1 className="text-3xl font-bold">Databashantering</h1>
+          <h1 className="text-3xl font-bold">{t('database_management')}</h1>
           <Badge variant="destructive">SUPER_ADMIN</Badge>
         </div>
         <Button onClick={fetchData} variant="outline" disabled={loading}>
@@ -306,7 +312,7 @@ export default function DatabaseManagementPage() {
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
-            Organisationer ({organizations.length})
+            {t('organizations')} ({organizations.length})
           </TabsTrigger>
           <TabsTrigger value="checklists" className="flex items-center gap-2">
             <List className="h-4 w-4" />
@@ -318,11 +324,11 @@ export default function DatabaseManagementPage() {
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Användare ({users.length})
+            {t('users')} ({users.length})
           </TabsTrigger>
           <TabsTrigger value="tasks" className="flex items-center gap-2">
             <CheckSquare className="h-4 w-4" />
-            Uppgifter ({tasks.length})
+            {t('tasks')} ({tasks.length})
           </TabsTrigger>
         </TabsList>
 
@@ -330,20 +336,20 @@ export default function DatabaseManagementPage() {
         <TabsContent value="organizations">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Organisationer</CardTitle>
+              <CardTitle>{t('organizations')}</CardTitle>
               <Button onClick={openCreateForm}>
                 <Plus className="h-4 w-4 mr-2" />
-                Ny Organisation
+                {t('create_new')}
               </Button>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Namn</TableHead>
-                    <TableHead>Buddy Aktiverad</TableHead>
-                    <TableHead>Skapad</TableHead>
-                    <TableHead>Åtgärder</TableHead>
+                    <TableHead>{t('name')}</TableHead>
+                    <TableHead>{t('buddy_enabled')}</TableHead>
+                    <TableHead>{t('created')}</TableHead>
+                    <TableHead>{t('actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -352,7 +358,7 @@ export default function DatabaseManagementPage() {
                       <TableCell className="font-medium">{org.name}</TableCell>
                       <TableCell>
                         <Badge variant={org.buddyEnabled ? "default" : "secondary"}>
-                          {org.buddyEnabled ? "Ja" : "Nej"}
+                          {org.buddyEnabled ? t('yes') : t('no')}
                         </Badge>
                       </TableCell>
                       <TableCell>{new Date(org.createdAt).toLocaleDateString("sv-SE")}</TableCell>

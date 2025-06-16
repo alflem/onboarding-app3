@@ -20,6 +20,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Info, Users, HelpCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 interface Task {
   id: string;
@@ -50,6 +52,10 @@ export default function BuddyChecklistPage() {
   const [isBuddy, setIsBuddy] = useState<boolean | null>(null);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   // Load accordion state from localStorage on component mount
   useEffect(() => {
@@ -185,16 +191,16 @@ export default function BuddyChecklistPage() {
   };
 
   if (status === "loading" || isLoading) {
-    return <div className="container p-8 flex justify-center">Laddar...</div>;
+    return <div className="container p-8 flex justify-center">{t('loading')}</div>;
   }
 
   if (buddyEnabled === false) {
     return (
       <div className="container p-4 md:p-8 space-y-6">
         <section className="space-y-2">
-          <h1 className="text-3xl font-bold">Buddy Checklista</h1>
+          <h1 className="text-3xl font-bold">{t('buddy_checklist_page')}</h1>
           <p className="text-muted-foreground">
-            Buddyfunktionen är inaktiverad för din organisation.
+            {t('buddy_function_disabled')}
           </p>
         </section>
       </div>
@@ -205,9 +211,9 @@ export default function BuddyChecklistPage() {
     return (
       <div className="container p-4 md:p-8 space-y-6">
         <section className="space-y-2">
-          <h1 className="text-3xl font-bold">Buddy Checklista</h1>
+          <h1 className="text-3xl font-bold">{t('buddy_checklist_page')}</h1>
           <p className="text-muted-foreground">
-            Du är inte en buddy.
+            {t('not_a_buddy')}
           </p>
         </section>
       </div>
@@ -217,18 +223,18 @@ export default function BuddyChecklistPage() {
   return (
     <div className="container p-4 md:p-8 space-y-6">
       <section className="space-y-2">
-        <h1 className="text-3xl font-bold">Buddy Checklista</h1>
+        <h1 className="text-3xl font-bold">{t('buddy_checklist_page')}</h1>
         <p className="text-muted-foreground">
-          Uppgifter att slutföra för din buddy.
+          {t('tasks_to_complete_for_buddy')}
         </p>
       </section>
 
       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
         <Card className="w-full md:w-64 lg:w-80">
           <CardHeader className="pb-2">
-                            <CardTitle>Din buddyprogress</CardTitle>
+                            <CardTitle>{t('buddy_progress')}</CardTitle>
                 <CardDescription>
-                  Du har slutfört {progress}% av buddyuppgifterna
+                  {t('completed_buddy_tasks_desc', { progress: progress.toString() })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -236,9 +242,9 @@ export default function BuddyChecklistPage() {
 
             <div className="mt-6 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Slutförda buddyuppgifter</span>
+                <span>{t('completed_buddy_tasks')}</span>
                 <Badge variant="outline" className="bg-secondary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
+                  {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} {t('of')} {checklist.categories.flatMap(c => c.tasks).length}
                 </Badge>
               </div>
             </div>
@@ -292,7 +298,7 @@ export default function BuddyChecklistPage() {
                                     className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
                                   >
                                   <ExternalLink className="h-3 w-3 group-hover:scale-110 transition-transform" />
-                                  Öppna länk
+                                  {t('open_link')}
                                 </a>
                               </div>
                             )}
@@ -306,7 +312,7 @@ export default function BuddyChecklistPage() {
             </Accordion>
           ) : (
             <div className="flex justify-center items-center p-8 border rounded-md">
-              <p className="text-muted-foreground">Inga buddyuppgifter hittades.</p>
+              <p className="text-muted-foreground">{t('no_buddy_tasks_found')}</p>
             </div>
           )}
         </div>
@@ -316,7 +322,7 @@ export default function BuddyChecklistPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-5 w-5 text-primary" />
-            Behöver du hjälp?
+            {t('need_help')}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center items-center gap-4">
@@ -326,8 +332,8 @@ export default function BuddyChecklistPage() {
           >
             <HelpCircle className="h-5 w-5 text-primary" />
             <div className="text-left">
-              <div className="font-medium">Support</div>
-              <div className="text-xs text-muted-foreground">Kontakta IT-support</div>
+              <div className="font-medium">{t('support')}</div>
+              <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
             </div>
           </Button>
           <Button
@@ -336,8 +342,8 @@ export default function BuddyChecklistPage() {
           >
             <Users className="h-5 w-5 text-primary" />
             <div className="text-left">
-              <div className="font-medium">Kontakta HR</div>
-              <div className="text-xs text-muted-foreground">Frågor om din anställning</div>
+              <div className="font-medium">{t('contact_hr')}</div>
+              <div className="text-xs text-muted-foreground">{t('employment_questions')}</div>
             </div>
           </Button>
         </CardContent>

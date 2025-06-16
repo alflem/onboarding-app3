@@ -50,8 +50,12 @@ import {
   Calendar,
   UserX,
   UserCheck,
-  BarChart3
+  BarChart3,
+  UserPlus,
+  BarChart
 } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 // Typdefintioner
 type Checklist = {
@@ -78,6 +82,10 @@ type Buddy = {
 export default function AdminPage() {
   const { data: session, status } = useSession({ required: true });
   const router = useRouter();
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   // State för datahämtning och laddningsstatus
   const [loading, setLoading] = useState(true);
@@ -374,7 +382,7 @@ export default function AdminPage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Laddar administrationspanel...</span>
+        <span className="ml-2">{t('loading_admin_panel')}</span>
       </div>
     );
   }
@@ -382,7 +390,7 @@ export default function AdminPage() {
   return (
     <div className="container p-6 space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Administrationspanel</h1>
+        <h1 className="text-3xl font-bold">{t('administration_panel')}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -393,19 +401,19 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ClipboardList className="h-5 w-5" />
-                  Onboarding Checklista
+                  {t('onboarding_checklist')}
                 </CardTitle>
-                <CardDescription>Din organisations checklista</CardDescription>
+                <CardDescription>{t('your_org_checklist')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-primary/5 rounded-lg">
                     <div className="text-2xl font-bold text-primary">{checklist.categoriesCount || 0}</div>
-                    <div className="text-sm text-muted-foreground">Kategorier</div>
+                    <div className="text-sm text-muted-foreground">{t('categories')}</div>
                   </div>
                   <div className="text-center p-3 bg-secondary/20 rounded-lg">
                     <div className="text-2xl font-bold text-primary">{checklist.tasksCount || 0}</div>
-                    <div className="text-sm text-muted-foreground">Uppgifter</div>
+                    <div className="text-sm text-muted-foreground">{t('tasks')}</div>
                   </div>
                 </div>
 
@@ -415,7 +423,7 @@ export default function AdminPage() {
                     onClick={() => router.push(`/admin/template/${checklist.id}`)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Redigera Checklista
+                    {t('edit_checklist')}
                   </Button>
                   {buddyEnabled && (
                     <Button
@@ -424,33 +432,33 @@ export default function AdminPage() {
                       onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}
                     >
                       <ClipboardCheck className="h-4 w-4 mr-2" />
-                      Buddyuppgifter
+                      {t('buddy_tasks')}
                     </Button>
                   )}
                 </div>
 
                 <div className="text-xs text-muted-foreground">
-                  <p>Hantera kategorier och uppgifter som nyanställda behöver slutföra.</p>
+                  <p>{t('manage_categories_tasks')}</p>
                 </div>
               </CardContent>
             </Card>
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Ingen Checklista</CardTitle>
-                <CardDescription>Skapa din första checklista</CardDescription>
+                <CardTitle>{t('no_checklist')}</CardTitle>
+                <CardDescription>{t('create_first_checklist')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button onClick={createChecklist} disabled={submitting} className="w-full">
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Skapar...
+                      {t('creating')}
                     </>
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      Skapa Checklista
+                      {t('create_checklist')}
                     </>
                   )}
                 </Button>
@@ -465,10 +473,10 @@ export default function AdminPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Medarbetare
+                {t('employees')}
               </CardTitle>
               <CardDescription>
-                Hantera medarbetare{buddyEnabled ? ' och buddy-tilldelningar' : ''}. Klicka på en rad för detaljer.
+                {buddyEnabled ? t('manage_employees_and_buddy') : t('manage_employees')}. {t('click_row_for_details')}
               </CardDescription>
             </CardHeader>
 
@@ -477,18 +485,18 @@ export default function AdminPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[250px]">Namn</TableHead>
-                      <TableHead>E-post</TableHead>
-                      <TableHead>Progress</TableHead>
+                      <TableHead className="w-[250px]">{t('name')}</TableHead>
+                      <TableHead>{t('email')}</TableHead>
+                      <TableHead>{t('progress')}</TableHead>
                       {buddyEnabled && <TableHead>Buddy</TableHead>}
-                      <TableHead className="text-right">Åtgärder</TableHead>
+                      <TableHead className="text-right">{t('actions')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {employees.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={buddyEnabled ? 5 : 4} className="text-center py-4 text-muted-foreground">
-                          Inga medarbetare hittades
+                        <TableCell colSpan={buddyEnabled ? 5 : 4} className="text-center py-8 text-muted-foreground">
+                          {t('no_employees_found')}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -671,20 +679,25 @@ export default function AdminPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Onboarding Progress
+                    <BarChart className="h-5 w-5" />
+                    {t('your_progress')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Totalt framsteg</span>
-                      <span className="text-sm font-bold">{employeeDetails.progress}%</span>
+                      <div className="text-sm font-medium">{t('completed_tasks')}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {t('tasks_completed_count', {
+                          completed: employeeDetails.categories.reduce((acc, category) => acc + category.completedTasks, 0),
+                          total: employeeDetails.categories.reduce((acc, category) => acc + category.totalTasks, 0)
+                        })}
+                      </div>
                     </div>
                     <div className="w-full bg-secondary/20 rounded-full h-3">
                       <div
                         className="bg-primary h-3 rounded-full transition-all duration-300"
-                        style={{ width: `${employeeDetails.progress}%` }}
+                        style={{ width: `${(employeeDetails.progress / 100) * 100}%` }}
                       ></div>
                     </div>
 
@@ -718,8 +731,8 @@ export default function AdminPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                                          <UserCheck className="h-4 w-4" />
-                    Buddytilldelning
+                      <UserCheck className="h-4 w-4" />
+                      {t('configure_buddy')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

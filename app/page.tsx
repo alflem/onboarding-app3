@@ -9,6 +9,8 @@ import Image from "next/image";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 interface Organization {
   id: string;
@@ -41,6 +43,10 @@ export default function Home() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Språkstöd
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -88,7 +94,7 @@ export default function Home() {
     return (
       <div className="container p-8 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin mb-4" />
-        <p className="text-muted-foreground">Laddar...</p>
+        <p className="text-muted-foreground">{t('loading')}</p>
       </div>
     );
   }
@@ -106,22 +112,22 @@ export default function Home() {
           priority
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <div className="text-center text-white space-y-4 px-4">
+          <div className="text-center text-white space-y-4 px-4 max-w-2xl w-full mx-auto">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
               {status === "authenticated" && session?.user
-                ? `Välkommen, ${session.user.name || 'användare'}!`
-                : "Välkommen till plattformen för onboarding!"}
+                ? `${t('welcome_user')}, ${session.user.name || 'användare'}!`
+                : t('welcome_to_platform')}
             </h1>
             {status === "authenticated" && session?.user && (
               <div className="text-lg md:text-xl text-white/90">
-                Du är inloggad på <span className="font-medium">
-                  {session.user.organizationName || dashboardData?.organization?.name || 'Laddar organisation...'}
+                {t('logged_in_to')} <span className="font-medium">
+                  {session.user.organizationName || dashboardData?.organization?.name || t('loading_organization')}
                 </span>
               </div>
             )}
             {status === "unauthenticated" && (
               <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-                En sömlös och strukturerad onboarding för nya medarbetare
+                {t('seamless_onboarding_desc')}
               </p>
             )}
           </div>
@@ -152,41 +158,39 @@ export default function Home() {
               </Card>
             ) : (
               <Card>
-                <CardContent className="p-8">
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-center">
+                <CardContent className="p-4 sm:p-6 lg:p-8">
+                  <div className="grid grid-cols-1 gap-8 items-center lg:grid-cols-4">
                     {/* Progress Circle & Title */}
-                    <div className="flex flex-col items-center lg:items-start space-y-4">
+                    <div className="flex flex-col items-center lg:items-start space-y-4 min-w-0">
                       <div className="relative">
                         <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-2xl font-bold text-primary">{dashboardData?.progress || 0}%</span>
                         </div>
                       </div>
                       <div className="text-center lg:text-left">
-                        <h3 className="text-xl font-semibold">Onboarding Progress</h3>
-                        <p className="text-sm text-muted-foreground">Dina framsteg hittills</p>
+                        <h3 className="text-xl font-semibold break-words">{t('onboarding_progress')}</h3>
+                        <p className="text-sm text-muted-foreground break-words">{t('your_progress')}</p>
                       </div>
                     </div>
 
                     {/* Progress Bar Section */}
-                    <div className="lg:col-span-2 space-y-4">
+                    <div className="lg:col-span-2 space-y-4 min-w-0">
                       <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">Slutförda uppgifter</span>
-                          <span className="text-sm text-muted-foreground">{dashboardData?.completedTasks || 0}/{dashboardData?.totalTasks || 0} uppgifter avklarade</span>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <span className="text-sm font-medium">{t('completed_tasks')}</span>
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">{t('tasks_completed_count', {completed: dashboardData?.completedTasks || 0, total: dashboardData?.totalTasks || 0})}</span>
                         </div>
                         <Progress value={dashboardData?.progress || 0} className="h-3" />
                       </div>
 
                       {dashboardData?.recentTasks && dashboardData.recentTasks.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-sm font-medium">Senaste aktivitet</span>
-                          <div className="flex flex-wrap gap-2">
+                          <span className="text-sm font-medium">{t('recent_activity')}</span>
+                          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1">
                             {dashboardData.recentTasks.slice(0, 3).map((task) => (
-                              <div key={task.id} className="flex items-center gap-2 px-3 py-1 bg-accent rounded-full">
+                              <div key={task.id} className="flex items-center gap-2 px-3 py-1 bg-accent rounded-full min-w-0 max-w-full">
                                 <CheckCircle className="h-3 w-3 text-primary" />
-                                <span className="text-xs font-medium text-accent-foreground truncate max-w-32">
-                                  {task.title}
-                                </span>
+                                <span className="text-xs font-medium text-accent-foreground truncate max-w-32">{task.title}</span>
                               </div>
                             ))}
                           </div>
@@ -195,17 +199,14 @@ export default function Home() {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex flex-col space-y-3">
-                      <Button asChild size="lg" className="w-full">
+                    <div className="flex flex-col space-y-3 min-w-0 w-full">
+                      <Button asChild className="w-full h-12 text-base font-semibold" size="lg">
                         <Link href="/checklist">
-                          Fortsätt
-                          <ArrowRight className="ml-2 h-4 w-4" />
+                          {t('continue')} <ArrowRight className="h-5 w-5 ml-2" />
                         </Link>
                       </Button>
-                      <div className="text-center">
-                        <span className="text-xs text-muted-foreground">
-                          {Math.max(0, 100 - (dashboardData?.progress || 0))}% återstår
-                        </span>
+                      <div className="text-xs text-muted-foreground text-center mt-2">
+                        {dashboardData ? `${100 - (dashboardData.progress || 0)}% ${t('remaining')}` : ''}
                       </div>
                     </div>
                   </div>
@@ -221,9 +222,9 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Onboardingplattform</CardTitle>
+                <CardTitle>{t('onboarding_platform')}</CardTitle>
                 <CardDescription>
-                  En sömlös och strukturerad onboarding för nya medarbetare
+                  {t('seamless_onboarding_desc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -232,33 +233,33 @@ export default function Home() {
                   och mer effektivt.
                 </p>
                 <Button asChild>
-                  <Link href="/auth/signin">Kom igång nu</Link>
+                  <Link href="/auth/signin">{t('get_started_now')}</Link>
                 </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Fördelar</CardTitle>
-                <CardDescription>Varför använda vår onboardingplattform</CardDescription>
+                <CardTitle>{t('benefits')}</CardTitle>
+                <CardDescription>{t('why_use_platform')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />
-                    <span>Personliga checklistor för varje medarbetare</span>
+                    <span>{t('personal_checklists')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />
-                    <span>Buddysystem för att stödja nya medarbetare</span>
+                    <span>{t('buddy_system')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />
-                    <span>Anpassningsbara checklistor för organisationens behov</span>
+                    <span>{t('customizable_checklists')}</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />
-                    <span>Tydlig uppföljning av framsteg</span>
+                    <span>{t('clear_progress_tracking')}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -267,7 +268,7 @@ export default function Home() {
         ) : (
           // Fallback for unknown states
           <div className="text-center p-8">
-            <p className="text-muted-foreground">Laddar...</p>
+            <p className="text-muted-foreground">{t('loading')}</p>
           </div>
         )}
       </div>

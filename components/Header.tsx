@@ -17,6 +17,9 @@ import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucid
 import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
 import Image from 'next/image';
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/language-selector";
+import { useLanguage } from "@/lib/language-context";
+import { useTranslations } from "@/lib/translations";
 
 // Typdeklarationer som matchar Prisma-schemat
 enum Role {
@@ -32,6 +35,10 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isBuddy, setIsBuddy] = useState<boolean>(false);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean>(false);
+
+  // Språkhantering
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
 
   useEffect(() => {
     // Kontrollera om användaren är buddy för någon
@@ -77,25 +84,25 @@ const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background border-b border-border">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-16">
           {/* App logo and title */}
-        <div className="flex-1">
-          <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg">
-            <Image
-              src="/logo.svg"
-              alt="Company Logo"
-              width={28}
-              height={28}
-              className="h-7 w-auto"
-              style={{ width: 'auto', height: '28px' }}
-            />
-            Onboarding
-          </Link>
-        </div>
+          <div className="flex-1 flex items-center justify-center md:justify-start min-w-0">
+            <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg min-w-0">
+              <Image
+                src="/logo.svg"
+                alt="Company Logo"
+                width={28}
+                height={28}
+                className="h-7 w-auto"
+                style={{ width: 'auto', height: '28px' }}
+              />
+              <span className="truncate max-w-[120px] sm:max-w-none">Onboarding</span>
+            </Link>
+          </div>
 
           {/* Desktop navigation - alla knappar samlade på högersidan */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-1 min-w-0">
             <Link href="/" passHref>
               <Button
                 variant={isActive("/") ? "default" : "ghost"}
@@ -103,7 +110,7 @@ const Header: React.FC = () => {
                 aria-current={isActive("/") ? "page" : undefined}
               >
                 <Home className="mr-1 h-4 w-4" />
-                Hem
+                {t('home')}
               </Button>
             </Link>
 
@@ -115,7 +122,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/checklist") ? "page" : undefined}
                 >
                   <CheckSquare className="mr-1 h-4 w-4" />
-                  Checklista
+                  {t('checklist')}
                 </Button>
               </Link>
             )}
@@ -128,7 +135,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/checklist/buddy") ? "page" : undefined}
                 >
                   <UserCheck className="mr-1 h-4 w-4" />
-                  Buddychecklista
+                  {t('buddy_checklist')}
                 </Button>
               </Link>
             )}
@@ -141,7 +148,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/admin") ? "page" : undefined}
                 >
                   <Settings className="mr-1 h-4 w-4" />
-                  Admin
+                  {t('admin')}
                 </Button>
               </Link>
             )}
@@ -154,10 +161,13 @@ const Header: React.FC = () => {
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
-                  Organisation
+                  {t('organization')}
                 </Button>
               </Link>
             )}
+
+            {/* Language selector */}
+            <LanguageSelector />
 
             {/* Theme toggle */}
             <ThemeToggle />
@@ -193,7 +203,7 @@ const Header: React.FC = () => {
                     className="text-destructive focus:text-destructive"
                     onClick={() => signOut({ callbackUrl: "/auth/signin" })}
                   >
-                    Logga ut
+                    {t('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -204,181 +214,110 @@ const Header: React.FC = () => {
                   size="sm"
                   className="ml-2"
                 >
-                  Logga in
+                  {t('login')}
                 </Button>
               </Link>
             )}
           </nav>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="sm"
+          {/* Mobilmeny-knapp */}
+          <div className="md:hidden flex items-center">
+            <button
+              className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               onClick={toggleMenu}
-              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? 'Stäng meny' : 'Öppna meny'}
             >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobilmeny */}
       {isMenuOpen && (
-        <div className="md:hidden bg-background border-t border-border">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            <Link
-              href="/"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                isActive("/")
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:bg-accent/50"
-              }`}
-              onClick={toggleMenu}
-            >
-              <div className="flex items-center">
-                <Home className="mr-2 h-4 w-4" />
-                Hem
-              </div>
+        <div className="md:hidden fixed top-16 left-0 w-full bg-background border-b border-border shadow-lg z-50 animate-fade-in">
+          <nav className="flex flex-col items-stretch p-4 space-y-2">
+            <Link href="/" passHref legacyBehavior>
+              <Button
+                variant={isActive("/") ? "default" : "ghost"}
+                size="lg"
+                className="justify-start w-full"
+                aria-current={isActive("/") ? "page" : undefined}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Home className="mr-2 h-5 w-5" /> {t('home')}
+              </Button>
             </Link>
-
             {session?.user && (
-              <Link
-                href="/checklist"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive("/checklist")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-                onClick={toggleMenu}
-              >
-                <div className="flex items-center">
-                  <CheckSquare className="mr-2 h-4 w-4" />
-                  Checklista
-                </div>
+              <Link href="/checklist" passHref legacyBehavior>
+                <Button
+                  variant={isActive("/checklist") ? "default" : "ghost"}
+                  size="lg"
+                  className="justify-start w-full"
+                  aria-current={isActive("/checklist") ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <CheckSquare className="mr-2 h-5 w-5" /> {t('checklist')}
+                </Button>
               </Link>
             )}
-
             {session?.user && isBuddy && buddyEnabled && (
-              <Link
-                href="/checklist/buddy"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive("/checklist/buddy")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-                onClick={toggleMenu}
-              >
-                <div className="flex items-center">
-                  <UserCheck className="mr-2 h-4 w-4" />
-                  Buddychecklista
-                </div>
+              <Link href="/checklist/buddy" passHref legacyBehavior>
+                <Button
+                  variant={isActive("/checklist/buddy") ? "default" : "ghost"}
+                  size="lg"
+                  className="justify-start w-full"
+                  aria-current={isActive("/checklist/buddy") ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <UserCheck className="mr-2 h-5 w-5" /> {t('buddy_checklist')}
+                </Button>
               </Link>
             )}
-
             {hasRole(Role.ADMIN) && (
-              <Link
-                href="/admin"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive("/admin")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-                onClick={toggleMenu}
-              >
-                <div className="flex items-center">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Admin
-                </div>
+              <Link href="/admin" passHref legacyBehavior>
+                <Button
+                  variant={isActive("/admin") ? "default" : "ghost"}
+                  size="lg"
+                  className="justify-start w-full"
+                  aria-current={isActive("/admin") ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Settings className="mr-2 h-5 w-5" /> {t('admin')}
+                </Button>
               </Link>
             )}
-
             {hasRole(Role.SUPER_ADMIN) && (
-              <Link
-                href="/super-admin"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${
-                  isActive("/super-admin")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
-                }`}
-                onClick={toggleMenu}
-              >
-                <div className="flex items-center">
-                  <Building className="mr-2 h-4 w-4" />
-                  Organisation
-                </div>
+              <Link href="/super-admin" passHref legacyBehavior>
+                <Button
+                  variant={isActive("/super-admin") ? "default" : "ghost"}
+                  size="lg"
+                  className="justify-start w-full"
+                  aria-current={isActive("/super-admin") ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Building className="mr-2 h-5 w-5" /> {t('organization')}
+                </Button>
               </Link>
             )}
-
-            {/* User authentication for mobile */}
-            <div className="pt-4 pb-3 border-t border-border">
-              {status === "loading" ? (
-                                  <div className="flex items-center px-5">
-                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
-                    <div className="ml-3 w-24 h-4 bg-muted animate-pulse rounded"></div>
-                  </div>
-              ) : status === "authenticated" && session?.user ? (
-                <>
-                  <div className="flex items-center px-5">
-                    <Avatar className="h-8 w-8 border border-border">
-                      <AvatarFallback className="bg-muted text-foreground">
-                        {session.user.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("") || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="ml-3">
-                      <div className="text-base font-medium text-foreground">
-                        {session.user.name}
-                      </div>
-                      <div className="text-sm font-medium text-muted-foreground">
-                        {session.user.organizationName || 'Loading organization...'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3 px-2 space-y-1">
-                    <div className="px-3 py-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-base font-medium">Tema</span>
-                        <ThemeToggle />
-                      </div>
-                    </div>
-
-                    <button
-                      className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-destructive hover:bg-accent/50"
-                      onClick={() => {
-                        signOut({ callbackUrl: "/auth/signin" });
-                        toggleMenu();
-                      }}
-                    >
-                      Logga ut
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="mt-3 px-2">
-                  <Link
-                    href="/auth/signin"
-                    className="block w-full"
-                    onClick={toggleMenu}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                    >
-                      Logga in
-                    </Button>
-                  </Link>
-                </div>
-              )}
+            <div className="flex items-center justify-between gap-2 mt-2">
+              <LanguageSelector />
+              <ThemeToggle />
             </div>
-          </div>
+            {status === "authenticated" && session?.user && (
+              <div className="flex items-center gap-2 mt-4">
+                <Avatar className="h-8 w-8 border border-border">
+                  <AvatarFallback className="bg-muted text-foreground">
+                    {session.user.name?.split(" ").map((n) => n[0]).join("") || "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm truncate max-w-[120px]">{session.user.name}</span>
+                <Button variant="ghost" size="sm" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                  {t('logout')}
+                </Button>
+              </div>
+            )}
+          </nav>
         </div>
       )}
     </header>
