@@ -26,7 +26,11 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organizationId;
+
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
+    }
 
     // Hämta checklistan för användarens organisation
     const checklist = await prisma.checklist.findFirst({
@@ -105,7 +109,11 @@ export async function POST(_request: NextRequest) {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organizationId;
+
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
+    }
 
     // Kontrollera om det redan finns en checklista för organisationen
     const existingChecklist = await prisma.checklist.findFirst({

@@ -154,7 +154,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
-                  Organisationer
+                  Organisation
                 </Button>
               </Link>
             )}
@@ -187,7 +187,7 @@ const Header: React.FC = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs text-muted-foreground">
-                    {session.user.organization?.name || 'Loading organization...'}
+                    {session.user.organizationName || 'Loading organization...'}
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
@@ -310,7 +310,7 @@ const Header: React.FC = () => {
               >
                 <div className="flex items-center">
                   <Building className="mr-2 h-4 w-4" />
-                  Organisationer
+                  Organisation
                 </div>
               </Link>
             )}
@@ -338,7 +338,7 @@ const Header: React.FC = () => {
                         {session.user.name}
                       </div>
                       <div className="text-sm font-medium text-muted-foreground">
-                        {session.user.organization?.name || 'Loading organization...'}
+                        {session.user.organizationName || 'Loading organization...'}
                       </div>
                     </div>
                   </div>

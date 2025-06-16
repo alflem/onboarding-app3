@@ -26,7 +26,11 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organizationId;
+
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
+    }
 
     // Hämta alla medarbetare för användarens organisation
     const employees = await prisma.user.findMany({
@@ -131,7 +135,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organizationId;
+
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
+    }
 
     // Generera ett temporärt lösenord - i produktion kanske du vill skicka ett e-postmeddelande med en inbjudan
     const tempPassword = Math.random().toString(36).slice(-8);

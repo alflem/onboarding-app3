@@ -30,10 +30,6 @@ declare module "next-auth" {
       organizationId?: string;
       organizationName?: string;
       companyName?: string;
-      organization: {
-        id: string;
-        name: string;
-      };
     };
   }
 

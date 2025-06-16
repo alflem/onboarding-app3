@@ -2,6 +2,7 @@
 import { NextAuthOptions } from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { CustomPrismaAdapter } from "@/lib/auth/custom-prisma-adapter";
+import { updateUserOrganizationIfNeeded } from "@/lib/auth/organization-seeder";
 import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -20,12 +21,34 @@ export const authOptions: NextAuthOptions = {
         }
       },
       profile(profile) {
+        // Try multiple possible fields for company name from Azure AD
+        const azureProfile = profile as any;
+        let companyName =
+          profile.companyName ||
+          azureProfile.company_name ||
+          azureProfile.organization ||
+          azureProfile.org ||
+          azureProfile.company ||
+          azureProfile.employer ||
+          undefined;
+
+        // If we still don't have company name, try to extract from email domain
+        if (!companyName && profile.email) {
+          const domain = profile.email.split('@')[1];
+          if (domain && domain !== 'outlook.com' && domain !== 'hotmail.com' && domain !== 'gmail.com') {
+            // Convert domain to a reasonable company name (e.g., xlent.se -> XLENT)
+            companyName = domain.split('.')[0].toUpperCase();
+          }
+        }
+
+        console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email})`);
+
         return {
           id: profile.sub,
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          companyName: profile.companyName || (profile as any).company_name || undefined,
+          companyName: companyName,
         };
       },
     })
@@ -72,20 +95,43 @@ export const authOptions: NextAuthOptions = {
       // Get user role and organization from database
       if (token.id) {
         try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.id },
-            include: {
-              organization: true
-            }
-          });
+          // Only check/update organization on first login or if we don't have cached data
+          const needsOrgCheck = !token.organizationId || (user && account?.provider === "azure-ad");
 
-          if (dbUser) {
-            token.role = dbUser.role;
-            token.organizationId = dbUser.organizationId ?? undefined;
-            token.organizationName = (dbUser.organization?.name as string | undefined);
+          if (needsOrgCheck && token.companyName) {
+            console.log(`JWT callback - Checking organization for new login: ${token.companyName}`);
+            try {
+              await updateUserOrganizationIfNeeded(prisma, token.id, token.companyName);
+            } catch (orgError) {
+              console.error("Error updating user organization (continuing with login):", orgError);
+              // Don't stop the login process if organization update fails
+            }
+          }
+
+          // Only fetch from database if we don't have cached user data
+          if (!token.role || !token.organizationId || needsOrgCheck) {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: token.id },
+              include: {
+                organization: true
+              }
+            });
+
+            if (dbUser) {
+              token.role = dbUser.role;
+              token.organizationId = dbUser.organizationId ?? undefined;
+              token.organizationName = (dbUser.organization?.name as string | undefined);
+
+              if (needsOrgCheck) {
+                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
+              }
+            } else if (needsOrgCheck) {
+              console.log(`JWT callback - User with ID ${token.id} not found in database`);
+            }
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          console.error("Error in JWT callback (continuing with basic token):", error);
+          // Don't throw the error to avoid breaking the login process
         }
       }
 
@@ -115,12 +161,12 @@ export const authOptions: NextAuthOptions = {
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: process.env.NODE_ENV === "production" ? `__Secure-next-auth.session-token` : "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
       },
     },
     // Add explicit callback URL cookie for Safari

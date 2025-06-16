@@ -115,7 +115,7 @@ export default function Home() {
             {status === "authenticated" && session?.user && (
               <div className="text-lg md:text-xl text-white/90">
                 Du är inloggad på <span className="font-medium">
-                  {session.user.organization?.name || dashboardData?.organization?.name || 'Laddar organisation...'}
+                  {session.user.organizationName || dashboardData?.organization?.name || 'Laddar organisation...'}
                 </span>
               </div>
             )}
@@ -229,7 +229,7 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <p>
                   Vår onboardingplattform hjälper nya medarbetare att komma igång snabbare
-                  och effektivare.
+                  och mer effektivt.
                 </p>
                 <Button asChild>
                   <Link href="/auth/signin">Kom igång nu</Link>

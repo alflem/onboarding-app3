@@ -26,7 +26,11 @@ export async function GET() {
     }
 
     // Hämta organisationsid från användarsessionen
-    const organizationId = session.user.organization.id;
+    const organizationId = session.user.organizationId;
+
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
+    }
 
     // Kontrollera om buddy-funktionen är aktiverad för organisationen
     const organization = await prisma.organization.findUnique({

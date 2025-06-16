@@ -2,6 +2,7 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
+import { findOrCreateOrganization } from "./organization-seeder";
 
 export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
   const standardAdapter = PrismaAdapter(prisma);
@@ -13,41 +14,50 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
     createUser: async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
       console.log("CustomPrismaAdapter.createUser called for:", user.email);
       try {
-        // Find or create "Demo Company" organization
-        console.log("Looking for Demo Company organization...");
-        let demoOrganization = await prisma.organization.findFirst({
-          where: {
-            name: "Demo Company"
-          }
-        });
+        // Get companyName from user object (this comes from JWT token)
+        const companyName = (user as any).companyName;
+        console.log(`CompanyName in createUser: ${companyName}`);
 
-        if (!demoOrganization) {
-          console.log("Creating Demo Company organization...");
-          demoOrganization = await prisma.organization.create({
-            data: {
-              name: "Demo Company",
-              buddyEnabled: true,
-            }
-          });
-          console.log("Demo Company created with ID:", demoOrganization.id);
-        } else {
-          console.log("Demo Company found with ID:", demoOrganization.id);
+        let organization;
+
+        if (companyName && companyName.trim() !== "") {
+          console.log(`Using companyName from JWT token: ${companyName}`);
+          try {
+            // Find or create organization based on companyName
+            organization = await findOrCreateOrganization(prisma, companyName);
+          } catch (orgError) {
+            console.error(`Error with organization "${companyName}", falling back to Demo Company:`, orgError);
+            organization = null; // Will trigger fallback below
+          }
         }
 
-        // Create user with required fields and assign to Demo Company
-        console.log("Creating user with Demo Company assignment...");
+        // Fallback to Demo Company if no companyName or organization creation failed
+        if (!organization) {
+          console.log("Using Demo Company as fallback");
+          organization = await prisma.organization.findFirst({
+            where: { name: "Demo Company" }
+          });
+
+          if (!organization) {
+            console.log("Creating Demo Company organization...");
+            organization = await findOrCreateOrganization(prisma, "Demo Company");
+          }
+        }
+
+        // Create user with required fields and assign to organization
+        console.log(`Creating user with organization assignment: ${organization.name} (${organization.id})`);
         const newUser = await prisma.user.create({
           data: {
             name: user.name || user.email?.split('@')[0] || "Unnamed User",
             email: user.email,
             // Required fields in your User model
             password: "", // Empty string if required
-            role: "SUPER_ADMIN", // Set new users as ADMIN by default
-            organizationId: demoOrganization.id, // Assign to Demo Company
+            role: "EMPLOYEE", // Set new users as EMPLOYEE by default
+            organizationId: organization.id, // Assign to correct organization
           },
         });
 
-        console.log(`New user ${newUser.email} created and assigned to Demo Company (${demoOrganization.id})`);
+        console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id})`);
 
         return {
           id: newUser.id,
