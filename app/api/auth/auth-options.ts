@@ -7,6 +7,20 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Define type for Azure AD profile
+interface AzureADProfile {
+  sub: string;
+  name: string;
+  email: string;
+  picture?: string;
+  companyName?: string;
+  company_name?: string;
+  organization?: string;
+  org?: string;
+  company?: string;
+  employer?: string;
+}
+
 // Updated to trigger database reset and Demo Company creation
 export const authOptions: NextAuthOptions = {
   adapter: CustomPrismaAdapter(prisma),
@@ -22,7 +36,7 @@ export const authOptions: NextAuthOptions = {
       },
       profile(profile) {
         // Try multiple possible fields for company name from Azure AD
-        const azureProfile = profile as any;
+        const azureProfile = profile as AzureADProfile;
         let companyName =
           profile.companyName ||
           azureProfile.company_name ||
@@ -65,7 +79,7 @@ export const authOptions: NextAuthOptions = {
 
       // Try to get company name from Azure AD profile
       if (account?.provider === "azure-ad" && profile) {
-        const azureProfile = profile as any;
+        const azureProfile = profile as AzureADProfile;
         if (azureProfile.companyName || azureProfile.company_name) {
           token.companyName = azureProfile.companyName || azureProfile.company_name;
         } else if (account.access_token) {
@@ -121,6 +135,7 @@ export const authOptions: NextAuthOptions = {
               token.role = dbUser.role;
               token.organizationId = dbUser.organizationId ?? undefined;
               token.organizationName = (dbUser.organization?.name as string | undefined);
+              token.organization = dbUser.organization ? { id: dbUser.organization.id, name: dbUser.organization.name } : undefined;
 
               if (needsOrgCheck) {
                 console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
@@ -144,6 +159,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationId = token.organizationId;
         session.user.organizationName = token.organizationName;
         session.user.companyName = token.companyName;
+        session.user.organization = token.organization;
       }
       return session;
     }

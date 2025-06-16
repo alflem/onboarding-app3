@@ -227,7 +227,7 @@ export async function findOrCreateOrganization(
   companyName: string
 ) {
   // Leta efter befintlig organisation
-  let organization = await prisma.organization.findFirst({
+  const organization = await prisma.organization.findFirst({
     where: {
       name: companyName
     }

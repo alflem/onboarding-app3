@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3, ChevronDown } from "lucide-react";
+import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import OrganizationForm from "./components/OrganizationForm";
 import UserForm from "./components/UserForm";
@@ -267,12 +267,12 @@ export default function DatabaseManagementPage() {
   };
 
   // Öppna formulär för att redigera befintliga poster
-  const openEditForm = (item: any) => {
+  const openEditForm = (item: Organization | User | Task) => {
     if (currentTab === "organizations") {
-      setEditingOrg(item);
+      setEditingOrg(item as Organization);
       setIsOrgFormOpen(true);
     } else if (currentTab === "users") {
-      setEditingUser(item);
+      setEditingUser(item as User);
       setIsUserFormOpen(true);
     } else if (currentTab === "tasks") {
       // Navigera till admin-panelen för att redigera uppgifter

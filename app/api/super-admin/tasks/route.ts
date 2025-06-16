@@ -140,7 +140,15 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const updateData: any = {};
+    // Define proper type for updateData
+    const updateData: {
+      title?: string;
+      description?: string | null;
+      link?: string | null;
+      categoryId?: string;
+      order?: number;
+      isBuddyTask?: boolean;
+    } = {};
     if (title) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (link !== undefined) updateData.link = link;

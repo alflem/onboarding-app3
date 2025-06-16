@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    if (employee.organizationId !== session.user.organization.id) {
+    if (employee.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    if (buddy.organizationId !== session.user.organization.id) {
+    if (buddy.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

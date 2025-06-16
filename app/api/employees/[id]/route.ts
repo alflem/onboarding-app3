@@ -76,7 +76,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till medarbetaren
-    if (employee.organizationId !== session.user.organization.id) {
+    if (employee.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -191,7 +191,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till medarbetaren
-    if (existingEmployee.organizationId !== session.user.organization.id) {
+    if (existingEmployee.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till kategorin
-    if (category.checklist.organizationId !== session.user.organization.id) {
+    if (category.checklist.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -122,7 +122,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till kategorin
-    if (existingCategory.checklist.organizationId !== session.user.organization.id) {
+    if (existingCategory.checklist.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -203,7 +203,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till kategorin
-    if (existingCategory.checklist.organizationId !== session.user.organization.id) {
+    if (existingCategory.checklist.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

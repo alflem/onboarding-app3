@@ -132,7 +132,15 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const updateData: any = {};
+    // Define proper type for updateData
+    const updateData: {
+      name?: string;
+      email?: string;
+      role?: "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
+      organizationId?: string | null;
+      buddyId?: string | null;
+      password?: string;
+    } = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (role) updateData.role = role;

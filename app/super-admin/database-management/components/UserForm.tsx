@@ -109,7 +109,7 @@ export default function UserForm({ isOpen, onClose, user, organizations, users, 
             <Label htmlFor="role">Roll</Label>
             <Select
               value={formData.role}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as any }))}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE" }))}
             >
               <SelectTrigger>
                 <SelectValue />

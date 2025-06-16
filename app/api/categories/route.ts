@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Kontrollera att användaren har tillgång till checklistan
-    if (checklist.organizationId !== session.user.organization.id) {
+    if (checklist.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

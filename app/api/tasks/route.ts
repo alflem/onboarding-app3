@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Kontrollera att användaren har tillgång till kategorin
-    if (category.checklist.organizationId !== session.user.organization.id) {
+    if (category.checklist.organizationId !== session.user.organizationId) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

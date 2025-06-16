@@ -65,7 +65,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till checklistan
-    if (checklist.organizationId !== session.user.organization.id) {
+    if (checklist.organizationId !== session.user.organization?.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -128,7 +128,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Kontrollera om användaren har tillgång till checklistan
-    if (checklist.organizationId !== session.user.organization.id) {
+    if (checklist.organizationId !== session.user.organization?.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

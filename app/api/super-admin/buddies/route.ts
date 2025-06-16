@@ -5,7 +5,48 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: NextRequest) {
+// Define types for organization buddy data
+interface OrganizationBuddyData {
+  organization: {
+    id: string;
+    name: string;
+    buddyEnabled: boolean;
+  } | null;
+  buddyRelations: Array<{
+    id: string;
+    name: string;
+    email: string;
+    organizationId: string | null;
+    buddy: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    } | null;
+    organization: {
+      id: string;
+      name: string;
+      buddyEnabled: boolean;
+    } | null;
+  }>;
+  potentialBuddies: Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    organizationId: string | null;
+    organization: {
+      id: string;
+      name: string;
+      buddyEnabled: boolean;
+    } | null;
+    _count: {
+      buddyFor: number;
+    };
+  }>;
+}
+
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -75,36 +116,40 @@ export async function GET(request: NextRequest) {
     });
 
     // Organisera data per organisation
-    const organizationBuddyData = {};
+    const organizationBuddyData: Record<string, OrganizationBuddyData> = {};
 
     // Gruppera buddy-relationer per organisation
     buddyRelations.forEach(user => {
       const orgId = user.organizationId;
-      if (!organizationBuddyData[orgId]) {
+      if (orgId && !organizationBuddyData[orgId]) {
         organizationBuddyData[orgId] = {
           organization: user.organization,
           buddyRelations: [],
           potentialBuddies: []
         };
       }
-      organizationBuddyData[orgId].buddyRelations.push(user);
+      if (orgId) {
+        organizationBuddyData[orgId].buddyRelations.push(user);
+      }
     });
 
     // Gruppera potentiella buddies per organisation
     potentialBuddies.forEach(user => {
       const orgId = user.organizationId;
-      if (!organizationBuddyData[orgId]) {
+      if (orgId && !organizationBuddyData[orgId]) {
         organizationBuddyData[orgId] = {
           organization: user.organization,
           buddyRelations: [],
           potentialBuddies: []
         };
       }
-      organizationBuddyData[orgId].potentialBuddies.push(user);
+      if (orgId) {
+        organizationBuddyData[orgId].potentialBuddies.push(user);
+      }
     });
 
     // Konvertera till array och beräkna statistik
-    const buddyDataArray = Object.values(organizationBuddyData).map((orgData: any) => ({
+    const buddyDataArray = Object.values(organizationBuddyData).map((orgData: OrganizationBuddyData) => ({
       ...orgData,
       stats: {
         totalBuddyRelations: orgData.buddyRelations.length,

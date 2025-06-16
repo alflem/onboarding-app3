@@ -4,6 +4,11 @@ import { PrismaClient } from "@prisma/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { findOrCreateOrganization } from "./organization-seeder";
 
+// Extend AdapterUser to include companyName
+interface ExtendedAdapterUser extends AdapterUser {
+  companyName?: string;
+}
+
 export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
   const standardAdapter = PrismaAdapter(prisma);
 
@@ -15,7 +20,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
       console.log("CustomPrismaAdapter.createUser called for:", user.email);
       try {
         // Get companyName from user object (this comes from JWT token)
-        const companyName = (user as any).companyName;
+        const companyName = (user as ExtendedAdapterUser).companyName;
         console.log(`CompanyName in createUser: ${companyName}`);
 
         let organization;

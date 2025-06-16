@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -20,7 +20,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
     }
 
-    const { userId } = params;
+    const { userId } = await params;
     const body = await request.json();
     const { role } = body;
 

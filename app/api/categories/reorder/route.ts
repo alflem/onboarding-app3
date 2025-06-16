@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest) {
 
     // Kontrollera om användaren har tillgång till alla kategorier
     const hasAccess = existingCategories.every(
-      (cat: typeof existingCategories[0]) => cat.checklist.organizationId === session.user.organization.id
+      (cat: typeof existingCategories[0]) => cat.checklist.organizationId === session.user.organizationId
     );
 
     if (!hasAccess) {
