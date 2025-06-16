@@ -12,15 +12,9 @@ const DEFAULT_CHECKLIST_CATEGORIES = [
         isBuddyTask: true
       },
       {
-        title: 'Kollegor i telefonboken (frivillig)',
-        description: 'Lägg till XLENT koncern...',
-        order: 2,
-        isBuddyTask: false
-      },
-      {
         title: 'Har du all utrustning du behöver?',
-        description: 'Har du all utrustning du behöver? Om inte – kontakta IT-ansvarig Christian!',
-        order: 3,
+        description: 'Har du all utrustning du behöver? Om inte – kontakta IT-ansvarig på kontoret.',
+        order: 2,
         isBuddyTask: false
       },
     ]
@@ -45,7 +39,7 @@ const DEFAULT_CHECKLIST_CATEGORIES = [
       },
       {
         title: 'Intranät',
-        description: 'På vårt intranät hittar du det mesta. Hämför när du system för exempelvis tidrapportering och CV-skrivande. Här finns även Workplace - XLENTs nya för nyheter, kultur och samverkan. Ta dig tid att klicka runt!',
+        description: 'På vårt intranät hittar du det mesta. Hämför när du system för exempelvis tidrapportering och CV-skrivande. Här finns även Workplace - XLENTs yta för nyheter, kultur och samverkan. Ta dig tid att klicka runt!',
         order: 3,
         isBuddyTask: false,
         link: 'https://example.com/intranet'
