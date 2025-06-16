@@ -43,7 +43,7 @@ const Header: React.FC = () => {
           setBuddyEnabled(data.buddyEnabled);
         })
         .catch(error => {
-          console.error("Kunde inte kontrollera buddy-status:", error);
+          console.error("Kunde inte kontrollera buddystatus:", error);
           setIsBuddy(false);
           setBuddyEnabled(false);
         });
@@ -128,7 +128,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/checklist/buddy") ? "page" : undefined}
                 >
                   <UserCheck className="mr-1 h-4 w-4" />
-                  Buddy-Checklista
+                  Buddychecklista
                 </Button>
               </Link>
             )}
@@ -276,7 +276,7 @@ const Header: React.FC = () => {
               >
                 <div className="flex items-center">
                   <UserCheck className="mr-2 h-4 w-4" />
-                  Buddy-Checklista
+                  Buddychecklista
                 </div>
               </Link>
             )}

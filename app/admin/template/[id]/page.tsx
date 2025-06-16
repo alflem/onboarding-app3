@@ -1185,7 +1185,7 @@ export default function TemplateEditPage() {
             onClick={() => router.push(`/admin/buddy-template/${id}`)}
           >
             <ClipboardCheck className="h-4 w-4 mr-2" />
-            Hantera Buddy-uppgifter
+            Hantera Buddyuppgifter
           </Button>
         )}
       </div>

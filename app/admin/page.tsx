@@ -424,7 +424,7 @@ export default function AdminPage() {
                       onClick={() => router.push(`/admin/buddy-template/${checklist.id}`)}
                     >
                       <ClipboardCheck className="h-4 w-4 mr-2" />
-                      Buddy-uppgifter
+                      Buddyuppgifter
                     </Button>
                   )}
                 </div>
@@ -718,8 +718,8 @@ export default function AdminPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <UserCheck className="h-4 w-4" />
-                      Buddy-tilldelning
+                                          <UserCheck className="h-4 w-4" />
+                    Buddytilldelning
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

@@ -1,12 +1,12 @@
 # Onboarding-App
 
-En omfattande onboarding-applikation byggd med Next.js och Prisma för att förenkla introduktionen av nya medarbetare. Applikationen stödjer anpassningsbara checklistor, administratörsfunktioner och en buddy-system för att hjälpa nya medarbetare att komma igång.
+En omfattande onboardingapplikation byggd med Next.js och Prisma för att förenkla introduktionen av nya medarbetare. Applikationen stödjer anpassningsbara checklistor, administratörsfunktioner och ett buddysystem för att hjälpa nya medarbetare att komma igång.
 
 ## Funktioner
 
 - **Administratörspanel**: Hantera användare, mallar och organisationer
-- **Anpassningsbara checklistor**: Skapa och administrera onboarding-checklistor
-- **Buddy-system**: Tilldela erfarna medarbetare som mentorer till nya anställda
+- **Anpassningsbara checklistor**: Skapa och administrera onboardingchecklistor
+- **Buddysystem**: Tilldela erfarna medarbetare som mentorer till nya anställda
 - **Användarroller**: Stöd för Super Admin, Admin och medarbetarroller
 - **Autentisering**: Använder NextAuth med stöd för lösenord och OAuth
 - **Databas**: PostgreSQL via Prisma ORM
@@ -116,7 +116,7 @@ Applikationen använder GitHub Actions för automatisk deployment till Azure Web
 - **Process**:
   1. Säkerhetsbekräftelse (kräver att man skriver "RESET")
   2. Nollställer databasen helt (tar bort all data)
-  3. Kör seed-script (om tillgängligt)
+  3. Kör seedscript (om tillgängligt)
   4. Bygger och deployar applikationen
 
 **⚠️ Varning**: Full Clean-deployment tar bort ALL data i databasen. Använd endast för utveckling eller när du medvetet vill börja om från början.

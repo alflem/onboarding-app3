@@ -2,7 +2,7 @@
 import { NextAuthOptions } from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { CustomPrismaAdapter } from "@/lib/auth/custom-prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -20,190 +20,91 @@ export const authOptions: NextAuthOptions = {
         }
       },
       profile(profile) {
-        console.log("Azure AD Profile:", profile);
         return {
           id: profile.sub,
           name: profile.name,
           email: profile.email,
           image: profile.picture,
-          companyName: profile.companyName || profile.company_name,
+          companyName: profile.companyName || (profile as any).company_name || undefined,
         };
       },
     })
   ],
   callbacks: {
     async jwt({ token, user, account, profile }) {
-      console.log("JWT Callback - Provider:", account?.provider, "User Email:", user?.email || token.email);
-
-      // Set basic user data on first login
+      // Set user data on first login
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-
-        // Store company name from Azure AD profile
-        if ('companyName' in user && user.companyName) {
-          token.companyName = user.companyName as string;
-          console.log("Company name from profile:", user.companyName);
-        }
-
-        // Store organization info if available from user object
-        if ('organizationId' in user && user.organizationId) {
-          token.organizationId = user.organizationId;
-          token.organizationName = (user as { organizationName?: string }).organizationName;
-        }
+        token.companyName = user.companyName || undefined;
       }
 
-      // On Azure AD login, also check the profile for company information
+      // Try to get company name from Azure AD profile
       if (account?.provider === "azure-ad" && profile) {
         const azureProfile = profile as any;
         if (azureProfile.companyName || azureProfile.company_name) {
           token.companyName = azureProfile.companyName || azureProfile.company_name;
-          console.log("Company name from Azure AD profile:", token.companyName);
+        } else if (account.access_token) {
+          try {
+            // Try to get company name from Microsoft Graph API
+            const graphResponse = await fetch('https://graph.microsoft.com/v1.0/me?$select=companyName,department', {
+              headers: {
+                'Authorization': `Bearer ${account.access_token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (graphResponse.ok) {
+              const graphData = await graphResponse.json();
+              if (graphData.companyName) {
+                token.companyName = graphData.companyName;
+              } else if (graphData.department) {
+                token.companyName = graphData.department;
+              }
+            }
+          } catch (error) {
+            console.error("Error fetching company information:", error);
+          }
         }
       }
 
-      // Always fetch user data from database to ensure correct role
-      // This is important for Safari which might not preserve JWT tokens properly
+      // Get user role and organization from database
       if (token.id) {
-        console.log("Fetching user data from database for token refresh...");
         try {
           const dbUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
+            where: { id: token.id },
             include: {
               organization: true
             }
           });
 
           if (dbUser) {
-            console.log(`Database user found: ${dbUser.email} with role: ${dbUser.role}`);
-            // Always update role from database to ensure accuracy
             token.role = dbUser.role;
-
-            // Set organization info from database
-            if (dbUser.organization) {
-              token.organizationId = dbUser.organization.id;
-              token.organizationName = dbUser.organization.name;
-            } else {
-              // Ensure Demo Company exists and assign user to it
-              let demoOrg = await prisma.organization.findFirst({
-                where: { name: "Demo Company" }
-              });
-
-              if (!demoOrg) {
-                demoOrg = await prisma.organization.create({
-                  data: {
-                    name: "Demo Company",
-                    buddyEnabled: true,
-                  }
-                });
-              }
-
-              // Update user with Demo Company
-              await prisma.user.update({
-                where: { id: token.id as string },
-                data: { organizationId: demoOrg.id }
-              });
-
-              token.organizationId = demoOrg.id;
-              token.organizationName = demoOrg.name;
-            }
-          } else {
-            console.error(`Database user not found for ID: ${token.id}, this should not happen`);
-            // If database user not found, something went wrong - keep existing role or use fallback
-            token.role = token.role || "ADMIN";
-            token.organizationId = token.organizationId || "demo";
-            token.organizationName = token.organizationName || "Demo Company";
+            token.organizationId = dbUser.organizationId ?? undefined;
+            token.organizationName = (dbUser.organization?.name as string | undefined);
           }
         } catch (error) {
-          console.error("Error fetching user from database:", error);
-          // On database error, keep existing token role or use fallback
-          token.role = token.role || "ADMIN";
-          token.organizationId = token.organizationId || "demo";
-          token.organizationName = token.organizationName || "Demo Company";
+          console.error("Error fetching user data:", error);
         }
       }
 
-      // For subsequent requests (when user is already in token), maintain the role
-      console.log(`Final token role: ${token.role} for user: ${token.email}`);
       return token;
     },
     async session({ session, token }) {
-      console.log("Session Callback - Token:", {
-        id: token.id,
-        email: token.email,
-        role: token.role,
-        organizationId: token.organizationId
-      });
-
-      if (session.user) {
-        // Always set basic user data from token
-        session.user.id = token.id as string;
-
-        // If no role in token, fetch from database as fallback
-        if (!token.role && token.id) {
-          console.log("No role in token, fetching from database...");
-          try {
-            const dbUser = await prisma.user.findUnique({
-              where: { id: token.id as string },
-              select: { role: true }
-            });
-
-            if (dbUser) {
-              console.log(`Fetched role from database: ${dbUser.role}`);
-              session.user.role = dbUser.role;
-            } else {
-              console.log("No database user found, using ADMIN fallback");
-              session.user.role = "ADMIN";
-            }
-          } catch (error) {
-            console.error("Error fetching role from database in session callback:", error);
-            session.user.role = "ADMIN";
-          }
-        } else {
-          session.user.role = (token.role as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE") || "ADMIN";
-        }
-
-        console.log(`Final session role: ${session.user.role} for user: ${session.user.id}`);
-
-        // Set organization data from token (populated during JWT callback)
-        if (token.organizationId && token.organizationName) {
-          session.user.organizationId = token.organizationId as string;
-          session.user.organizationName = token.organizationName as string;
-          session.user.organization = {
-            id: token.organizationId as string,
-            name: token.organizationName as string
-          };
-        } else {
-          // Fallback organization if token doesn't have org data
-          session.user.organizationId = "demo";
-          session.user.organizationName = "Demo Company";
-          session.user.organization = {
-            id: "demo",
-            name: "Demo Company"
-          };
-        }
-
-        // Set company name from token if available
-        if (token.companyName) {
-          session.user.companyName = token.companyName as string;
-          console.log("Setting company name in session:", token.companyName);
-        }
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role as Role;
+        session.user.organizationId = token.organizationId;
+        session.user.organizationName = token.organizationName;
+        session.user.companyName = token.companyName;
       }
-
-      console.log("Final session:", {
-        userId: session.user?.id,
-        role: session.user?.role,
-        organizationId: session.user?.organizationId
-      });
-
       return session;
     }
   },
   pages: {
-    signIn: "/auth/signin",
-    signOut: "/auth/signout",
-    error: "/auth/error",
+    signIn: '/auth/signin',
+    error: '/auth/error',
   },
   session: {
     strategy: "jwt",
@@ -214,15 +115,13 @@ export const authOptions: NextAuthOptions = {
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      name: `__Secure-next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "none",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
-        // Add domain explicitly for better Safari compatibility
-        domain: process.env.NODE_ENV === "production" ? undefined : undefined,
-      }
+        secure: true,
+      },
     },
     // Add explicit callback URL cookie for Safari
     callbackUrl: {

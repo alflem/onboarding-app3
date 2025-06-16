@@ -83,7 +83,7 @@ export default function BuddyChecklistPage() {
           setBuddyEnabled(data.buddyEnabled);
         })
         .catch(error => {
-          console.error("Kunde inte kontrollera buddy-status:", error);
+          console.error("Kunde inte kontrollera buddystatus:", error);
           setIsBuddy(false);
           setBuddyEnabled(false);
         });
@@ -194,7 +194,7 @@ export default function BuddyChecklistPage() {
         <section className="space-y-2">
           <h1 className="text-3xl font-bold">Buddy Checklista</h1>
           <p className="text-muted-foreground">
-            Buddy-funktionen är inaktiverad för din organisation.
+            Buddyfunktionen är inaktiverad för din organisation.
           </p>
         </section>
       </div>
@@ -226,9 +226,9 @@ export default function BuddyChecklistPage() {
       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
         <Card className="w-full md:w-64 lg:w-80">
           <CardHeader className="pb-2">
-            <CardTitle>Din buddy-progress</CardTitle>
-            <CardDescription>
-              Du har slutfört {progress}% av buddy-uppgifterna
+                            <CardTitle>Din buddyprogress</CardTitle>
+                <CardDescription>
+                  Du har slutfört {progress}% av buddyuppgifterna
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -236,7 +236,7 @@ export default function BuddyChecklistPage() {
 
             <div className="mt-6 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Slutförda buddy-uppgifter</span>
+                <span>Slutförda buddyuppgifter</span>
                 <Badge variant="outline" className="bg-secondary/10">
                   {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
                 </Badge>
@@ -306,7 +306,7 @@ export default function BuddyChecklistPage() {
             </Accordion>
           ) : (
             <div className="flex justify-center items-center p-8 border rounded-md">
-              <p className="text-muted-foreground">Inga buddy-uppgifter hittades.</p>
+              <p className="text-muted-foreground">Inga buddyuppgifter hittades.</p>
             </div>
           )}
         </div>
@@ -336,7 +336,7 @@ export default function BuddyChecklistPage() {
           >
             <Users className="h-5 w-5 text-primary" />
             <div className="text-left">
-              <div className="font-medium">HR-kontakt</div>
+              <div className="font-medium">Kontakta HR</div>
               <div className="text-xs text-muted-foreground">Frågor om din anställning</div>
             </div>
           </Button>

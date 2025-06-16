@@ -110,7 +110,7 @@ export default function Home() {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
               {status === "authenticated" && session?.user
                 ? `Välkommen, ${session.user.name || 'användare'}!`
-                : "Välkommen till Onboarding-plattformen!"}
+                : "Välkommen till plattformen för onboarding!"}
             </h1>
             {status === "authenticated" && session?.user && (
               <div className="text-lg md:text-xl text-white/90">
@@ -221,15 +221,15 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Onboarding-plattform</CardTitle>
+                <CardTitle>Onboardingplattform</CardTitle>
                 <CardDescription>
                   En sömlös och strukturerad onboarding för nya medarbetare
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Vår onboarding-plattform hjälper nya medarbetare att komma igång snabbare
-                  och effektivare. Med personliga checklistor, dokumentation och guider.
+                  Vår onboardingplattform hjälper nya medarbetare att komma igång snabbare
+                  och effektivare.
                 </p>
                 <Button asChild>
                   <Link href="/auth/signin">Kom igång nu</Link>
@@ -240,7 +240,7 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <CardTitle>Fördelar</CardTitle>
-                <CardDescription>Varför använda vår onboarding-plattform</CardDescription>
+                <CardDescription>Varför använda vår onboardingplattform</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -250,7 +250,7 @@ export default function Home() {
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />
-                    <span>Buddy-system för att stödja nya medarbetare</span>
+                    <span>Buddysystem för att stödja nya medarbetare</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="mr-2 h-5 w-5 text-primary shrink-0" />

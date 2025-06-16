@@ -176,7 +176,7 @@ export default function SuperAdminPage() {
       <section className="space-y-2">
         <h1 className="text-3xl font-bold">Superadmin Panel</h1>
         <p className="text-muted-foreground">
-          Hantera organisationer och globala inställningar för onboarding-plattformen.
+                          Hantera organisationer och globala inställningar för onboardingplattformen.
         </p>
       </section>
 
@@ -219,7 +219,7 @@ export default function SuperAdminPage() {
             <Building className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-xl font-medium mb-2">Inga organisationer ännu</p>
             <p className="text-muted-foreground text-center max-w-md mb-6">
-              Skapa din första organisation för att börja konfigurera onboarding-plattformen.
+                              Skapa din första organisation för att börja konfigurera onboardingplattformen.
             </p>
             <Dialog>
               <DialogTrigger asChild>

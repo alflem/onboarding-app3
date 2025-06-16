@@ -87,7 +87,7 @@ export default function ChecklistPage() {
     localStorage.setItem('checklist-accordion-state', JSON.stringify(value));
   };
 
-  // Kontrollera om buddy-funktionen är aktiverad
+      // Kontrollera om buddyfunktionen är aktiverad
   useEffect(() => {
     if (session?.user?.id) {
       fetch('/api/user/is-buddy')
@@ -96,7 +96,7 @@ export default function ChecklistPage() {
           setBuddyEnabled(data.buddyEnabled);
         })
         .catch(error => {
-          console.error("Kunde inte kontrollera buddy-status:", error);
+          console.error("Kunde inte kontrollera buddystatus:", error);
           setBuddyEnabled(false);
         });
     }
@@ -254,7 +254,7 @@ export default function ChecklistPage() {
           {buddyEnabled && buddyTasksCount > 0 && (
             <Card className="w-full">
               <CardHeader className="pb-2">
-                <CardTitle>Buddy-uppgifter</CardTitle>
+                <CardTitle>Buddyuppgifter</CardTitle>
                 <CardDescription>
                   Uppgifter som ska utföras av din buddy
                 </CardDescription>
@@ -346,7 +346,7 @@ export default function ChecklistPage() {
       <HelpCircle className="h-5 w-5 text-primary" />
       <div className="text-left">
         <div className="font-medium">Support</div>
-        <div className="text-xs text-muted-foreground">Kontakta IT-support</div>
+        <div className="text-xs text-muted-foreground">Kontakta ITsupport</div>
       </div>
     </Button>
     <Button
@@ -355,7 +355,7 @@ export default function ChecklistPage() {
     >
       <Users className="h-5 w-5 text-primary" />
       <div className="text-left">
-        <div className="font-medium">HR-kontakt</div>
+        <div className="font-medium">Kontakta HR</div>
         <div className="text-xs text-muted-foreground">Frågor om din anställning</div>
       </div>
     </Button>
