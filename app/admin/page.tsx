@@ -50,8 +50,6 @@ import {
   Calendar,
   UserX,
   UserCheck,
-  BarChart3,
-  UserPlus,
   BarChart
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
