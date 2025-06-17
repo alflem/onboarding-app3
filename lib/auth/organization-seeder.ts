@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-const DEFAULT_CHECKLIST_CATEGORIES = [
+export const DEFAULT_CHECKLIST_CATEGORIES = [
   {
     name: 'Din digitala setup',
     order: 1,

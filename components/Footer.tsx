@@ -16,7 +16,7 @@ export default function Footer() {
             />
             <div>
               <h3 className="text-xl font-semibold text-foreground">Hållbara Konsulter</h3>
-              <p className="text-sm text-muted-foreground">Onboarding Platform</p>
+              <p className="text-sm text-muted-foreground">Onboarding App</p>
             </div>
           </div>
 

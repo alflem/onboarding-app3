@@ -26,7 +26,7 @@ Nya organisationer skapas med en komplett standardchecklista som innehåller:
 - **Praktiskt att fixa** - Presentationer, foton, grupper
 - **Din konsultprofil** - Konsultprofil och CV
 
-Varje kategori innehåller specifika uppgifter, varav vissa är markerade som "buddy-uppgifter".
+Varje kategori innehåller specifika uppgifter, varav vissa är markerade som "buddyuppgifter".
 
 ## Teknisk implementation
 

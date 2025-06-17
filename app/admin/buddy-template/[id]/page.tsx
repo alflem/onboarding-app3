@@ -361,7 +361,7 @@ function SortableBuddyCategory({
               <AlertDialogHeader>
                 <AlertDialogTitle>Är du säker?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Detta tar bort kategorin och alla buddy-uppgifter inom den.
+                  Detta tar bort kategorin och alla buddyuppgifter inom den.
                   Denna åtgärd kan inte ångras.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -400,7 +400,7 @@ function SortableBuddyCategory({
           </SortableContext>
         ) : (
           <p className="text-center py-4 text-muted-foreground">
-            Inga buddy-uppgifter i denna kategori ännu. Lägg till en!
+            Inga buddyuppgifter i denna kategori ännu. Lägg till en!
           </p>
         )}
 
@@ -413,12 +413,12 @@ function SortableBuddyCategory({
               size="sm"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Lägg till buddy-uppgift
+              Lägg till buddyuppgift
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Lägg till buddy-uppgift</DialogTitle>
+              <DialogTitle>Lägg till buddyuppgift</DialogTitle>
               <DialogDescription>
                 Lägg till en ny uppgift som ska genomföras av en buddy i kategorin {category.name}.
               </DialogDescription>
@@ -935,8 +935,8 @@ export default function BuddyTemplatePage() {
           categoryId: "",
         });
 
-        toast.success("Buddy-uppgift skapad", {
-          description: "Buddy-uppgiften har lagts till i mallen.",
+        toast.success("Buddyuppgift skapad", {
+          description: "Buddyuppgiften har lagts till i mallen.",
         });
       } catch (error) {
         console.error("Fel vid skapande av uppgift:", error);
@@ -996,8 +996,8 @@ export default function BuddyTemplatePage() {
 
         setEditingTaskId(null);
 
-        toast.success("Buddy-uppgift uppdaterad", {
-          description: "Buddy-uppgiften har uppdaterats i mallen.",
+        toast.success("Buddyuppgift uppdaterad", {
+          description: "Buddyuppgiften har uppdaterats i mallen.",
         });
       } catch (error) {
         console.error("Fel vid uppdatering av uppgift:", error);
@@ -1036,8 +1036,8 @@ export default function BuddyTemplatePage() {
           ),
         });
 
-        toast.success("Buddy-uppgift borttagen", {
-          description: "Buddy-uppgiften har tagits bort från mallen.",
+        toast.success("Buddyuppgift borttagen", {
+          description: "Buddyuppgiften har tagits bort från mallen.",
         });
       } catch (error) {
         console.error("Fel vid borttagning av uppgift:", error);
@@ -1055,7 +1055,7 @@ export default function BuddyTemplatePage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Laddar buddy-uppgifter...</span>
+        <span className="ml-2">Laddar buddyuppgifter...</span>
       </div>
     );
   }
@@ -1097,9 +1097,9 @@ export default function BuddyTemplatePage() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Redigera buddy-uppgift</DialogTitle>
+              <DialogTitle>Redigera buddyuppgift</DialogTitle>
               <DialogDescription>
-                Redigera information för denna buddy-uppgift.
+                Redigera information för denna buddyuppgift.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -1175,7 +1175,7 @@ export default function BuddyTemplatePage() {
         <CardContent>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Alla uppgifter på denna sida är buddy-uppgifter, vilket innebär
+              Alla uppgifter på denna sida är buddyuppgifter, vilket innebär
               att de ska utföras av en person som är buddy för en nyanställd.
             </p>
 

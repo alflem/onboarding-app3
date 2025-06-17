@@ -136,7 +136,7 @@ export default function OrganisationPage() {
     }
   };
 
-  // Uppdatera buddy-inställningar
+  // Uppdatera buddyinställningar
   const handleUpdateBuddySettings = async () => {
     if (buddyEnabled === organization?.buddyEnabled) return;
 
@@ -153,16 +153,16 @@ export default function OrganisationPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte uppdatera buddy-inställningar");
+        throw new Error(errorData.error || "Kunde inte uppdatera buddyinställningar");
       }
 
       const updatedOrg = await response.json();
       setOrganization(prev => prev ? { ...prev, ...updatedOrg } : null);
-      toast.success(`Buddy-funktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
+      toast.success(`Buddyfunktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
 
     } catch (error) {
-      console.error("Fel vid uppdatering av buddy-inställningar:", error);
-      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");
+      console.error("Fel vid uppdatering av buddyinställningar:", error);
+      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddyinställningar");
       // Återställ värdet vid fel
       setBuddyEnabled(organization?.buddyEnabled || true);
     } finally {
@@ -337,12 +337,12 @@ export default function OrganisationPage() {
             </div>
           </div>
 
-          {/* Buddy-inställningar */}
+          {/* Buddyinställningar */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Buddy-system</Label>
               <p className="text-sm text-muted-foreground">
-                Aktivera buddy-funktionen för organisationen
+                Aktivera buddyfunktionen för organisationen
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export default function OrganisationPage() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Uppdatera buddy-inställningar
+            Uppdatera buddyinställningar
           </Button>
         </CardFooter>
       </Card>

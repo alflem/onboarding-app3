@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Verifiera att buddy-användaren finns och tillhör samma organisation
+    // Verifiera att buddyanvändaren finns och tillhör samma organisation
     const buddy = await prisma.user.findUnique({
       where: {
         id: body.buddyId
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Uppdatera användaren med den nya buddy-relationen
+    // Uppdatera användaren med den nya buddyrelationen
     const updatedEmployee = await prisma.user.update({
       where: {
         id: id

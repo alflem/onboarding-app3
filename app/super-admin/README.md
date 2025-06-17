@@ -18,20 +18,20 @@ Fullständig CRUD-funktionalitet för:
 
 #### Organisationer
 - Skapa, redigera och ta bort organisationer
-- Hantera buddy-inställningar
+- Hantera buddyinställningar
 - Se antal användare per organisation
 
 #### Användare
 - Skapa, redigera och ta bort användare
 - Ändra användarroller (EMPLOYEE, ADMIN, SUPER_ADMIN)
 - Tilldela användare till organisationer
-- Hantera buddy-relationer
+- Hantera buddyrelationer
 - Återställa lösenord
 
 #### Uppgifter
 - Skapa, redigera och ta bort uppgifter
 - Flytta uppgifter mellan kategorier
-- Markera som buddy-uppgifter
+- Markera som buddyuppgifter
 - Hantera ordning och länkar
 
 ## API Endpoints

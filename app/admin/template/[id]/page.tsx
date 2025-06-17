@@ -44,6 +44,7 @@ import {
   Save,
   ClipboardCheck,
   Loader2,
+  RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -584,6 +585,39 @@ export default function TemplateEditPage() {
       });
     } finally {
       setLoading(false);
+    }
+  }, [id]);
+
+  // Funktion för att återställa checklistan till standardmall
+  const resetChecklist = useCallback(async () => {
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/templates/${id}/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte återställa checklista');
+      }
+
+      const result = await response.json();
+
+      // Uppdatera checklistan med den nya data
+      setChecklist(result.data);
+
+      toast.success("Checklista återställd", {
+        description: "Checklistan har återställts till standardmallen från organization_seeder."
+      });
+    } catch (error) {
+      console.error("Fel vid återställning av checklista:", error);
+      toast.error("Kunde inte återställa checklista", {
+        description: "Ett fel uppstod vid återställning av checklista."
+      });
+    } finally {
+      setSaving(false);
     }
   }, [id]);
 
@@ -1188,6 +1222,52 @@ export default function TemplateEditPage() {
             Hantera Buddyuppgifter
           </Button>
         )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="text-destructive hover:text-destructive"
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Återställer...
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Återställ till standardmall
+                </>
+              )}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Återställ checklista?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Denna åtgärd kan inte ångras.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Avbryt</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={resetChecklist}
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Återställer...
+                  </>
+                ) : (
+                  "Återställ"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Mallinställningar */}

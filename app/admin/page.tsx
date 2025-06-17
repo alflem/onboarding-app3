@@ -50,7 +50,8 @@ import {
   Calendar,
   UserX,
   UserCheck,
-  BarChart
+  BarChart,
+  RotateCcw
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -77,6 +78,12 @@ type User = {
 type Buddy = {
   id: string;
   name: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
+  tasks: Array<{ id: string }>;
 };
 
 export default function AdminPage() {
@@ -159,6 +166,45 @@ export default function AdminPage() {
       });
     }
   }, []);
+
+  // Funktion för att återställa checklistan till standardmall
+  const resetChecklist = useCallback(async () => {
+    if (!checklist) return;
+
+    try {
+      setSubmitting(true);
+      const response = await fetch(`/api/templates/${checklist.id}/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte återställa checklista');
+      }
+
+      const result = await response.json();
+
+      // Uppdatera checklistan med den nya data
+      setChecklist({
+        ...checklist,
+        categoriesCount: result.data.categories.length,
+        tasksCount: result.data.categories.reduce((sum: number, cat: Category) => sum + cat.tasks.length, 0)
+      });
+
+      toast.success("Checklista återställd", {
+        description: "Checklistan har återställts till standardmallen från organization_seeder."
+      });
+    } catch (error) {
+      console.error("Fel vid återställning av checklista:", error);
+      toast.error("Kunde inte återställa checklista", {
+        description: "Ett fel uppstod vid återställning av checklista."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [checklist]);
 
   // Funktion för att hämta eller skapa en checklista
   const fetchChecklist = useCallback(async () => {
@@ -371,7 +417,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Fel vid uppdatering av buddy:", error);
       toast.error("Kunde inte uppdatera buddy", {
-        description: "Ett fel uppstod vid uppdatering av buddy-tilldelning."
+        description: "Ett fel uppstod vid uppdatering av buddytilldelning."
       });
     } finally {
       setSubmitting(false);
@@ -435,6 +481,52 @@ export default function AdminPage() {
                       {t('buddy_tasks')}
                     </Button>
                   )}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full text-destructive hover:text-destructive"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Återställer...
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Återställ till standardmall
+                          </>
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Återställ checklista?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Denna åtgärd kan inte ångras.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={resetChecklist}
+                          disabled={submitting}
+                        >
+                          {submitting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Återställer...
+                            </>
+                          ) : (
+                            "Återställ"
+                          )}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
 
                 <div className="text-xs text-muted-foreground">
@@ -646,7 +738,7 @@ export default function AdminPage() {
               {employeeDetails?.name || "Medarbetardetaljer"}
             </DialogTitle>
             <DialogDescription>
-              Onboarding-status och buddy-hantering
+              Onboarding-status och buddyhantering
             </DialogDescription>
           </DialogHeader>
 

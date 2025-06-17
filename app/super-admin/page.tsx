@@ -135,7 +135,7 @@ export default function SuperAdminOrganization() {
     }
   };
 
-  // Uppdatera buddy-inställningar
+  // Uppdatera buddyinställningar
   const handleUpdateBuddySettings = async () => {
     if (buddyEnabled === organization?.buddyEnabled) return;
 
@@ -152,7 +152,7 @@ export default function SuperAdminOrganization() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte uppdatera buddy-inställningar");
+        throw new Error(errorData.error || "Kunde inte uppdatera buddyinställningar");
       }
 
       const updatedOrg = await response.json();
@@ -160,8 +160,8 @@ export default function SuperAdminOrganization() {
       toast.success(`Buddy-funktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
 
     } catch (error) {
-      console.error("Fel vid uppdatering av buddy-inställningar:", error);
-      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");
+      console.error("Fel vid uppdatering av buddyinställningar:", error);
+      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddyinställningar");
       // Återställ värdet vid fel
       setBuddyEnabled(organization?.buddyEnabled || true);
     } finally {

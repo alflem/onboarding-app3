@@ -32,7 +32,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
     }
 
-    // Kontrollera om buddy-funktionen är aktiverad för organisationen
+    // Kontrollera om buddyfunktionen är aktiverad för organisationen
     const organization = await prisma.organization.findUnique({
       where: { id: organizationId },
       select: { buddyEnabled: true }

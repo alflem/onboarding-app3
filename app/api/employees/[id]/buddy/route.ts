@@ -7,7 +7,7 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-// PATCH /api/employees/[id]/buddy - Uppdatera buddy-tilldelning för en medarbetare
+// PATCH /api/employees/[id]/buddy - Uppdatera buddytilldelning för en medarbetare
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     // Hämta användarsession
@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // buddyId kan vara null för att ta bort buddy
     if (buddyId !== null && (typeof buddyId !== 'string' || buddyId.trim() === '')) {
       return NextResponse.json(
-        { error: 'Ogiltigt buddy-ID' },
+        { error: 'Ogiltigt buddyID' },
         { status: 400 }
       );
     }
@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Om buddyId inte är null, verifiera att buddy-användaren finns
+    // Om buddyId inte är null, verifiera att buddyanvändaren finns
     if (buddyId !== null) {
       const buddy = await prisma.user.findUnique({
         where: {
@@ -97,7 +97,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       }
     }
 
-    // Uppdatera användaren med den nya buddy-relationen (eller ta bort den)
+    // Uppdatera användaren med den nya buddyrelationen (eller ta bort den)
     const updatedEmployee = await prisma.user.update({
       where: {
         id: id

@@ -508,7 +508,7 @@ export default function DatabaseManagementPage() {
             <CardContent>
               {buddyData.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  Inga buddy-relationer hittades
+                  Inga buddyrelationer hittades
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -524,7 +524,7 @@ export default function DatabaseManagementPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-2xl font-bold">{orgData.stats.totalBuddyRelations}</div>
-                            <div className="text-sm text-muted-foreground">Aktiva buddy-relationer</div>
+                            <div className="text-sm text-muted-foreground">Aktiva buddyrelationer</div>
                           </div>
                         </div>
                       </CardHeader>
@@ -538,7 +538,7 @@ export default function DatabaseManagementPage() {
                             </h4>
                             {orgData.buddyRelations.length === 0 ? (
                               <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded">
-                                Inga aktiva buddy-relationer
+                                Inga aktiva buddyrelationer
                               </div>
                             ) : (
                               <div className="space-y-2">

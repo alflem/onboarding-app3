@@ -143,7 +143,7 @@ export default function OrganizationDetails() {
     }
   };
 
-  // Uppdatera buddy-inställningar
+  // Uppdatera buddyinställningar
   const handleUpdateBuddySettings = async () => {
     if (buddyEnabled === organization?.buddyEnabled) return;
 
@@ -160,7 +160,7 @@ export default function OrganizationDetails() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte uppdatera buddy-inställningar");
+        throw new Error(errorData.error || "Kunde inte uppdatera buddyinställningar");
       }
 
       const updatedOrg = await response.json();
@@ -168,8 +168,8 @@ export default function OrganizationDetails() {
       toast.success(`Buddy-funktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
 
     } catch (error) {
-      console.error("Fel vid uppdatering av buddy-inställningar:", error);
-      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");
+      console.error("Fel vid uppdatering av buddyinställningar:", error);
+      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddyinställningar");
       // Återställ värdet vid fel
       setBuddyEnabled(organization?.buddyEnabled || true);
     } finally {
@@ -340,13 +340,13 @@ const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean)
             Buddy-inställningar
           </CardTitle>
           <CardDescription>
-            Hantera buddy-funktionalitet för denna organisation
+            Hantera buddyfunktionalitet för denna organisation
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <Label htmlFor="buddy-enabled">Aktivera buddy-funktionen</Label>
+              <Label htmlFor="buddy-enabled">Aktivera buddyfunktionen</Label>
               <p className="text-sm text-muted-foreground">
                 När aktiverad kan administratörer tilldela buddies till nyanställda medarbetare
               </p>
@@ -373,7 +373,7 @@ const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean)
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                <span>Spara buddy-inställningar</span>
+                <span>Spara buddyinställningar</span>
               </>
             )}
           </Button>

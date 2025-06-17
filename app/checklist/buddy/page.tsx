@@ -59,7 +59,7 @@ export default function BuddyChecklistPage() {
 
   // Load accordion state from localStorage on component mount
   useEffect(() => {
-    const savedAccordionState = localStorage.getItem('buddy-checklist-accordion-state');
+    const savedAccordionState = localStorage.getItem('buddychecklist-accordion-state');
     if (savedAccordionState) {
       try {
         const parsedState = JSON.parse(savedAccordionState);
@@ -76,7 +76,7 @@ export default function BuddyChecklistPage() {
   // Save accordion state to localStorage whenever it changes
   const handleAccordionChange = (value: string[]) => {
     setOpenAccordionItems(value);
-    localStorage.setItem('buddy-checklist-accordion-state', JSON.stringify(value));
+    localStorage.setItem('buddychecklist-accordion-state', JSON.stringify(value));
   };
 
   // Kontrollera om användaren är buddy

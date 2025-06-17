@@ -45,14 +45,14 @@ export async function GET(_req: NextRequest) {
       },
     });
 
-    // Beräkna progress (exkludera buddy-uppgifter)
+    // Beräkna progress (exkludera buddyuppgifter)
     let totalTasks = 0;
     let completedTasks = 0;
 
     if (checklist) {
       checklist.categories.forEach((category: typeof checklist.categories[0]) => {
         category.tasks.forEach((task: typeof category.tasks[0]) => {
-          // Exkludera buddy-uppgifter från progress-beräkningen
+          // Exkludera buddyuppgifter från progress-beräkningen
           if (!task.isBuddyTask) {
             totalTasks++;
             // Kontrollera om denna uppgift är avklarad av användaren

@@ -58,7 +58,7 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
     }
 
-    // Hämta alla buddy-relationer
+    // Hämta alla buddyrelationer
     const buddyRelations = await prisma.user.findMany({
       where: {
         buddyId: {
@@ -118,7 +118,7 @@ export async function GET(_request: NextRequest) {
     // Organisera data per organisation
     const organizationBuddyData: Record<string, OrganizationBuddyData> = {};
 
-    // Gruppera buddy-relationer per organisation
+    // Gruppera buddyrelationer per organisation
     buddyRelations.forEach(user => {
       const orgId = user.organizationId;
       if (orgId && !organizationBuddyData[orgId]) {
@@ -164,7 +164,7 @@ export async function GET(_request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Fel vid hämtning av buddy-data:", error);
+    console.error("Fel vid hämtning av buddydata:", error);
     return NextResponse.json(
       { error: "Internt serverfel" },
       { status: 500 }
