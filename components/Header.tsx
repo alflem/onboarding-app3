@@ -153,6 +153,19 @@ const Header: React.FC = () => {
               </Link>
             )}
 
+            {(hasRole(Role.ADMIN) || hasRole(Role.SUPER_ADMIN)) && (
+              <Link href="/organisation" passHref>
+                <Button
+                  variant={isActive("/organisation") ? "default" : "ghost"}
+                  size="sm"
+                  aria-current={isActive("/organisation") ? "page" : undefined}
+                >
+                  <Building className="mr-1 h-4 w-4" />
+                  Organisation
+                </Button>
+              </Link>
+            )}
+
             {hasRole(Role.SUPER_ADMIN) && (
               <Link href="/super-admin" passHref>
                 <Button
@@ -161,7 +174,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
-                  {t('organization')}
+                  Databashantering
                 </Button>
               </Link>
             )}
@@ -286,6 +299,19 @@ const Header: React.FC = () => {
                 </Button>
               </Link>
             )}
+            {(hasRole(Role.ADMIN) || hasRole(Role.SUPER_ADMIN)) && (
+              <Link href="/organisation" passHref legacyBehavior>
+                <Button
+                  variant={isActive("/organisation") ? "default" : "ghost"}
+                  size="lg"
+                  className="justify-start w-full"
+                  aria-current={isActive("/organisation") ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Building className="mr-2 h-5 w-5" /> Organisation
+                </Button>
+              </Link>
+            )}
             {hasRole(Role.SUPER_ADMIN) && (
               <Link href="/super-admin" passHref legacyBehavior>
                 <Button
@@ -295,7 +321,7 @@ const Header: React.FC = () => {
                   aria-current={isActive("/super-admin") ? "page" : undefined}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Building className="mr-2 h-5 w-5" /> {t('organization')}
+                  <Building className="mr-2 h-5 w-5" /> Databashantering
                 </Button>
               </Link>
             )}

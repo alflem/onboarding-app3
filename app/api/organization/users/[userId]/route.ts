@@ -16,13 +16,19 @@ export async function PATCH(
       return NextResponse.json({ error: "Ej autentiserad" }, { status: 401 });
     }
 
-    if (session.user.role !== "SUPER_ADMIN") {
+    // Tillåt både ADMIN och SUPER_ADMIN
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
     }
 
     const { userId } = await params;
     const body = await request.json();
     const { role } = body;
+
+    // ADMIN kan inte befordra användare till SUPER_ADMIN
+    if (session.user.role === "ADMIN" && role === "SUPER_ADMIN") {
+      return NextResponse.json({ error: "ADMIN kan inte befordra användare till SUPER_ADMIN" }, { status: 403 });
+    }
 
     // Kontrollera att användaren tillhör samma organisation
     const userToUpdate = await prisma.user.findFirst({

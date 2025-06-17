@@ -52,7 +52,7 @@ interface User {
   createdAt: string;
 }
 
-export default function SuperAdminOrganization() {
+export default function OrganisationPage() {
   const { data: session, status } = useSession({ required: true });
   const router = useRouter();
 
@@ -94,11 +94,12 @@ export default function SuperAdminOrganization() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      // Endast SUPER_ADMIN får vara kvar här
-      if (session?.user.role !== "SUPER_ADMIN") {
-        router.replace("/organisation");
+      // Kontrollera att användaren är admin eller super admin
+      if (session?.user.role !== "ADMIN" && session?.user.role !== "SUPER_ADMIN") {
+        router.push("/");
         return;
       }
+
       fetchOrganizationDetails();
     }
   }, [status, session, router, fetchOrganizationDetails]);
@@ -214,7 +215,7 @@ export default function SuperAdminOrganization() {
     }
   };
 
-  // Ändra superadmin-roll
+  // Ändra superadmin-roll (endast för SUPER_ADMIN)
   const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean) => {
     try {
       setSavingUsers(prev => ({ ...prev, [userId]: true }));
@@ -263,7 +264,7 @@ export default function SuperAdminOrganization() {
     return <div className="flex items-center justify-center min-h-screen">{t('loading')}</div>;
   }
 
-  if (session?.user?.role !== "SUPER_ADMIN") {
+  if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPER_ADMIN") {
     return <div className="flex items-center justify-center min-h-screen">{t('access_denied')}</div>;
   }
 
@@ -279,14 +280,10 @@ export default function SuperAdminOrganization() {
 
   if (!organization) {
     return (
-      <div className="container p-4 md:p-8 space-y-6">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">{t('no_organization_found')}</h2>
-            <p className="text-muted-foreground mt-2">
-              {t('not_linked_to_org')}
-            </p>
-          </div>
+      <div className="container p-4 md:p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Organisation hittades inte</h1>
+          <p className="text-muted-foreground">Din organisation kunde inte hittas. Kontakta systemadministratören.</p>
         </div>
       </div>
     );
@@ -294,144 +291,124 @@ export default function SuperAdminOrganization() {
 
   return (
     <div className="container p-4 md:p-8 space-y-6">
-      <div className="flex items-center gap-2 mb-6">
-        <Building className="h-6 w-6" />
-        <h1 className="text-3xl font-bold">{t('organization_management')}</h1>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Organisationshantering</h1>
+          <p className="text-muted-foreground">Hantera organisationsinställningar och användare</p>
+        </div>
       </div>
 
-      <Card className="mb-8">
+      {/* Organisationsinställningar */}
+      <Card>
         <CardHeader>
-          <CardTitle>{t('basic_information')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Organisationsinställningar
+          </CardTitle>
           <CardDescription>
-            {t('manage_org_settings')}
+            Uppdatera organisationsnamn och inställningar
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="orgName">{t('organization_name')}</Label>
+        <CardContent className="space-y-4">
+          {/* Organisationsnamn */}
+          <div className="space-y-2">
+            <Label htmlFor="orgName">Organisationsnamn</Label>
+            <div className="flex gap-2">
               <Input
                 id="orgName"
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}
-                placeholder={t('organization_name')}
+                placeholder="Ange organisationsnamn"
+                className="flex-1"
               />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t('organization_id')}</Label>
-              <div className="bg-muted p-2 rounded-md text-muted-foreground text-sm font-mono">
-                {organization.id}
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t('created')}</Label>
-              <div className="text-muted-foreground">
-                {new Date(organization.createdAt).toLocaleDateString("sv-SE")}
-              </div>
+              <Button
+                onClick={handleUpdateOrganization}
+                disabled={isSaving || !orgName.trim() || orgName === organization.name}
+                size="sm"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Spara
+              </Button>
             </div>
           </div>
-        </CardContent>
-        <CardFooter>
-          <Button
-            onClick={handleUpdateOrganization}
-            disabled={isSaving || !orgName.trim() || orgName === organization?.name}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('saving')}
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {t('save_changes')}
-              </>
-            )}
-          </Button>
-        </CardFooter>
-      </Card>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>{t('buddy_system_settings')}</CardTitle>
-          <CardDescription>
-            {t('configure_buddy')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          {/* Buddy-inställningar */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-base">
-                {t('enable_buddy_system')}
-              </Label>
-              <div className="text-sm text-muted-foreground">
-                {t('buddy_help_new_employees')}
-              </div>
+              <Label>Buddy-system</Label>
+              <p className="text-sm text-muted-foreground">
+                Aktivera buddy-funktionen för organisationen
+              </p>
             </div>
-            <Switch
-              checked={buddyEnabled}
-              onCheckedChange={setBuddyEnabled}
-              disabled={isSavingBuddy}
-            />
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={buddyEnabled}
+                onCheckedChange={setBuddyEnabled}
+                disabled={isSavingBuddy}
+              />
+              {isSavingBuddy && <Loader2 className="h-4 w-4 animate-spin" />}
+            </div>
           </div>
         </CardContent>
         <CardFooter>
           <Button
             onClick={handleUpdateBuddySettings}
-            disabled={isSavingBuddy || buddyEnabled === organization?.buddyEnabled}
+            disabled={isSavingBuddy || buddyEnabled === organization.buddyEnabled}
+            variant="outline"
+            size="sm"
           >
             {isSavingBuddy ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('saving')}
-              </>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" />
-                {t('save_buddy_settings')}
-              </>
+              <Save className="h-4 w-4 mr-2" />
             )}
+            Uppdatera buddy-inställningar
           </Button>
         </CardFooter>
       </Card>
 
+      {/* Användarhantering */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            {t('users_in_organization')} ({organization.users.length})
+            Användare i organisationen ({organization.users.length})
           </CardTitle>
           <CardDescription>
-            {t('manage_user_roles')}
+            Hantera användarroller
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('name')}</TableHead>
-                <TableHead>{t('email')}</TableHead>
-                <TableHead>{t('role')}</TableHead>
-                <TableHead>{t('admin')}</TableHead>
-                <TableHead>{t('super_admin')}</TableHead>
-                <TableHead>{t('member_since')}</TableHead>
+                <TableHead>Namn</TableHead>
+                <TableHead>E-post</TableHead>
+                <TableHead>Roll</TableHead>
+                <TableHead>Admin</TableHead>
+                {session?.user?.role === "SUPER_ADMIN" && (
+                  <TableHead>Super Admin</TableHead>
+                )}
+                <TableHead>Medlem sedan</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {organization.users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      {user.name}
-                    </div>
-                  </TableCell>
+                  <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.role === "SUPER_ADMIN" ? "bg-red-100 text-red-800" :
-                      user.role === "ADMIN" ? "bg-blue-100 text-blue-800" :
-                      "bg-gray-100 text-gray-800"
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      user.role === "SUPER_ADMIN"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        : user.role === "ADMIN"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
                     }`}>
                       {user.role}
                     </span>
@@ -439,33 +416,26 @@ export default function SuperAdminOrganization() {
                   <TableCell>
                     <Checkbox
                       checked={user.role === "ADMIN" || user.role === "SUPER_ADMIN"}
-                      onCheckedChange={(checked) =>
-                        handleChangeUserRole(user.id, checked as boolean)
-                      }
-                      disabled={savingUsers[user.id] || user.role === "SUPER_ADMIN"}
+                      onCheckedChange={(checked) => handleChangeUserRole(user.id, checked as boolean)}
+                      disabled={savingUsers[user.id] || user.id === session?.user?.id}
                     />
                   </TableCell>
+                  {session?.user?.role === "SUPER_ADMIN" && (
+                    <TableCell>
+                      <Checkbox
+                        checked={user.role === "SUPER_ADMIN"}
+                        onCheckedChange={(checked) => handleChangeSuperAdminRole(user.id, checked as boolean)}
+                        disabled={savingUsers[user.id] || user.id === session?.user?.id}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
-                    <Checkbox
-                      checked={user.role === "SUPER_ADMIN"}
-                      onCheckedChange={(checked) =>
-                        handleChangeSuperAdminRole(user.id, checked as boolean)
-                      }
-                      disabled={savingUsers[user.id]}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString("sv-SE")}
+                    {new Date(user.createdAt).toLocaleDateString()}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          {organization.users.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              {t('no_users_found')}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
