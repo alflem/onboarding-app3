@@ -15,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -63,11 +62,8 @@ export default function OrganisationPage() {
   // Tillstånd
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
-  const [savingUsers, setSavingUsers] = useState<Record<string, boolean>>({});
-  const [isSaving, setIsSaving] = useState(false);
+  const [buddyEnabled, setBuddyEnabled] = useState(false);
   const [isSavingBuddy, setIsSavingBuddy] = useState(false);
-  const [orgName, setOrgName] = useState("");
-  const [buddyEnabled, setBuddyEnabled] = useState(true);
 
   // Hämta organisationsdetaljer
   const fetchOrganizationDetails = useCallback(async () => {
@@ -81,7 +77,6 @@ export default function OrganisationPage() {
       }
       const orgData = await response.json();
       setOrganization(orgData);
-      setOrgName(orgData.name);
       setBuddyEnabled(orgData.buddyEnabled);
 
     } catch (error) {
@@ -104,39 +99,7 @@ export default function OrganisationPage() {
     }
   }, [status, session, router, fetchOrganizationDetails]);
 
-  // Uppdatera organisationsnamn
-  const handleUpdateOrganization = async () => {
-    if (!orgName.trim() || orgName === organization?.name) return;
-
-    try {
-      setIsSaving(true);
-
-      const response = await fetch(`/api/organization`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name: orgName })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte uppdatera organisationen");
-      }
-
-      const updatedOrg = await response.json();
-      setOrganization(prev => prev ? { ...prev, ...updatedOrg } : null);
-      toast.success("Organisationen har uppdaterats");
-
-    } catch (error) {
-      console.error("Fel vid uppdatering:", error);
-      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera organisationen");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Uppdatera buddyinställningar
+  // Uppdatera buddy-inställningar
   const handleUpdateBuddySettings = async () => {
     if (buddyEnabled === organization?.buddyEnabled) return;
 
@@ -148,23 +111,21 @@ export default function OrganisationPage() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ buddyEnabled: buddyEnabled })
+        body: JSON.stringify({ buddyEnabled })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Kunde inte uppdatera buddyinställningar");
+        throw new Error(errorData.error || "Kunde inte uppdatera buddy-inställningar");
       }
 
       const updatedOrg = await response.json();
       setOrganization(prev => prev ? { ...prev, ...updatedOrg } : null);
-      toast.success(`Buddyfunktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
+      toast.success("Buddy-inställningar har uppdaterats");
 
     } catch (error) {
-      console.error("Fel vid uppdatering av buddyinställningar:", error);
-      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddyinställningar");
-      // Återställ värdet vid fel
-      setBuddyEnabled(organization?.buddyEnabled || true);
+      console.error("Fel vid uppdatering:", error);
+      toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");
     } finally {
       setIsSavingBuddy(false);
     }
@@ -173,8 +134,6 @@ export default function OrganisationPage() {
   // Ändra användarroll
   const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
     try {
-      setSavingUsers(prev => ({ ...prev, [userId]: true }));
-
       const newRole = isAdmin ? "ADMIN" : "EMPLOYEE";
 
       console.log(`Ändrar användare ${userId} till roll: ${newRole}`);
@@ -210,16 +169,12 @@ export default function OrganisationPage() {
     } catch (error) {
       console.error("Fel vid uppdatering:", error);
       toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera användarroll");
-    } finally {
-      setSavingUsers(prev => ({ ...prev, [userId]: false }));
     }
   };
 
   // Ändra superadmin-roll (endast för SUPER_ADMIN)
   const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean) => {
     try {
-      setSavingUsers(prev => ({ ...prev, [userId]: true }));
-
       const newRole = isSuperAdmin ? "SUPER_ADMIN" : "ADMIN";
 
       console.log(`Ändrar användare ${userId} till roll: ${newRole}`);
@@ -255,8 +210,6 @@ export default function OrganisationPage() {
     } catch (error) {
       console.error("Fel vid uppdatering:", error);
       toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera användarroll");
-    } finally {
-      setSavingUsers(prev => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -311,19 +264,6 @@ export default function OrganisationPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Organisationsnamn - Read only */}
-          <div className="space-y-2">
-            <Label htmlFor="orgName">Organisationsnamn</Label>
-            <div className="flex gap-2">
-              <Input
-                id="orgName"
-                value={organization?.name}
-                disabled
-                className="flex-1 bg-muted"
-              />
-            </div>
-          </div>
-
           {/* Buddyinställningar */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
@@ -404,7 +344,7 @@ export default function OrganisationPage() {
                     <Checkbox
                       checked={user.role === "ADMIN" || user.role === "SUPER_ADMIN"}
                       onCheckedChange={(checked) => handleChangeUserRole(user.id, checked as boolean)}
-                      disabled={savingUsers[user.id] || user.id === session?.user?.id}
+                      disabled={user.id === session?.user?.id}
                     />
                   </TableCell>
                   {session?.user?.role === "SUPER_ADMIN" && (
@@ -412,7 +352,7 @@ export default function OrganisationPage() {
                       <Checkbox
                         checked={user.role === "SUPER_ADMIN"}
                         onCheckedChange={(checked) => handleChangeSuperAdminRole(user.id, checked as boolean)}
-                        disabled={savingUsers[user.id] || user.id === session?.user?.id}
+                        disabled={user.id === session?.user?.id}
                       />
                     </TableCell>
                   )}
