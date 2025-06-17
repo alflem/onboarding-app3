@@ -338,41 +338,43 @@ export default function ChecklistPage() {
       </div>
 
       <Card>
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <Info className="h-5 w-5 text-primary" />
-      {t('need_help')}
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="flex justify-center items-center gap-4">
-    <Button
-      asChild
-      variant="outline"
-      className="flex items-center justify-start gap-2 h-auto py-3 px-6 max-w-md flex-grow"
-    >
-      <a href="https://xcg.freshservice.com/support/home" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
-        <HelpCircle className="h-5 w-5 text-primary" />
-        <div className="text-left">
-          <div className="font-medium">{t('support')}</div>
-          <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
-        </div>
-      </a>
-    </Button>
-    <Button
-      asChild
-      variant="outline"
-      className="flex items-center justify-start gap-2 h-auto py-3 px-6 max-w-md flex-grow"
-    >
-      <a href="https://xlent.sharepoint.com/sites/XCg" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
-        <Users className="h-5 w-5 text-primary" />
-        <div className="text-left">
-          <div className="font-medium">{t('intranet')}</div>
-          <div className="text-xs text-muted-foreground">{t('intranet_desc')}</div>
-        </div>
-      </a>
-    </Button>
-  </CardContent>
-</Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-primary" />
+            {t('need_help')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button
+              asChild
+              variant="outline"
+              className="flex items-center justify-start gap-2 h-auto py-3 px-6 w-full"
+            >
+              <a href="https://xcg.freshservice.com/support/home" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
+                <HelpCircle className="h-5 w-5 text-primary" />
+                <div className="text-left">
+                  <div className="font-medium">{t('support')}</div>
+                  <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
+                </div>
+              </a>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="flex items-center justify-start gap-2 h-auto py-3 px-6 w-full"
+            >
+              <a href="https://xlent.sharepoint.com/sites/XCg" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
+                <Users className="h-5 w-5 text-primary" />
+                <div className="text-left">
+                  <div className="font-medium">{t('intranet')}</div>
+                  <div className="text-xs text-muted-foreground">{t('intranet_desc')}</div>
+                </div>
+              </a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
