@@ -87,7 +87,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-16">
           {/* App logo and title */}
-          <div className="flex-1 flex items-center justify-center md:justify-start min-w-0">
+          <div className="flex-1 flex items-center justify-center md:justify-start min-w-0 md:mr-4">
             <Link href="/" className="flex items-center gap-2 text-foreground font-medium text-lg min-w-0">
               <Image
                 src="/logo.svg"
