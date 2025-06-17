@@ -75,7 +75,7 @@ const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Vi skulle gärna vilja ta ett foto på dig! Fotot ska skickas varumärkesansvarig, på central nivå, som lägger upp det på vår hemsida. Någon av dina nya kollegor hjälper dig med foto samt säkerställer att det skickas till rätt person.',
         order: 1,
         isBuddyTask: false,
-        link: 'https://example.com/presentation-webbsida'
+        link: 'XLENT.se/kontor'
       },
       {
         title: 'Foto till digitala plattformar',
@@ -117,7 +117,7 @@ const DEFAULT_CHECKLIST_CATEGORIES = [
       },
       {
         title: 'Kontaktuppgifter',
-        description: 'Säkerställ att ditt telefonnummer och kostnavtiklelser dokumenteras på avseedd yta. Någon av dina nya kollegor guidar dig till rätt.',
+        description: 'Säkerställ att ditt telefonnummer och kostnavtiklelser dokumenteras på avsedd yta. Någon av dina nya kollegor guidar dig till rätt.',
         order: 8,
         isBuddyTask: false
       },

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucide-react";
-import { useSession, signOut } from "next-auth/react"; // Använd NextAuth hooks
+import { useSession, signOut, signIn } from "next-auth/react"; // Lägg till signIn import
 import Image from 'next/image';
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSelector } from "@/components/language-selector";
@@ -201,22 +201,21 @@ const Header: React.FC = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+                    onClick={() => signOut({ callbackUrl: "/" })}
                   >
                     {t('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/auth/signin">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-2"
-                >
-                  {t('login')}
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-2"
+                onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
+              >
+                {t('login')}
+              </Button>
             )}
           </nav>
 

@@ -260,9 +260,9 @@ export default function ChecklistPage() {
           {buddyEnabled && buddyTasksCount > 0 && (
             <Card className="w-full">
               <CardHeader className="pb-2">
-                <CardTitle>Buddyuppgifter</CardTitle>
+                <CardTitle>{t('buddy_tasks')}</CardTitle>
                 <CardDescription>
-                  Uppgifter som ska utföras av din buddy
+                  {t('buddy_tasks_desc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -346,24 +346,30 @@ export default function ChecklistPage() {
   </CardHeader>
   <CardContent className="flex justify-center items-center gap-4">
     <Button
+      asChild
       variant="outline"
       className="flex items-center justify-start gap-2 h-auto py-3 px-6 max-w-md flex-grow"
     >
-      <HelpCircle className="h-5 w-5 text-primary" />
-      <div className="text-left">
-        <div className="font-medium">{t('support')}</div>
-        <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
-      </div>
+      <a href="https://xcg.freshservice.com/support/home" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
+        <HelpCircle className="h-5 w-5 text-primary" />
+        <div className="text-left">
+          <div className="font-medium">{t('support')}</div>
+          <div className="text-xs text-muted-foreground">{t('contact_it_support')}</div>
+        </div>
+      </a>
     </Button>
     <Button
+      asChild
       variant="outline"
       className="flex items-center justify-start gap-2 h-auto py-3 px-6 max-w-md flex-grow"
     >
-      <Users className="h-5 w-5 text-primary" />
-      <div className="text-left">
-        <div className="font-medium">{t('contact_hr')}</div>
-        <div className="text-xs text-muted-foreground">{t('employment_questions')}</div>
-      </div>
+      <a href="https://xlent.sharepoint.com/sites/XCg" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full h-full">
+        <Users className="h-5 w-5 text-primary" />
+        <div className="text-left">
+          <div className="font-medium">{t('intranet')}</div>
+          <div className="text-xs text-muted-foreground">{t('intranet_desc')}</div>
+        </div>
+      </a>
     </Button>
   </CardContent>
 </Card>

@@ -476,7 +476,7 @@ export default function AdminPage() {
                 {t('users')}
               </CardTitle>
               <CardDescription>
-                {buddyEnabled ? t('manage_users_and_buddy') : t('manage_users')}. {t('click_row_for_details')}
+                {buddyEnabled ? t('manage_employees_and_buddy') : t('manage_employees')}. {t('click_row_for_details')}
               </CardDescription>
             </CardHeader>
 

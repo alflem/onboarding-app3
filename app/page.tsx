@@ -113,7 +113,7 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
           <div className="text-center text-white space-y-6 px-4 max-w-2xl w-full mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold whitespace-nowrap">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold flex justify-center whitespace-nowrap">
               {status === "authenticated" && session?.user
                 ? `${t('welcome_user')}, ${session.user.name || 'användare'}!`
                 : t('welcome_to_platform')}
@@ -126,9 +126,9 @@ export default function Home() {
               </div>
             )}
             {status === "unauthenticated" && (
-              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto whitespace-nowrap">
+              <div className="text-lg md:text-xl text-white/90 max-w-4xl mx-auto whitespace-nowrap">
                 {t('seamless_onboarding_desc')}
-              </p>
+              </div>
             )}
           </div>
         </div>
@@ -222,15 +222,12 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t('onboarding_platform')}</CardTitle>
-                <CardDescription>
-                  {t('seamless_onboarding_desc')}
-                </CardDescription>
+                <CardTitle className="mb-2">{t('onboarding_platform')}</CardTitle>
+                <Separator />
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Vår onboardingplattform hjälper nya medarbetare att komma igång snabbare
-                  och mer effektivt.
+                  {t('platform_intro')}
                 </p>
                 <Button asChild>
                   <Link href="/auth/signin">{t('get_started_now')}</Link>
@@ -240,8 +237,8 @@ export default function Home() {
 
             <Card>
               <CardHeader>
-                <CardTitle>{t('benefits')}</CardTitle>
-                <CardDescription>{t('why_use_platform')}</CardDescription>
+                <CardTitle className="mb-2">{t('benefits')}</CardTitle>
+                <Separator />
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">

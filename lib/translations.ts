@@ -12,9 +12,10 @@ type TranslationKey =
   | 'theme'
   | 'language'
   | 'onboarding_platform'
+  | 'platform_intro'
   | 'need_help'
   | 'support'
-  | 'contact_hr'
+  | 'intranet'
   | 'loading_organization'
   // Home page
   | 'welcome_to_platform'
@@ -39,7 +40,7 @@ type TranslationKey =
   | 'completed_tasks'
   | 'of'
   | 'contact_it_support'
-  | 'employment_questions'
+  | 'intranet_desc'
   // Common
   | 'close'
   | 'save'
@@ -128,6 +129,7 @@ type TranslationKey =
   | 'create_checklist'
   | 'edit_checklist'
   | 'buddy_tasks'
+  | 'buddy_tasks_desc'
   | 'manage_categories_tasks'
   | 'employees'
   | 'manage_employees'
@@ -182,9 +184,11 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     theme: 'Tema',
     language: 'Språk',
     onboarding_platform: 'Onboarding Platform',
+    platform_intro: 'Vår onboardingplattform hjälper nya medarbetare att komma igång på ett smidigt och strukturerat sätt.',
     need_help: 'Behöver du hjälp?',
-    support: 'Support',
-    contact_hr: 'Kontakta HR',
+    support: 'IT-support',
+    intranet: 'Intranätet',
+    intranet_desc: 'Här hittar du allt inom XLENT consulting group',
     loading_organization: 'Laddar organisation...',
     // Home page
     welcome_to_platform: 'Välkommen till plattformen för onboarding!',
@@ -202,14 +206,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     clear_progress_tracking: 'Tydlig uppföljning av framsteg',
     loading: 'Laddar...',
     // Checklist page
-    your_onboarding_checklist: 'Din onboarding-checklista',
+    your_onboarding_checklist: 'Din checklista',
     follow_steps_desc: 'Följ dessa steg för en smidig start på ditt nya jobb.',
     your_progress: 'Dina framsteg hittills',
     completed_progress_desc: 'Du har slutfört {progress}% av din checklista',
     completed_tasks: 'Slutförda uppgifter',
     of: 'av',
-    contact_it_support: 'Kontakta IT-support',
-    employment_questions: 'Frågor om din anställning',
+    contact_it_support: 'Kontakta CSF-IT',
     // Common
     close: 'Stäng',
     save: 'Spara',
@@ -298,6 +301,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     create_checklist: 'Skapa Checklista',
     edit_checklist: 'Redigera Checklista',
     buddy_tasks: 'Buddyuppgifter',
+    buddy_tasks_desc: 'Uppgifter som ska utföras av din buddy',
     manage_categories_tasks: 'Hantera kategorier och uppgifter som nyanställda behöver slutföra.',
     employees: 'Medarbetare',
     manage_employees: 'Hantera medarbetare',
@@ -349,9 +353,11 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     theme: 'Tema',
     language: 'Språk',
     onboarding_platform: 'Onboarding Platform',
+    platform_intro: 'Vår onboardingplattform hjelper nye medarbeidere med å komme i gang på en smidig og strukturert måte.',
     need_help: 'Trenger du hjelp?',
     support: 'Support',
-    contact_hr: 'Kontakt HR',
+    intranet: 'Intranettet',
+    intranet_desc: 'Her finner du alt i XLENT consulting group',
     loading_organization: 'Laster organisasjon...',
     // Home page
     welcome_to_platform: 'Velkommen til onboarding-plattformen!',
@@ -369,14 +375,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     clear_progress_tracking: 'Tydelig oppfølging av fremgang',
     loading: 'Laster...',
     // Checklist page
-    your_onboarding_checklist: 'Din onboarding-sjekkliste',
+    your_onboarding_checklist: 'Din sjekkliste',
     follow_steps_desc: 'Følg disse trinnene for en jevn start på din nye jobb.',
     your_progress: 'Din fremgang så langt',
     completed_progress_desc: 'Du har fullført {progress}% av din sjekkliste',
     completed_tasks: 'Fullførte oppgaver',
     of: 'av',
     contact_it_support: 'Kontakt IT-support',
-    employment_questions: 'Spørsmål om din ansettelse',
     // Common
     close: 'Lukk',
     save: 'Lagre',
@@ -465,6 +470,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     create_checklist: 'Opprett Sjekkliste',
     edit_checklist: 'Rediger Sjekkliste',
     buddy_tasks: 'Buddy-oppgaver',
+    buddy_tasks_desc: 'Oppgaver som skal utføres av din buddy',
     manage_categories_tasks: 'Håndter kategorier og oppgaver som nyansatte må fullføre.',
     employees: 'Ansatte',
     manage_employees: 'Håndter ansatte',
@@ -516,9 +522,11 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     theme: 'Theme',
     language: 'Language',
     onboarding_platform: 'Onboarding Platform',
+    platform_intro: 'Our onboarding platform helps new employees get started in a smooth and structured way.',
     need_help: 'Need help?',
     support: 'Support',
-    contact_hr: 'Contact HR',
+    intranet: 'Intranet',
+    intranet_desc: 'Here you find everything within XLENT consulting group',
     loading_organization: 'Loading organization...',
     // Home page
     welcome_to_platform: 'Welcome to the onboarding platform!',
@@ -536,14 +544,13 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     clear_progress_tracking: 'Clear progress tracking',
     loading: 'Loading...',
     // Checklist page
-    your_onboarding_checklist: 'Your onboarding checklist',
+    your_onboarding_checklist: 'Your checklist',
     follow_steps_desc: 'Follow these steps for a smooth start to your new job.',
     your_progress: 'Your progress so far',
     completed_progress_desc: 'You have completed {progress}% of your checklist',
     completed_tasks: 'Completed tasks',
     of: 'of',
     contact_it_support: 'Contact IT support',
-    employment_questions: 'Questions about your employment',
     // Common
     close: 'Close',
     save: 'Save',
@@ -631,7 +638,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     creating: 'Creating...',
     create_checklist: 'Create Checklist',
     edit_checklist: 'Edit Checklist',
-    buddy_tasks: 'Buddy Tasks',
+    buddy_tasks: 'Buddy tasks',
+    buddy_tasks_desc: 'Tasks to be completed by your buddy',
     manage_categories_tasks: 'Manage categories and tasks that new employees need to complete.',
     employees: 'Employees',
     manage_employees: 'Manage employees',
