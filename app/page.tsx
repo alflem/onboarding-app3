@@ -112,21 +112,21 @@ export default function Home() {
           priority
         />
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-          <div className="text-center text-white space-y-4 px-4 max-w-2xl w-full mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+          <div className="text-center text-white space-y-6 px-4 max-w-2xl w-full mx-auto">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold whitespace-nowrap">
               {status === "authenticated" && session?.user
                 ? `${t('welcome_user')}, ${session.user.name || 'användare'}!`
                 : t('welcome_to_platform')}
             </h1>
             {status === "authenticated" && session?.user && (
-              <div className="text-lg md:text-xl text-white/90">
+              <div className="text-lg md:text-xl text-white/90 whitespace-nowrap">
                 {t('logged_in_to')} <span className="font-medium">
                   {session.user.organizationName || dashboardData?.organization?.name || t('loading_organization')}
                 </span>
               </div>
             )}
             {status === "unauthenticated" && (
-              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
+              <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto whitespace-nowrap">
                 {t('seamless_onboarding_desc')}
               </p>
             )}
