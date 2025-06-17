@@ -167,11 +167,11 @@ const Header: React.FC = () => {
             )}
 
             {hasRole(Role.SUPER_ADMIN) && (
-              <Link href="/super-admin" passHref>
+              <Link href="/super-admin/database-management" passHref>
                 <Button
-                  variant={isActive("/super-admin") ? "default" : "ghost"}
+                  variant={isActive("/super-admin/database-management") ? "default" : "ghost"}
                   size="sm"
-                  aria-current={isActive("/super-admin") ? "page" : undefined}
+                  aria-current={isActive("/super-admin/database-management") ? "page" : undefined}
                 >
                   <Building className="mr-1 h-4 w-4" />
                   Databashantering
@@ -313,12 +313,12 @@ const Header: React.FC = () => {
               </Link>
             )}
             {hasRole(Role.SUPER_ADMIN) && (
-              <Link href="/super-admin" passHref legacyBehavior>
+              <Link href="/super-admin/database-management" passHref legacyBehavior>
                 <Button
-                  variant={isActive("/super-admin") ? "default" : "ghost"}
+                  variant={isActive("/super-admin/database-management") ? "default" : "ghost"}
                   size="lg"
                   className="justify-start w-full"
-                  aria-current={isActive("/super-admin") ? "page" : undefined}
+                  aria-current={isActive("/super-admin/database-management") ? "page" : undefined}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Building className="mr-2 h-5 w-5" /> Databashantering

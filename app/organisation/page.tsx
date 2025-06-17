@@ -307,33 +307,20 @@ export default function OrganisationPage() {
             Organisationsinställningar
           </CardTitle>
           <CardDescription>
-            Uppdatera organisationsnamn och inställningar
+            Hantera organisationsinställningar
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Organisationsnamn */}
+          {/* Organisationsnamn - Read only */}
           <div className="space-y-2">
             <Label htmlFor="orgName">Organisationsnamn</Label>
             <div className="flex gap-2">
               <Input
                 id="orgName"
-                value={orgName}
-                onChange={(e) => setOrgName(e.target.value)}
-                placeholder="Ange organisationsnamn"
-                className="flex-1"
+                value={organization?.name}
+                disabled
+                className="flex-1 bg-muted"
               />
-              <Button
-                onClick={handleUpdateOrganization}
-                disabled={isSaving || !orgName.trim() || orgName === organization.name}
-                size="sm"
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Spara
-              </Button>
             </div>
           </div>
 
