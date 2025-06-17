@@ -63,13 +63,15 @@ type Checklist = {
   tasksCount?: number;
 };
 
-type Employee = {
+type User = {
   id: string;
   name: string;
   email: string;
+  role: string;
   organizationId: string;
   progress: number;
   hasBuddy: boolean;
+  createdAt: string;
 };
 
 type Buddy = {
@@ -88,7 +90,7 @@ export default function AdminPage() {
   // State för datahämtning och laddningsstatus
   const [loading, setLoading] = useState(true);
   const [checklist, setChecklist] = useState<Checklist | null>(null);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<User[]>([]);
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean>(true);
 
@@ -184,21 +186,21 @@ export default function AdminPage() {
     }
   }, [createChecklist]);
 
-  // Funktion för att hämta medarbetare från API
-  const fetchEmployees = useCallback(async () => {
+  // Funktion för att hämta användare från API
+  const fetchUsers = useCallback(async () => {
     try {
-      const response = await fetch('/api/employees');
+      const response = await fetch('/api/organization/users');
 
       if (!response.ok) {
-        throw new Error('Kunde inte hämta medarbetare');
+        throw new Error('Kunde inte hämta användare');
       }
 
       const data = await response.json();
       setEmployees(data);
     } catch (error) {
-      console.error("Fel vid hämtning av medarbetare:", error);
-      toast.error("Kunde inte ladda medarbetare", {
-        description: "Ett fel uppstod vid hämtning av medarbetare."
+      console.error("Fel vid hämtning av användare:", error);
+      toast.error("Kunde inte ladda användare", {
+        description: "Ett fel uppstod vid hämtning av användare."
       });
     }
   }, []);
@@ -233,10 +235,10 @@ export default function AdminPage() {
       // Hämta data
       fetchOrganizationSettings();
       fetchChecklist();
-      fetchEmployees();
+      fetchUsers();
       fetchBuddies();
     }
-  }, [status, session, router, fetchOrganizationSettings, fetchChecklist, fetchEmployees, fetchBuddies]);
+  }, [status, session, router, fetchOrganizationSettings, fetchChecklist, fetchUsers, fetchBuddies]);
 
   // Funktion för att hämta detaljerad information om en medarbetare
   const fetchEmployeeDetails = async (employeeId: string) => {
@@ -318,7 +320,7 @@ export default function AdminPage() {
 
       await response.json();
 
-      fetchEmployees(); // Uppdatera listan med medarbetare
+      fetchUsers(); // Uppdatera listan med medarbetare
       setSelectedEmployeeId(null);
       setSelectedBuddyId(null);
       setBuddyDialogOpen(false);
@@ -360,7 +362,7 @@ export default function AdminPage() {
       await response.json();
 
       // Uppdatera både listan och detaljerna
-      fetchEmployees();
+      fetchUsers();
       await fetchEmployeeDetails(selectedEmployeeForDetail);
 
       toast.success(buddyId ? "Buddy tilldelad" : "Buddy borttagen", {
@@ -471,10 +473,10 @@ export default function AdminPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                {t('employees')}
+                {t('users')}
               </CardTitle>
               <CardDescription>
-                {buddyEnabled ? t('manage_employees_and_buddy') : t('manage_employees')}. {t('click_row_for_details')}
+                {buddyEnabled ? t('manage_users_and_buddy') : t('manage_users')}. {t('click_row_for_details')}
               </CardDescription>
             </CardHeader>
 
@@ -485,6 +487,7 @@ export default function AdminPage() {
                     <TableRow>
                       <TableHead className="w-[250px]">{t('name')}</TableHead>
                       <TableHead>{t('email')}</TableHead>
+                      <TableHead>{t('role')}</TableHead>
                       <TableHead>{t('progress')}</TableHead>
                       {buddyEnabled && <TableHead>Buddy</TableHead>}
                       <TableHead className="text-right">{t('actions')}</TableHead>
@@ -493,7 +496,7 @@ export default function AdminPage() {
                   <TableBody>
                     {employees.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={buddyEnabled ? 5 : 4} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={buddyEnabled ? 6 : 5} className="text-center py-8 text-muted-foreground">
                           {t('no_employees_found')}
                         </TableCell>
                       </TableRow>
@@ -506,6 +509,11 @@ export default function AdminPage() {
                         >
                           <TableCell>{employee.name}</TableCell>
                           <TableCell>{employee.email}</TableCell>
+                          <TableCell>
+                            <Badge variant={employee.role === 'ADMIN' ? 'default' : employee.role === 'SUPER_ADMIN' ? 'secondary' : 'outline'}>
+                              {employee.role}
+                            </Badge>
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center">
                               <div className="w-full bg-secondary/20 rounded-full h-2.5 mr-2">
@@ -525,18 +533,7 @@ export default function AdminPage() {
                                   Tilldelad
                                 </Badge>
                               ) : (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedEmployeeId(employee.id);
-                                    setBuddyDialogOpen(true);
-                                  }}
-                                >
-                                  <User className="h-3 w-3 mr-1" />
-                                  Tilldela buddy
-                                </Button>
+                                <span className="text-muted-foreground">Ej tilldelad</span>
                               )}
                             </TableCell>
                           )}
