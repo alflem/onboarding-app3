@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/lib/language-context";
+import { ViewProvider } from "@/lib/view-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
@@ -64,11 +65,13 @@ export default function RootLayout({
         >
           <LanguageProvider>
             <AuthProvider>
-              <Header />
-              <main className="container mx-auto px-4 py-6 flex-1">
-                {children}
-              </main>
-              <Footer />
+              <ViewProvider>
+                <Header />
+                <main className="container mx-auto px-4 py-6 flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </ViewProvider>
             </AuthProvider>
           </LanguageProvider>
           <Toaster />

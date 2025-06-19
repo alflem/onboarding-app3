@@ -6,63 +6,64 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
     order: 1,
     tasks: [
       {
-        title: 'Dator och mobil',
-        description: 'Se till att installera och få igång din dator och telefon.',
+        title: 'IT-utrustning',
+        description: 'Har du all IT-utrustning du behöver? Fungerar allt? Om inte – kontakta IT-ansvarig på kontoret!',
         order: 1,
-        isBuddyTask: true
-      },
-      {
-        title: 'Har du all utrustning du behöver?',
-        description: 'Har du all utrustning du behöver? Om inte – kontakta IT-ansvarig på kontoret.',
-        order: 2,
         isBuddyTask: false
       },
     ]
   },
   {
-    name: 'Ekonomi och affärssystem',
+    name: 'Information',
     order: 2,
     tasks: [
       {
+        title: 'Hållbara konsulter',
+        description: 'Att trivas och må bra på jobbet ser vi som en självklarhet, därför har vi skapat Hållbara konsulter. Läs mer om XLENTs viktiga och pågående arbete inom social hållbarhet.',
+        order: 1,
+        isBuddyTask: false,
+        link: 'https://example.com/hallbara-konsulter'
+      },
+      {
+        title: 'Intranätets startsida',
+        description: 'På intranätets startsida finns mycket att läsa! Allt från information om våra processer till manualer om hur du tidrapporterar. Här hittar du också genvägar till våra viktigaste arbetsverktyg. Glöm inte att klicka dig in på Workplace - XLENTs sida för nyheter, kultur och samverkan!',
+        order: 2,
+        isBuddyTask: false,
+        link: 'https://example.com/intranet-startsida'
+      },
+      {
         title: 'Medarbetarresan',
         description: 'Här får du en samlad bild över våra delprocesser för dig som anställd.',
-        order: 1,
+        order: 3,
         isBuddyTask: false,
         link: 'https://example.com/medarbetarresan'
       },
       {
         title: 'Teams',
-        description: 'Teams är ytan för vårt interna arbete. Här hittar du allt från fokusgrupper till bilder och semesterplanering.',
-        order: 2,
+        description: 'Teams är vår främsta kommunikationskanal samt samlingsyta för vårt interna arbete. Kika gärna runt för att bekanta dig med såväl innehåll som struktur.',
+        order: 4,
         isBuddyTask: false,
         link: 'https://example.com/teams'
       },
       {
-        title: 'Intranät',
-        description: 'På vårt intranät hittar du det mesta. Hämför när du system för exempelvis tidrapportering och CV-skrivande. Här finns även Workplace - XLENTs yta för nyheter, kultur och samverkan. Ta dig tid att klicka runt!',
-        order: 3,
-        isBuddyTask: false,
-        link: 'https://example.com/intranet'
+        title: 'Maconomy',
+        description: 'Vi använder Maconomy, som nås via intranätets startsida, för tidrapportering, attestering, reseräkningar med mera. Någon av dina nya kollegor kommer gå igenom Maconomy med dig.',
+        order: 5,
+        isBuddyTask: false
       },
       {
         title: 'CSF Support och service',
         description: 'XLENTs centrala support kallas CSF. Kontakta dem vid behov av support.',
-        order: 4,
+        order: 6,
         isBuddyTask: false,
         link: 'https://example.com/csf-support'
       },
       {
         title: 'Varumärkessidan',
-        description: 'XLENT koncernen består av många olika bolag och varumärken. På den här sidan hittar du info om varumärke, logotyper, mallar etc.',
-        order: 5,
+        description: 'XLENT-koncernen består av många olika bolag och varumärken. På den här sidan hittar du info om varumärke, logotyper, mallar etc.',
+        order: 7,
         isBuddyTask: false,
         link: 'https://example.com/varumarkessidan'
-      },
-      {
-        title: 'Ekonomi och affärssystem',
-        description: 'Vi använder Maconomy för tidrapportering, attestering, reseräkningar mm. Du når Maconomy via intranätet.',
-        order: 6,
-        isBuddyTask: false
       },
     ]
   },
@@ -71,11 +72,11 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
     order: 3,
     tasks: [
       {
-        title: 'Presentation webbsida',
-        description: 'Vi skulle gärna vilja ta ett foto på dig! Fotot ska skickas varumärkesansvarig, på central nivå, som lägger upp det på vår hemsida. Någon av dina nya kollegor hjälper dig med foto samt säkerställer att det skickas till rätt person.',
+        title: 'Foto på hemsidan',
+        description: 'Vi skulle gärna vilja ta ett foto på dig! Fotot skickas sedan till XLENTs varumärkesansvarig som lägger upp det på vår hemsida. Någon av dina nya kollegor hjälper dig med foto samt säkerställer att det skickas till rätt person.',
         order: 1,
         isBuddyTask: false,
-        link: 'XLENT.se/kontor'
+        link: 'https://example.com/foto-hemsidan'
       },
       {
         title: 'Foto till digitala plattformar',
@@ -97,27 +98,27 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         link: 'https://example.com/presentation-instagram'
       },
       {
-        title: 'Skapa en e-mailsignatur',
-        description: 'Skapa en e-mailsignatur.',
-        order: 5,
-        isBuddyTask: false,
-        link: 'https://example.com/email-signatur'
-      },
-      {
         title: 'Workplace',
-        description: 'På Workplace, under Redigera profil, fyll i namnet på din chef. När du gjort det får du åtkomst till flertaletWorkplacegrupper. Självklart kan du välja att gå med i ytterligare grupper. Rekommenderade grupper: • XLENT syns och hörs • Försäljning inom XLENT • Kompetensluncher • CSF informerar • Har du hört • Fråga XLENT',
-        order: 6,
+        description: 'På Workplace, under Redigera profil, fyll i namnet på din chef. När du gjort det får du åtkomst till flertalet grupper. Självklart kan du välja att gå med i ytterligare grupper. Rekommenderade grupper: • XLENT syns och hörs • Försäljning inom XLENT • Kompetensluncher • CSF informerar • Har du hört • Fråga XLENT',
+        order: 5,
         isBuddyTask: false
       },
       {
         title: 'Uppdatera personlig information i HR-system',
-        description: 'Se över ICE kontakten och ev. kontonummer i HR-systemet Beneth. Du fyller i informationen under My profile respektive Manage personal info. Beneft nås via intranätet.',
-        order: 7,
+        description: 'Se över ICE-kontakten och ev. kontonummer i HR-systemet Sympa. Du fyller i informationen under My profile > Manage personal info. Sympa nås via intranätets startsida.',
+        order: 6,
         isBuddyTask: false
       },
       {
+        title: 'Skapa en e-mailsignatur',
+        description: 'Skapa en e-mailsignatur.',
+        order: 7,
+        isBuddyTask: false,
+        link: 'https://example.com/email-signatur'
+      },
+      {
         title: 'Kontaktuppgifter',
-        description: 'Säkerställ att ditt telefonnummer och kostnavtiklelser dokumenteras på avsedd yta. Någon av dina nya kollegor guidar dig till rätt.',
+        description: 'Säkerställ att ditt telefonnummer och kostavvikelser dokumenteras på avsedd yta. Någon av dina nya kollegor guidar dig rätt!',
         order: 8,
         isBuddyTask: false
       },
@@ -127,26 +128,6 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         order: 9,
         isBuddyTask: false,
         link: 'https://example.com/sjukvardsforsakring'
-      },
-    ]
-  },
-  {
-    name: 'Din konsultprofil',
-    order: 4,
-    tasks: [
-      {
-        title: 'Information konsultprofil',
-        description: 'Läs om vad en konsultprofil är och hur du skapar en sådan',
-        order: 1,
-        isBuddyTask: false,
-        link: 'https://example.com/information-konsultprofil'
-      },
-      {
-        title: 'Skapa konsultprofil',
-        description: 'Skapa din konsultprofil/ditt konsultcv i Cinode • Lösenord vid första inloggning= xlent123. Personligt lösenord skapas via det mail du får efter din första inloggning.',
-        order: 2,
-        isBuddyTask: false,
-        link: 'https://example.com/skapa-konsultprofil'
       },
     ]
   },

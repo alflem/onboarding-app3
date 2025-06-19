@@ -10,16 +10,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck } from "lucide-react";
+import { Home, CheckSquare, Settings, Building, Menu, X, UserCheck, User, Shield } from "lucide-react";
 import { useSession, signOut, signIn } from "next-auth/react"; // Lägg till signIn import
 import Image from 'next/image';
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSelector } from "@/components/language-selector";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
+import { useViewContext } from "@/lib/view-context";
 
 // Typdeklarationer som matchar Prisma-schemat
 enum Role {
@@ -39,6 +41,9 @@ const Header: React.FC = () => {
   // Språkhantering
   const { language } = useLanguage();
   const { t } = useTranslations(language);
+
+  // View switching för super-admins
+  const { currentViewMode, isViewSwitchingEnabled, setViewMode } = useViewContext();
 
   useEffect(() => {
     // Kontrollera om användaren är buddy för någon
@@ -67,8 +72,12 @@ const Header: React.FC = () => {
   };
 
   // Funktion för att kontrollera användarroll baserat på Prisma Role enum
+  // Nu använder vi currentViewMode istället för session.user.role för super-admins
   const hasRole = (requiredRole: Role): boolean => {
     if (!session?.user?.role) return false;
+
+    // Använd simulerad roll om view switching är aktiverat
+    const effectiveRole = isViewSwitchingEnabled ? currentViewMode : session.user.role;
 
     const roleHierarchy: Record<Role, number> = {
       [Role.EMPLOYEE]: 1,
@@ -76,7 +85,7 @@ const Header: React.FC = () => {
       [Role.SUPER_ADMIN]: 3
     };
 
-    const userRoleLevel = roleHierarchy[session.user.role as Role] || 0;
+    const userRoleLevel = roleHierarchy[effectiveRole as Role] || 0;
     const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
 
     return userRoleLevel >= requiredRoleLevel;
@@ -127,7 +136,8 @@ const Header: React.FC = () => {
               </Link>
             )}
 
-            {session?.user && isBuddy && buddyEnabled && (
+            {session?.user && isBuddy && buddyEnabled &&
+             (!isViewSwitchingEnabled || currentViewMode !== "EMPLOYEE") && (
               <Link href="/checklist/buddy" passHref>
                 <Button
                   variant={isActive("/checklist/buddy") ? "default" : "ghost"}
@@ -212,6 +222,35 @@ const Header: React.FC = () => {
                   <DropdownMenuLabel className="text-xs text-muted-foreground">
                     {session.user.organizationName || 'Loading organization...'}
                   </DropdownMenuLabel>
+
+                  {/* View switcher for super-admins */}
+                  {isViewSwitchingEnabled && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs">Visa som</DropdownMenuLabel>
+                      {[
+                        { mode: "EMPLOYEE" as const, label: "Medarbetare", icon: User },
+                        { mode: "ADMIN" as const, label: "Admin", icon: Shield },
+                        { mode: "SUPER_ADMIN" as const, label: "Super Admin", icon: Building }
+                      ].map((view) => {
+                        const Icon = view.icon;
+                        const isActive = currentViewMode === view.mode;
+                        return (
+                          <DropdownMenuItem
+                            key={view.mode}
+                            onClick={() => setViewMode(view.mode)}
+                            className={`flex items-center gap-2 ${isActive ? "bg-accent" : ""}`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span>{view.label}</span>
+                            {isActive && <span className="text-xs text-muted-foreground ml-auto">aktiv</span>}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
                     onClick={() => signOut({ callbackUrl: "/" })}
@@ -273,7 +312,8 @@ const Header: React.FC = () => {
                 </Button>
               </Link>
             )}
-            {session?.user && isBuddy && buddyEnabled && (
+            {session?.user && isBuddy && buddyEnabled &&
+             (!isViewSwitchingEnabled || currentViewMode !== "EMPLOYEE") && (
               <Link href="/checklist/buddy" passHref legacyBehavior>
                 <Button
                   variant={isActive("/checklist/buddy") ? "default" : "ghost"}

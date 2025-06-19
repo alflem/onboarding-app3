@@ -1,6 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { useLanguage } from '@/lib/language-context';
+import { useTranslations } from '@/lib/translations';
 
 export default function Footer() {
+  const { language } = useLanguage();
+  const { t } = useTranslations(language);
   return (
     <footer className="bg-background border-t border-border mt-16">
       <div className="container mx-auto px-4 py-8">
@@ -25,6 +31,12 @@ export default function Footer() {
             <p className="text-sm text-muted-foreground">
               Skapad av Albin Flemström
             </p>
+                                    <a
+              href="https://forms.office.com/e/tJ0Z5RR5AY"
+              className="text-xs text-muted-foreground hover:text-foreground underline hover:no-underline cursor-pointer transition-colors"
+            >
+              {t('suggestion_box')}
+            </a>
           </div>
         </div>
       </div>

@@ -169,7 +169,8 @@ type TranslationKey =
   | 'tasks_completed_count'
   | 'recent_activity'
   | 'save_changes'
-  | 'save_buddy_settings';
+  | 'save_buddy_settings'
+  | 'suggestion_box';
 
 // Översättningar
 const translations: Record<Language, Record<TranslationKey, string>> = {
@@ -340,7 +341,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     tasks_completed_count: '{completed}/{total} slutförda uppgifter',
     recent_activity: 'Senaste aktivitet',
     save_changes: 'Spara ändringar',
-    save_buddy_settings: 'Spara buddyinställningar'
+    save_buddy_settings: 'Spara buddyinställningar',
+    suggestion_box: 'Förslagslåda'
   },
   no: {
     welcome: 'Velkommen',
@@ -509,7 +511,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     tasks_completed_count: '{completed}/{total} oppgaver fullført',
     recent_activity: 'Siste aktivitet',
     save_changes: 'Lagre endringer',
-    save_buddy_settings: 'Lagre buddyinnstillinger'
+    save_buddy_settings: 'Lagre buddyinnstillinger',
+    suggestion_box: 'Forslagsboks'
   },
   en: {
     welcome: 'Welcome',
@@ -678,7 +681,8 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     tasks_completed_count: '{completed}/{total} tasks completed',
     recent_activity: 'Recent activity',
     save_changes: 'Save changes',
-    save_buddy_settings: 'Save buddy settings'
+    save_buddy_settings: 'Save buddy settings',
+    suggestion_box: 'Suggestion Box'
   }
 };
 
