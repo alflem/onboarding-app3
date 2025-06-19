@@ -7,6 +7,26 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Function to map Azure AD roles to application roles
+function mapAzureRoleToAppRole(azureRoles: string[] | undefined): Role {
+  if (!azureRoles || azureRoles.length === 0) {
+    return Role.EMPLOYEE; // Default role when no Azure roles assigned
+  }
+
+  // Check for super admin role first (highest priority)
+  if (azureRoles.some(role => role.toLowerCase().includes('super_admin') || role.toLowerCase().includes('superadmin'))) {
+    return Role.SUPER_ADMIN;
+  }
+
+  // Check for admin role
+  if (azureRoles.some(role => role.toLowerCase().includes('admin'))) {
+    return Role.ADMIN;
+  }
+
+  // Default to employee if roles exist but don't match known patterns
+  return Role.EMPLOYEE;
+}
+
 // Define type for Azure AD profile
 interface AzureADProfile {
   sub: string;
@@ -19,6 +39,7 @@ interface AzureADProfile {
   org?: string;
   company?: string;
   employer?: string;
+  roles?: string[];
 }
 
 // Updated to trigger database reset and Demo Company creation
@@ -55,7 +76,11 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email})`);
+                // Extract roles from Azure AD token
+        const azureRoles = azureProfile.roles || [];
+        const mappedRole = mapAzureRoleToAppRole(azureRoles);
+
+        console.log(`Azure AD profile callback - companyName: ${companyName}, roles: ${JSON.stringify(azureRoles)}, mappedRole: ${mappedRole} (from email: ${profile.email})`);
 
         return {
           id: profile.sub,
@@ -63,6 +88,7 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           image: profile.picture,
           companyName: companyName,
+          role: mappedRole,
         };
       },
     })
@@ -75,16 +101,46 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.companyName = user.companyName || undefined;
+        token.role = user.role || Role.EMPLOYEE; // Set role from Azure AD mapping
       }
 
-      // Try to get company name from Azure AD profile
+            // Try to get company name and roles from Azure AD profile
       if (account?.provider === "azure-ad" && profile) {
         const azureProfile = profile as AzureADProfile;
+
+        // Try to extract roles from profile or id_token
+        let roles: string[] = [];
+        if (azureProfile.roles) {
+          roles = azureProfile.roles;
+        } else if (account.id_token) {
+          try {
+            // Decode the JWT token to get roles
+            const base64Url = account.id_token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+                        const tokenPayload = JSON.parse(jsonPayload);
+
+            if (tokenPayload.roles) {
+              roles = tokenPayload.roles;
+            }
+          } catch (error) {
+            console.error("Error decoding JWT token:", error);
+          }
+        }
+
+        if (roles.length > 0) {
+          const mappedRole = mapAzureRoleToAppRole(roles);
+          console.log(`JWT callback - Found roles: ${JSON.stringify(roles)}, mapped to: ${mappedRole}`);
+          token.role = mappedRole;
+        }
+
         if (azureProfile.companyName || azureProfile.company_name) {
           token.companyName = azureProfile.companyName || azureProfile.company_name;
         } else if (account.access_token) {
           try {
-            // Try to get company name from Microsoft Graph API
+            // Try to get company name and app role assignments from Microsoft Graph API
             const graphResponse = await fetch('https://graph.microsoft.com/v1.0/me?$select=companyName,department', {
               headers: {
                 'Authorization': `Bearer ${account.access_token}`,
@@ -98,6 +154,32 @@ export const authOptions: NextAuthOptions = {
                 token.companyName = graphData.companyName;
               } else if (graphData.department) {
                 token.companyName = graphData.department;
+              }
+            }
+
+            // Try to get app role assignments if we don't have roles yet
+            if (roles.length === 0) {
+              try {
+                const appRoleResponse = await fetch('https://graph.microsoft.com/v1.0/me/appRoleAssignments', {
+                  headers: {
+                    'Authorization': `Bearer ${account.access_token}`,
+                    'Content-Type': 'application/json',
+                  },
+                });
+
+                                if (appRoleResponse.ok) {
+                  const appRoleData = await appRoleResponse.json();
+
+                  // Extract role values from app role assignments
+                  if (appRoleData.value && appRoleData.value.length > 0) {
+                    // Note: You'll need to map these role IDs to actual role names
+                    // This is a basic implementation - you might need to enhance this
+                    const roleIds = appRoleData.value.map((assignment: any) => assignment.appRoleId);
+                    console.log(`Found app role IDs:`, roleIds);
+                  }
+                }
+              } catch (error) {
+                console.error("Error fetching app role assignments:", error);
               }
             }
           } catch (error) {
@@ -132,13 +214,23 @@ export const authOptions: NextAuthOptions = {
             });
 
             if (dbUser) {
+              // Update role in database if it's different from Azure AD role
+              if (token.role && dbUser.role !== token.role) {
+                console.log(`JWT callback - Updating user ${dbUser.email} role from ${dbUser.role} to ${token.role}`);
+                await prisma.user.update({
+                  where: { id: token.id },
+                  data: { role: token.role }
+                });
+                dbUser.role = token.role; // Update local reference
+              }
+
               token.role = dbUser.role;
               token.organizationId = dbUser.organizationId ?? undefined;
               token.organizationName = (dbUser.organization?.name as string | undefined);
               token.organization = dbUser.organization ? { id: dbUser.organization.id, name: dbUser.organization.name } : undefined;
 
               if (needsOrgCheck) {
-                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
+                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId}) with role: ${dbUser.role}`);
               }
             } else if (needsOrgCheck) {
               console.log(`JWT callback - User with ID ${token.id} not found in database`);

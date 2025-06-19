@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: "Ej autentiserad" }, { status: 401 });
     }
 
-    if (session.user.role !== "SUPER_ADMIN") {
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
     }
 
@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Ej autentiserad" }, { status: 401 });
     }
 
-    if (session.user.role !== "SUPER_ADMIN") {
+    if (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN") {
       return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
     }
 
