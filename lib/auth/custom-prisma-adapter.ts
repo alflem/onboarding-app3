@@ -1,12 +1,13 @@
 // lib/auth/custom-prisma-adapter.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { findOrCreateOrganization } from "./organization-seeder";
 
-// Extend AdapterUser to include companyName
+// Extend AdapterUser to include companyName and Azure management info
 interface ExtendedAdapterUser extends AdapterUser {
   companyName?: string;
+  isAzureManaged?: boolean;
 }
 
 export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
@@ -19,9 +20,12 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
     createUser: async (user: Omit<AdapterUser, "id">): Promise<AdapterUser> => {
       console.log("CustomPrismaAdapter.createUser called for:", user.email);
       try {
-        // Get companyName from user object (this comes from JWT token)
-        const companyName = (user as ExtendedAdapterUser).companyName;
-        console.log(`CompanyName in createUser: ${companyName}`);
+        // Get companyName and Azure management info from user object (this comes from JWT token)
+        const extendedUser = user as ExtendedAdapterUser;
+        const companyName = extendedUser.companyName;
+        const userRole = extendedUser.role || Role.EMPLOYEE;
+        const isAzureManaged = extendedUser.isAzureManaged || false;
+        console.log(`CompanyName in createUser: ${companyName}, role: ${userRole}, isAzureManaged: ${isAzureManaged}`);
 
         let organization;
 
@@ -57,7 +61,8 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             email: user.email,
             // Required fields in your User model
             password: "", // Empty string if required
-            role: "ADMIN", // Set new users as ADMIN by default
+            role: userRole, // Use role from Azure AD or default to EMPLOYEE
+            isAzureManaged: isAzureManaged, // Track if user is managed by Azure AD
             organizationId: organization.id, // Assign to correct organization
           },
         });

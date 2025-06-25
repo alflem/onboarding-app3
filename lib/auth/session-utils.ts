@@ -10,6 +10,7 @@ export interface SafeSession {
     role?: "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
     organizationId: string;
     organizationName: string;
+    isAzureManaged?: boolean;
     organization: {
       id: string;
       name: string;
@@ -41,6 +42,7 @@ export async function getSafeSession(): Promise<SafeSession | null> {
       role: session.user.role,
       organizationId,
       organizationName,
+      isAzureManaged: session.user.isAzureManaged,
       organization: {
         id: organizationId,
         name: organizationName
