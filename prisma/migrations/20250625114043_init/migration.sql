@@ -92,6 +92,7 @@ CREATE TABLE "Task" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
+    "link" TEXT,
     "categoryId" TEXT NOT NULL,
     "order" INTEGER NOT NULL,
     "isBuddyTask" BOOLEAN NOT NULL DEFAULT false,
