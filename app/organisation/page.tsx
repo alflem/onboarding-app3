@@ -48,6 +48,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  isAzureManaged: boolean;
   createdAt: string;
 }
 
@@ -133,6 +134,13 @@ export default function OrganisationPage() {
 
   // Ändra användarroll
   const handleChangeUserRole = async (userId: string, isAdmin: boolean) => {
+    // Check if user is Azure-managed before making the API call
+    const user = organization?.users.find(u => u.id === userId);
+    if (user?.isAzureManaged) {
+      toast.error("Kan inte ändra roller för användare som hanteras av Azure AD");
+      return;
+    }
+
     try {
       const newRole = isAdmin ? "ADMIN" : "EMPLOYEE";
 
@@ -174,6 +182,13 @@ export default function OrganisationPage() {
 
   // Ändra superadmin-roll (endast för SUPER_ADMIN)
   const handleChangeSuperAdminRole = async (userId: string, isSuperAdmin: boolean) => {
+    // Check if user is Azure-managed before making the API call
+    const user = organization?.users.find(u => u.id === userId);
+    if (user?.isAzureManaged) {
+      toast.error("Kan inte ändra roller för användare som hanteras av Azure AD");
+      return;
+    }
+
     try {
       const newRole = isSuperAdmin ? "SUPER_ADMIN" : "ADMIN";
 
@@ -317,6 +332,7 @@ export default function OrganisationPage() {
                 <TableHead>Namn</TableHead>
                 <TableHead>E-post</TableHead>
                 <TableHead>Roll</TableHead>
+                <TableHead>Hantering</TableHead>
                 <TableHead>Admin</TableHead>
                 {session?.user?.role === "SUPER_ADMIN" && (
                   <TableHead>Super Admin</TableHead>
@@ -341,10 +357,20 @@ export default function OrganisationPage() {
                     </span>
                   </TableCell>
                   <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      user.isAzureManaged
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                    }`}>
+                      {user.isAzureManaged ? "Azure AD" : "Lokalt"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     <Checkbox
                       checked={user.role === "ADMIN" || user.role === "SUPER_ADMIN"}
                       onCheckedChange={(checked) => handleChangeUserRole(user.id, checked as boolean)}
-                      disabled={user.id === session?.user?.id}
+                      disabled={user.id === session?.user?.id || user.isAzureManaged}
+                      title={user.isAzureManaged ? "Roller hanteras av Azure AD" : ""}
                     />
                   </TableCell>
                   {session?.user?.role === "SUPER_ADMIN" && (
@@ -352,7 +378,8 @@ export default function OrganisationPage() {
                       <Checkbox
                         checked={user.role === "SUPER_ADMIN"}
                         onCheckedChange={(checked) => handleChangeSuperAdminRole(user.id, checked as boolean)}
-                        disabled={user.id === session?.user?.id}
+                        disabled={user.id === session?.user?.id || user.isAzureManaged}
+                        title={user.isAzureManaged ? "Roller hanteras av Azure AD" : ""}
                       />
                     </TableCell>
                   )}

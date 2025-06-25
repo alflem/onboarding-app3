@@ -18,6 +18,7 @@ model User {
   updatedAt      DateTime       @updatedAt
   organizationId String?
   role           Role           @default(EMPLOYEE)
+  isAzureManaged Boolean        @default(false)
   buddyId        String?
   accounts       Account[]
   sessions       Session[]

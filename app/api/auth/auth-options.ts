@@ -7,6 +7,25 @@ import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Simplified function to map Azure AD roles to application roles
+function mapAzureRoleToAppRole(azureRoles: string[] | undefined): Role {
+  if (!azureRoles || azureRoles.length === 0) {
+    return Role.EMPLOYEE;
+  }
+
+  // Check for super admin role first
+  if (azureRoles.some(role => role.toLowerCase().includes('super_admin') || role.toLowerCase().includes('superadmin'))) {
+    return Role.SUPER_ADMIN;
+  }
+
+  // Check for admin role
+  if (azureRoles.some(role => role.toLowerCase().includes('admin'))) {
+    return Role.ADMIN;
+  }
+
+  return Role.EMPLOYEE;
+}
+
 // Define type for Azure AD profile
 interface AzureADProfile {
   sub: string;
@@ -19,9 +38,10 @@ interface AzureADProfile {
   org?: string;
   company?: string;
   employer?: string;
+  roles?: string[];
 }
 
-// Updated to trigger database reset and Demo Company creation
+// Updated to support hybrid Azure AD role management
 export const authOptions: NextAuthOptions = {
   adapter: CustomPrismaAdapter(prisma),
   providers: [
@@ -55,7 +75,12 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email})`);
+        // Simple role mapping - only use roles if they exist in the profile
+        const azureRoles = azureProfile.roles || [];
+        const mappedRole = mapAzureRoleToAppRole(azureRoles);
+        const isAzureManaged = azureRoles.length > 0;
+
+        console.log(`Azure AD login - user: ${profile.email}, company: ${companyName}, roles: ${JSON.stringify(azureRoles)}, mapped: ${mappedRole}`);
 
         return {
           id: profile.sub,
@@ -63,6 +88,8 @@ export const authOptions: NextAuthOptions = {
           email: profile.email,
           image: profile.picture,
           companyName: companyName,
+          role: mappedRole,
+          isAzureManaged: isAzureManaged,
         };
       },
     })
@@ -75,10 +102,12 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.companyName = user.companyName || undefined;
+        token.role = user.role || Role.EMPLOYEE;
+        token.isAzureManaged = user.isAzureManaged || false;
       }
 
-      // Try to get company name from Azure AD profile
-      if (account?.provider === "azure-ad" && profile) {
+      // Try to get company name from Azure AD profile if needed
+      if (account?.provider === "azure-ad" && profile && !token.companyName) {
         const azureProfile = profile as AzureADProfile;
         if (azureProfile.companyName || azureProfile.company_name) {
           token.companyName = azureProfile.companyName || azureProfile.company_name;
@@ -132,13 +161,25 @@ export const authOptions: NextAuthOptions = {
             });
 
             if (dbUser) {
-              token.role = dbUser.role;
+              // Update user's role and Azure status if needed (hybrid approach)
+              if (token.role && (dbUser.role !== token.role || dbUser.isAzureManaged !== token.isAzureManaged)) {
+                await prisma.user.update({
+                  where: { id: token.id },
+                  data: {
+                    role: token.role,
+                    isAzureManaged: token.isAzureManaged || false
+                  }
+                });
+              }
+
+              // For hybrid management: Use Azure role if user is Azure-managed, otherwise use DB role
+              token.role = token.isAzureManaged ? token.role : dbUser.role;
               token.organizationId = dbUser.organizationId ?? undefined;
               token.organizationName = (dbUser.organization?.name as string | undefined);
               token.organization = dbUser.organization ? { id: dbUser.organization.id, name: dbUser.organization.name } : undefined;
 
               if (needsOrgCheck) {
-                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
+                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId}) with role: ${token.role} (Azure managed: ${token.isAzureManaged})`);
               }
             } else if (needsOrgCheck) {
               console.log(`JWT callback - User with ID ${token.id} not found in database`);
@@ -160,6 +201,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationName = token.organizationName;
         session.user.companyName = token.companyName;
         session.user.organization = token.organization;
+        session.user.isAzureManaged = token.isAzureManaged;
       }
       return session;
     }

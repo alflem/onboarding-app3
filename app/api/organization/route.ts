@@ -24,6 +24,7 @@ export async function GET(_request: NextRequest) {
             name: true,
             email: true,
             role: true,
+            isAzureManaged: true,
             createdAt: true
           }
         }

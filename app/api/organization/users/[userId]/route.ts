@@ -42,6 +42,11 @@ export async function PATCH(
       return NextResponse.json({ error: "Användare hittades ej eller tillhör inte din organisation" }, { status: 404 });
     }
 
+    // Kontrollera om användaren är Azure-managed
+    if (userToUpdate.isAzureManaged) {
+      return NextResponse.json({ error: "Kan inte ändra roller för användare som hanteras av Azure AD" }, { status: 403 });
+    }
+
     // Uppdatera användarens roll
     const updatedUser = await prisma.user.update({
       where: {
@@ -55,6 +60,7 @@ export async function PATCH(
         name: true,
         email: true,
         role: true,
+        isAzureManaged: true,
         createdAt: true
       }
     });

@@ -15,6 +15,7 @@ declare module "next-auth" {
     organizationId?: string | null;
     organizationName?: string | null;
     companyName?: string | null;
+    isAzureManaged?: boolean;
   }
 
   /**
@@ -30,6 +31,7 @@ declare module "next-auth" {
       organizationId?: string;
       organizationName?: string;
       companyName?: string;
+      isAzureManaged?: boolean;
       organization?: {
         id: string;
         name: string;
@@ -57,6 +59,7 @@ declare module "next-auth/jwt" {
     organizationId?: string;
     organizationName?: string;
     companyName?: string;
+    isAzureManaged?: boolean;
     organization?: {
       id: string;
       name: string;
