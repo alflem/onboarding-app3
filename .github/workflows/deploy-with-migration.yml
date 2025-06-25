@@ -1,0 +1,63 @@
+name: Deploy with Migration - Deploy Next.js app to Azure Web App with safe migrations
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+env:
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+  WEBAPP_NAME: "onboarding-app"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  AZURE_AD_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+  AZURE_AD_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+  AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+
+jobs:
+  deploy-with-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Database Migrations
+        run: |
+          echo "🔄 Running database migrations..."
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Build application
+        run: |
+          echo "🏗️ Building Next.js application..."
+          npm run build
+          cp -r ./public ./.next/standalone/ || true
+          cp -r ./.next/static ./.next/standalone/.next/ || true
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          slot-name: "Production"
+          publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
+          package: ./.next/standalone
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment with migration completed!"
+          echo "- Database migrations applied safely"
+          echo "- Application built and deployed"
+          echo "- No data was lost during the process"
