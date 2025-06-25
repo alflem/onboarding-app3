@@ -1,26 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/auth-options";
+import { requireAdmin } from '@/lib/auth/session-utils';
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function GET(_request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const sessionOrResponse = await requireAdmin();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Ej autentiserad" }, { status: 401 });
-    }
-
-    if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
+    if (sessionOrResponse instanceof NextResponse) {
+      return sessionOrResponse;
     }
 
     // Hämta användarens organisation
     const organization = await prisma.organization.findUnique({
       where: {
-        id: session.user.organizationId!
+        id: sessionOrResponse.user.organizationId
       },
       include: {
         users: {
@@ -51,14 +46,10 @@ export async function GET(_request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const sessionOrResponse = await requireAdmin();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Ej autentiserad" }, { status: 401 });
-    }
-
-    if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json({ error: "Ej behörig" }, { status: 403 });
+    if (sessionOrResponse instanceof NextResponse) {
+      return sessionOrResponse;
     }
 
     const body = await request.json();
@@ -66,7 +57,7 @@ export async function PATCH(request: NextRequest) {
 
     const organization = await prisma.organization.update({
       where: {
-        id: session.user.organizationId!
+        id: sessionOrResponse.user.organizationId
       },
       data: {
         ...(name && { name }),
