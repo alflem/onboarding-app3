@@ -12,6 +12,15 @@ export async function GET(_request: NextRequest) {
       return sessionOrResponse;
     }
 
+    // Extra check - if user has no organizationId, this is a critical error
+    if (!sessionOrResponse.user.organizationId) {
+      console.error(`User ${sessionOrResponse.user.email} has no organizationId in GET /api/organization`);
+      return NextResponse.json(
+        { error: "Användaren har ingen organisation tilldelad. Kontakta systemadministratören." },
+        { status: 400 }
+      );
+    }
+
     // Hämta användarens organisation
     const organization = await prisma.organization.findUnique({
       where: {
@@ -32,6 +41,7 @@ export async function GET(_request: NextRequest) {
     });
 
     if (!organization) {
+      console.error(`Organization ${sessionOrResponse.user.organizationId} not found for user ${sessionOrResponse.user.email}`);
       return NextResponse.json({ error: "Organisation hittades ej" }, { status: 404 });
     }
 

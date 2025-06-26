@@ -161,6 +161,51 @@ export const authOptions: NextAuthOptions = {
             });
 
             if (dbUser) {
+              // Ensure user has an organization - critical for app functionality
+              if (!dbUser.organizationId) {
+                console.log(`User ${dbUser.email} has no organization - attempting to fix...`);
+                try {
+                  // Try to find or create Demo Company as fallback
+                  let demoOrg = await prisma.organization.findFirst({
+                    where: { name: "Demo Company" }
+                  });
+
+                  if (!demoOrg) {
+                    console.log("Creating Demo Company organization...");
+                    demoOrg = await prisma.organization.create({
+                      data: {
+                        name: "Demo Company",
+                        buddyEnabled: true,
+                      },
+                    });
+                  }
+
+                  // Assign user to Demo Company
+                  await prisma.user.update({
+                    where: { id: token.id },
+                    data: {
+                      organizationId: demoOrg.id
+                    }
+                  });
+
+                  // Refresh user data
+                  const updatedUser = await prisma.user.findUnique({
+                    where: { id: token.id },
+                    include: { organization: true }
+                  });
+
+                  if (updatedUser) {
+                    dbUser.organizationId = updatedUser.organizationId;
+                    dbUser.organization = updatedUser.organization;
+                  }
+
+                  console.log(`User ${dbUser.email} assigned to Demo Company`);
+                } catch (orgFixError) {
+                  console.error("Failed to assign user to organization:", orgFixError);
+                  // Continue without throwing error to allow login
+                }
+              }
+
               // Update user's role and Azure status if needed (hybrid approach)
               if (token.role && (dbUser.role !== token.role || dbUser.isAzureManaged !== token.isAzureManaged)) {
                 await prisma.user.update({

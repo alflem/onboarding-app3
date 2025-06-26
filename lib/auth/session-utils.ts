@@ -30,9 +30,13 @@ export async function getSafeSession(): Promise<SafeSession | null> {
     return null;
   }
 
-  // Ensure organization is always present with fallback
-  const organizationId = session.user.organizationId || "demo";
-  const organizationName = session.user.organizationName || "Demo Company";
+  // If user has no organizationId, we need to handle this gracefully
+  if (!session.user.organizationId) {
+    // This should not happen in normal flow, but if it does, return null
+    // The user needs to be properly onboarded first
+    console.error(`User ${session.user.email} has no organizationId - authentication incomplete`);
+    return null;
+  }
 
   return {
     user: {
@@ -40,12 +44,12 @@ export async function getSafeSession(): Promise<SafeSession | null> {
       email: session.user.email,
       name: session.user.name,
       role: session.user.role,
-      organizationId,
-      organizationName,
+      organizationId: session.user.organizationId,
+      organizationName: session.user.organizationName || "Unknown Organization",
       isAzureManaged: session.user.isAzureManaged,
       organization: {
-        id: organizationId,
-        name: organizationName
+        id: session.user.organizationId,
+        name: session.user.organizationName || "Unknown Organization"
       }
     }
   };
