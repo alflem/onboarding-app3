@@ -260,6 +260,17 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   debug: process.env.NODE_ENV === "development", // Enable debug in development
+  events: {
+    createUser: async (message) => {
+      console.log("User created:", message.user.email);
+    },
+    signIn: async (message) => {
+      console.log("Sign in:", message.user.email);
+    },
+    signOut: async (message) => {
+      console.log("Sign out:", message.session?.user?.email);
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
   useSecureCookies: process.env.NODE_ENV === "production",
   cookies: {

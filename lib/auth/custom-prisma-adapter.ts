@@ -23,7 +23,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         // Get companyName and Azure management info from user object (this comes from JWT token)
         const extendedUser = user as ExtendedAdapterUser;
         const companyName = extendedUser.companyName;
-        const userRole = extendedUser.role || Role.EMPLOYEE;
+        const userRole = Role.EMPLOYEE; // Default role for new users, will be updated in JWT callback
         const isAzureManaged = extendedUser.isAzureManaged || false;
         console.log(`CompanyName in createUser: ${companyName}, role: ${userRole}, isAzureManaged: ${isAzureManaged}`);
 
