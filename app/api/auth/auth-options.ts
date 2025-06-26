@@ -1,7 +1,7 @@
 // auth/options.ts
 import { NextAuthOptions } from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
-import { CustomPrismaAdapter } from "@/lib/auth/custom-prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { updateUserOrganizationIfNeeded } from "@/lib/auth/organization-seeder";
 import { PrismaClient, Role } from "@prisma/client";
 
@@ -43,7 +43,7 @@ interface AzureADProfile {
 
 // Updated to support hybrid Azure AD role management
 export const authOptions: NextAuthOptions = {
-  adapter: CustomPrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma),
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
@@ -138,21 +138,11 @@ export const authOptions: NextAuthOptions = {
       // Get user role and organization from database
       if (token.id) {
         try {
-          // Only check/update organization on first login or if we don't have cached data
-          const needsOrgCheck = !token.organizationId || (user && account?.provider === "azure-ad");
+          // Only check/update organization after user exists in database
+          const needsOrgCheck = !token.organizationId;
 
-          if (needsOrgCheck && token.companyName) {
-            console.log(`JWT callback - Checking organization for new login: ${token.companyName}`);
-            try {
-              await updateUserOrganizationIfNeeded(prisma, token.id, token.companyName);
-            } catch (orgError) {
-              console.error("Error updating user organization (continuing with login):", orgError);
-              // Don't stop the login process if organization update fails
-            }
-          }
-
-          // Only fetch from database if we don't have cached user data
-          if (!token.role || !token.organizationId || needsOrgCheck) {
+          // Fetch user from database
+          if (needsOrgCheck) {
             const dbUser = await prisma.user.findUnique({
               where: { id: token.id },
               include: {
@@ -223,11 +213,10 @@ export const authOptions: NextAuthOptions = {
               token.organizationName = (dbUser.organization?.name as string | undefined);
               token.organization = dbUser.organization ? { id: dbUser.organization.id, name: dbUser.organization.name } : undefined;
 
-              if (needsOrgCheck) {
-                console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId}) with role: ${token.role} (Azure managed: ${token.isAzureManaged})`);
-              }
-            } else if (needsOrgCheck) {
-              console.log(`JWT callback - User with ID ${token.id} not found in database`);
+              console.log(`JWT callback - User ${dbUser.email} found with organization: ${dbUser.organization?.name} (${dbUser.organizationId}) with role: ${token.role} (Azure managed: ${token.isAzureManaged})`);
+            } else {
+              // User doesn't exist yet - this happens during account creation
+              console.log(`JWT callback - User with ID ${token.id} not found in database yet`);
             }
           }
         } catch (error) {
