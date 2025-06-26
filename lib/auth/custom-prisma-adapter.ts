@@ -2,7 +2,6 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient, Role } from "@prisma/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
-import { findOrCreateOrganization } from "./organization-seeder";
 
 // Extend AdapterUser to include companyName and Azure management info
 interface ExtendedAdapterUser extends AdapterUser {
