@@ -29,55 +29,65 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
 
         let organization;
 
-        if (companyName && companyName.trim() !== "") {
-          console.log(`Using companyName from JWT token: ${companyName}`);
-          try {
-            // Find or create organization based on companyName
-            organization = await findOrCreateOrganization(prisma, companyName);
-          } catch (orgError) {
-            console.error(`Error with organization "${companyName}", falling back to Demo Company:`, orgError);
-            organization = null; // Will trigger fallback below
-          }
-        }
+        // First try to find Demo Company
+        organization = await prisma.organization.findFirst({
+          where: { name: "Demo Company" }
+        });
 
-        // Fallback to Demo Company if no companyName or organization creation failed
+        // If Demo Company doesn't exist, create it simply
         if (!organization) {
-          console.log("Using Demo Company as fallback");
-          organization = await prisma.organization.findFirst({
-            where: { name: "Demo Company" }
-          });
-
-          if (!organization) {
-            console.log("Creating Demo Company organization...");
-            organization = await findOrCreateOrganization(prisma, "Demo Company");
+          console.log("Creating simple Demo Company organization...");
+          try {
+            organization = await prisma.organization.create({
+              data: {
+                name: "Demo Company",
+                buddyEnabled: true,
+              },
+            });
+            console.log(`Created Demo Company organization with ID: ${organization.id}`);
+          } catch (createError) {
+            console.error("Error creating Demo Company:", createError);
+            // If we can't even create Demo Company, there's a serious database issue
+            throw new Error("Failed to create organization for user");
           }
         }
 
         // Create user with required fields and assign to organization
         console.log(`Creating user with organization assignment: ${organization.name} (${organization.id})`);
-        const newUser = await prisma.user.create({
-          data: {
-            name: user.name || user.email?.split('@')[0] || "Unnamed User",
+
+        try {
+          const newUser = await prisma.user.create({
+            data: {
+              name: user.name || user.email?.split('@')[0] || "Unnamed User",
+              email: user.email!,
+              // Required fields in your User model
+              password: "", // Empty string if required
+              role: userRole, // Use role from Azure AD or default to EMPLOYEE
+              isAzureManaged: isAzureManaged, // Track if user is managed by Azure AD
+              organizationId: organization.id, // Assign to correct organization
+            },
+          });
+
+          console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id})`);
+
+          return {
+            id: newUser.id,
+            email: newUser.email,
+            name: newUser.name,
+            emailVerified: null,
+            image: null,
+          };
+        } catch (userCreateError) {
+          console.error("Error creating user in database:", userCreateError);
+          console.error("User data:", {
+            name: user.name,
             email: user.email,
-            // Required fields in your User model
-            password: "", // Empty string if required
-            role: userRole, // Use role from Azure AD or default to EMPLOYEE
-            isAzureManaged: isAzureManaged, // Track if user is managed by Azure AD
-            organizationId: organization.id, // Assign to correct organization
-          },
-        });
-
-        console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id})`);
-
-        return {
-          id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-          emailVerified: null,
-          image: null,
-        };
+            organizationId: organization.id
+          });
+          throw new Error(`Failed to create user: ${userCreateError}`);
+        }
       } catch (error) {
-        console.error("Error creating user:", error);
+        console.error("Error in createUser adapter:", error);
         throw error;
       }
     },
