@@ -51,13 +51,20 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
 
         // Create user with required fields and assign to organization
         console.log(`Creating user with organization assignment: ${organization.name} (${organization.id})`);
+
+        // Determine user role - check if user should be SUPER_ADMIN
+        const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+        const userRole = (superAdminEmail && user.email === superAdminEmail) ? "SUPER_ADMIN" : "ADMIN";
+
+        console.log(`Setting user role to: ${userRole} for ${user.email}`);
+
         const newUser = await prisma.user.create({
           data: {
             name: user.name || user.email?.split('@')[0] || "Unnamed User",
             email: user.email,
             // Required fields in your User model
             password: "", // Empty string if required
-            role: "ADMIN", // Set new users as ADMIN by default
+            role: userRole, // Set role based on email check
             organizationId: organization.id, // Assign to correct organization
           },
         });
