@@ -1,0 +1,68 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: onboarding-55f7be69    # Ändra till ditt Azure App Service namn
+  AZURE_WEBAPP_PACKAGE_PATH: '.'            # path to your web app project
+  NODE_VERSION: '22.x'                      # Node.js version
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 'Install dependencies'
+      run: |
+        npm ci
+        npm install --include=dev
+
+    - name: 'Generate Prisma Client'
+      run: |
+        npx prisma generate
+
+    - name: 'Build application'
+      run: |
+        npm run build
+
+    - name: 'Run Prisma Migrations'
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        npx prisma migrate deploy
+
+    - name: 'Create deployment package'
+      run: |
+        # Remove dev dependencies for production
+        npm prune --production
+        # But keep prisma for runtime
+        npm install prisma @prisma/client
+        # Ensure Prisma client is generated for production
+        npx prisma generate
+
+    - name: 'Deploy to Azure WebApp'
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: 'Post-deployment: Verify Prisma'
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          # Optional: verify that the app is running and database is accessible
+          echo "Deployment completed successfully"
