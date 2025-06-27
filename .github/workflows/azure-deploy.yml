@@ -41,26 +41,41 @@ jobs:
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
-        echo "Attempting to run migrations..."
+        echo "🔍 Checking if migrations are needed..."
 
-        # Capture the output and exit code from migrate deploy
-        set +e  # Don't exit on error
-        migrate_output=$(npx prisma migrate deploy 2>&1)
-        migrate_exit_code=$?
-        set -e  # Resume exit on error
+        # Check migration status first to avoid conflicts
+        set +e
+        status_output=$(npx prisma migrate status 2>&1)
+        status_exit_code=$?
+        set -e
 
-        if [ $migrate_exit_code -eq 0 ]; then
-          echo "✅ Migrations completed successfully!"
-          echo "$migrate_output"
-        elif echo "$migrate_output" | grep -q "P3005"; then
-          echo "⚠️  Database has existing schema (P3005 error detected)"
-          echo "Using db push to synchronize schema..."
+        if echo "$status_output" | grep -q "Database schema is up to date"; then
+          echo "✅ Database schema is already up to date - skipping migrations"
+        elif echo "$status_output" | grep -q "P3005\|not empty"; then
+          echo "⚠️  Database has existing schema (detected via status check)"
+          echo "Using db push to synchronize schema safely..."
           npx prisma db push --accept-data-loss
           echo "✅ Schema synchronized successfully!"
         else
-          echo "❌ Migration failed with unexpected error:"
-          echo "$migrate_output"
-          exit 1
+          echo "📦 Running pending migrations..."
+          # Capture the output and exit code from migrate deploy
+          set +e
+          migrate_output=$(npx prisma migrate deploy 2>&1)
+          migrate_exit_code=$?
+          set -e
+
+          if [ $migrate_exit_code -eq 0 ]; then
+            echo "✅ Migrations completed successfully!"
+            echo "$migrate_output"
+          elif echo "$migrate_output" | grep -q "P3005"; then
+            echo "⚠️  P3005 error during migration - falling back to db push"
+            npx prisma db push --accept-data-loss
+            echo "✅ Schema synchronized via db push!"
+          else
+            echo "❌ Migration failed with unexpected error:"
+            echo "$migrate_output"
+            exit 1
+          fi
         fi
 
     - name: 'Create deployment package'

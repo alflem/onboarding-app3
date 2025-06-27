@@ -23,17 +23,25 @@ postgresql://username:password@server.postgres.database.azure.com:5432/database?
 
 ## Användning
 
+### 📋 Workflow Strategi
+- **Normalt:** Använd bara automatisk deployment (push till master)
+- **Akut migration:** Använd manuell migration workflow
+- **Första gången:** Använd baseline setup om du får P3005 fel
+
 ### 🚀 Automatisk Deployment (`azure-deploy.yml`)
 - Push till `main` eller `master` branch triggar automatisk deployment
-- Workflow hanterar både nya och befintliga databaser automatiskt
-- Kör migreringar och deployar till Azure
+- Kollar automatiskt om migrations behövs för att undvika konflikter
+- Hanterar både nya och befintliga databaser automatiskt
+- Kör migreringar OCH deployar till Azure
 
 ### 🔄 Manuell Migration (`migrate-database.yml`)
-För att köra migreringar utan full deployment:
+För att köra **endast** migreringar utan deployment:
 1. Gå till GitHub → Actions → "Database Migration"
 2. Klicka "Run workflow"
 3. Välj environment (production/staging)
 4. Klicka "Run workflow"
+
+> ⚠️ **VIKTIGT:** Kör inte manuell migration samtidigt som automatisk deployment pågår. Azure-deploy kontrollerar automatiskt om migrations behövs.
 
 ### 📋 Database Baseline Setup (`database-baseline.yml`)
 **Endast för första gången** med befintlig databas:
