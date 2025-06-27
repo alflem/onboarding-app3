@@ -41,15 +41,23 @@ jobs:
       run: |
         echo "Running migration for ${{ github.event.inputs.environment }} environment"
 
-        # Try to run migrations normally first
-        if npx prisma migrate deploy; then
+        # Capture the output and exit code from migrate deploy
+        set +e  # Don't exit on error
+        migrate_output=$(npx prisma migrate deploy 2>&1)
+        migrate_exit_code=$?
+        set -e  # Resume exit on error
+
+        if [ $migrate_exit_code -eq 0 ]; then
           echo "✅ Migrations completed successfully!"
-        elif npx prisma migrate status 2>&1 | grep -q "P3005\|not empty"; then
-          echo "⚠️  Database has existing schema. Using db push for safety..."
+          echo "$migrate_output"
+        elif echo "$migrate_output" | grep -q "P3005"; then
+          echo "⚠️  Database has existing schema (P3005 error detected)"
+          echo "Using db push to synchronize schema..."
           npx prisma db push --accept-data-loss
           echo "✅ Schema synchronized successfully!"
         else
-          echo "❌ Migration failed with unexpected error"
+          echo "❌ Migration failed with unexpected error:"
+          echo "$migrate_output"
           exit 1
         fi
 

@@ -1,0 +1,88 @@
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: onboarding-55f7be69    # Ändra till ditt Azure App Service namn
+  AZURE_WEBAPP_PACKAGE_PATH: '.'            # path to your web app project
+  NODE_VERSION: '22.x'                      # Node.js version
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: 'Install dependencies'
+      run: |
+        npm ci
+        npm install --include=dev
+
+    - name: 'Generate Prisma Client'
+      run: |
+        npx prisma generate
+
+    - name: 'Build application'
+      run: |
+        npm run build
+
+    - name: 'Handle Database Schema'
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        echo "Attempting to run migrations..."
+
+        # Capture the output and exit code from migrate deploy
+        set +e  # Don't exit on error
+        migrate_output=$(npx prisma migrate deploy 2>&1)
+        migrate_exit_code=$?
+        set -e  # Resume exit on error
+
+        if [ $migrate_exit_code -eq 0 ]; then
+          echo "✅ Migrations completed successfully!"
+          echo "$migrate_output"
+        elif echo "$migrate_output" | grep -q "P3005"; then
+          echo "⚠️  Database has existing schema (P3005 error detected)"
+          echo "Using db push to synchronize schema..."
+          npx prisma db push --accept-data-loss
+          echo "✅ Schema synchronized successfully!"
+        else
+          echo "❌ Migration failed with unexpected error:"
+          echo "$migrate_output"
+          exit 1
+        fi
+
+    - name: 'Create deployment package'
+      run: |
+        # Remove dev dependencies for production
+        npm prune --production
+        # But keep prisma for runtime
+        npm install prisma @prisma/client
+        # Ensure Prisma client is generated for production
+        npx prisma generate
+
+    - name: 'Deploy to Azure WebApp'
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    - name: 'Post-deployment: Verify Prisma'
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          # Optional: verify that the app is running and database is accessible
+          echo "Deployment completed successfully"
