@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
+import { hasBuddyPreparationModel } from "@/types/prisma-extended";
 
 // GET /api/user/is-buddy - Check if logged-in user is a buddy for someone
 export async function GET() {
@@ -53,9 +54,32 @@ export async function GET() {
       }
     });
 
+    // Check for active buddy preparations
+    let activePreparations = [];
+    if (hasBuddyPreparationModel(prisma)) {
+      try {
+        activePreparations = await (prisma as any).buddyPreparation.findMany({
+          where: {
+            buddyId: session.user.id,
+            isActive: true,
+            linkedUserId: null
+          },
+          select: {
+            id: true,
+            upcomingEmployeeName: true,
+            upcomingEmployeeEmail: true,
+            notes: true
+          }
+        });
+             } catch (_error) {
+         console.log('BuddyPreparation model not available yet');
+       }
+    }
+
     return NextResponse.json({
-      isBuddy: employeesWithThisBuddy.length > 0,
+      isBuddy: employeesWithThisBuddy.length > 0 || activePreparations.length > 0,
       buddyFor: employeesWithThisBuddy,
+      activePreparations: activePreparations,
       buddyEnabled: true
     });
   } catch (error) {

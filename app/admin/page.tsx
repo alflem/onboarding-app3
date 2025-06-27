@@ -18,6 +18,15 @@ import {
 } from "@/components/ui/dialog";
 
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   AlertDialog,
@@ -55,6 +64,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
+import { BuddyPreparation } from "@/types/buddy-preparation";
 
 // Typdefintioner
 type Checklist = {
@@ -100,6 +110,7 @@ export default function AdminPage() {
   const [employees, setEmployees] = useState<User[]>([]);
   const [buddies, setBuddies] = useState<Buddy[]>([]);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean>(true);
+  const [buddyPreparations, setBuddyPreparations] = useState<BuddyPreparation[]>([]);
 
   // State för formulär
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
@@ -120,6 +131,16 @@ export default function AdminPage() {
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
+
+  // State för buddy preparations
+  const [showPreparationForm, setShowPreparationForm] = useState(false);
+  const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | null>(null);
+  const [preparationForm, setPreparationForm] = useState({
+    upcomingEmployeeName: '',
+    upcomingEmployeeEmail: '',
+    buddyId: '',
+    notes: ''
+  });
 
   // Funktion för att hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {
@@ -270,6 +291,25 @@ export default function AdminPage() {
     }
   }, []);
 
+  // Funktion för att hämta buddy-förberedelser
+  const fetchBuddyPreparations = useCallback(async () => {
+    try {
+      const response = await fetch('/api/buddy-preparations');
+
+      if (!response.ok) {
+        throw new Error('Kunde inte hämta buddy-förberedelser');
+      }
+
+      const data = await response.json();
+      setBuddyPreparations(data.preparations || []);
+    } catch (error) {
+      console.error("Fel vid hämtning av buddy-förberedelser:", error);
+      toast.error("Kunde inte ladda buddy-förberedelser", {
+        description: "Ett fel uppstod vid hämtning av förberedelser."
+      });
+    }
+  }, []);
+
   useEffect(() => {
     if (status === "authenticated") {
       // Kontrollera att användaren är admin
@@ -283,8 +323,11 @@ export default function AdminPage() {
       fetchChecklist();
       fetchUsers();
       fetchBuddies();
+      if (buddyEnabled) {
+        fetchBuddyPreparations();
+      }
     }
-  }, [status, session, router, fetchOrganizationSettings, fetchChecklist, fetchUsers, fetchBuddies]);
+      }, [status, session, router, fetchOrganizationSettings, fetchChecklist, fetchUsers, fetchBuddies, fetchBuddyPreparations, buddyEnabled]);
 
   // Funktion för att hämta detaljerad information om en medarbetare
   const fetchEmployeeDetails = async (employeeId: string) => {
@@ -422,6 +465,144 @@ export default function AdminPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Funktioner för att hantera buddy-förberedelser
+  const handleCreatePreparation = async () => {
+    if (!preparationForm.upcomingEmployeeName.trim()) {
+      toast.error("Namn krävs");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch('/api/buddy-preparations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preparationForm),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Kunde inte skapa förberedelse');
+      }
+
+      await response.json();
+
+      // Återställ formulär och stäng dialog
+      setPreparationForm({
+        upcomingEmployeeName: '',
+        upcomingEmployeeEmail: '',
+        buddyId: '',
+        notes: ''
+      });
+      setShowPreparationForm(false);
+
+      // Hämta uppdaterad lista
+      fetchBuddyPreparations();
+
+      toast.success("Buddy-förberedelse skapad", {
+        description: "Förberedelsen har skapats och kommer länkas automatiskt när medarbetaren läggs till."
+      });
+    } catch (error) {
+      console.error("Fel vid skapande av förberedelse:", error);
+      toast.error("Kunde inte skapa förberedelse", {
+        description: error instanceof Error ? error.message : "Ett fel uppstod vid skapande av förberedelse."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdatePreparation = async () => {
+    if (!editingPreparation || !preparationForm.upcomingEmployeeName.trim()) {
+      toast.error("Namn krävs");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/buddy-preparations?id=${editingPreparation.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(preparationForm),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Kunde inte uppdatera förberedelse');
+      }
+
+      await response.json();
+
+      // Återställ formulär och stäng dialog
+      setPreparationForm({
+        upcomingEmployeeName: '',
+        upcomingEmployeeEmail: '',
+        buddyId: '',
+        notes: ''
+      });
+      setEditingPreparation(null);
+      setShowPreparationForm(false);
+
+      // Hämta uppdaterad lista
+      fetchBuddyPreparations();
+
+      toast.success("Buddy-förberedelse uppdaterad", {
+        description: "Förberedelsen har uppdaterats."
+      });
+    } catch (error) {
+      console.error("Fel vid uppdatering av förberedelse:", error);
+      toast.error("Kunde inte uppdatera förberedelse", {
+        description: error instanceof Error ? error.message : "Ett fel uppstod vid uppdatering av förberedelse."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeletePreparation = async (preparationId: string) => {
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/buddy-preparations?id=${preparationId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte ta bort förberedelse');
+      }
+
+      fetchBuddyPreparations();
+
+      toast.success("Buddy-förberedelse borttagen", {
+        description: "Förberedelsen har tagits bort."
+      });
+    } catch (error) {
+      console.error("Fel vid borttagning av förberedelse:", error);
+      toast.error("Kunde inte ta bort förberedelse", {
+        description: "Ett fel uppstod vid borttagning av förberedelse."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openEditPreparation = (preparation: BuddyPreparation) => {
+    setEditingPreparation(preparation);
+    setPreparationForm({
+      upcomingEmployeeName: preparation.upcomingEmployeeName,
+      upcomingEmployeeEmail: preparation.upcomingEmployeeEmail || '',
+      buddyId: preparation.buddyId || '',
+      notes: preparation.notes || ''
+    });
+    setShowPreparationForm(true);
   };
 
   if (status === "loading" || loading) {
@@ -680,6 +861,207 @@ export default function AdminPage() {
           </Card>
         </div>
       </div>
+
+      {/* Buddy Preparations Section */}
+      {buddyEnabled && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Buddy-förberedelser
+            </CardTitle>
+            <CardDescription>
+              Förbered kommande medarbetare innan de börjar. När medarbetaren läggs till i systemet kommer förberedelsen länkas automatiskt.
+            </CardDescription>
+            <div className="pt-2">
+              <Button onClick={() => setShowPreparationForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Skapa förberedelse
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {buddyPreparations.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Inga aktiva buddy-förberedelser</p>
+                  <p className="text-sm">Skapa en förberedelse för kommande medarbetare.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {buddyPreparations.map((preparation) => (
+                    <Card key={preparation.id} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{preparation.upcomingEmployeeName}</h4>
+                            {preparation.linkedUserId && (
+                              <Badge variant="secondary">Länkad</Badge>
+                            )}
+                          </div>
+                          {preparation.upcomingEmployeeEmail && (
+                            <p className="text-sm text-muted-foreground">{preparation.upcomingEmployeeEmail}</p>
+                          )}
+                          {preparation.buddy && (
+                            <p className="text-sm">
+                              <span className="font-medium">Buddy:</span> {preparation.buddy.name}
+                            </p>
+                          )}
+                          {preparation.notes && (
+                            <p className="text-sm text-muted-foreground">{preparation.notes}</p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditPreparation(preparation)}
+                            disabled={submitting}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-destructive"
+                                disabled={submitting}
+                              >
+                                <UserX className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Ta bort förberedelse?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Detta kommer att ta bort buddy-förberedelsen för {preparation.upcomingEmployeeName}. Denna åtgärd kan inte ångras.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeletePreparation(preparation.id)}
+                                  disabled={submitting}
+                                >
+                                  {submitting ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Tar bort...
+                                    </>
+                                  ) : (
+                                    "Ta bort"
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dialog för buddy preparation */}
+      {buddyEnabled && (
+        <Dialog open={showPreparationForm} onOpenChange={setShowPreparationForm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingPreparation ? 'Redigera förberedelse' : 'Skapa buddy-förberedelse'}
+              </DialogTitle>
+              <DialogDescription>
+                Förbered en kommande medarbetare genom att tilldela en buddy i förväg. Förberedelsen kommer automatiskt länkas när medarbetaren läggs till.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="upcoming-name">Namn på kommande medarbetare *</Label>
+                <Input
+                  id="upcoming-name"
+                  placeholder="Ange namn..."
+                  value={preparationForm.upcomingEmployeeName}
+                  onChange={(e) => setPreparationForm({
+                    ...preparationForm,
+                    upcomingEmployeeName: e.target.value
+                  })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="upcoming-email">E-post (valfritt)</Label>
+                <Input
+                  id="upcoming-email"
+                  type="email"
+                  placeholder="person@företag.se"
+                  value={preparationForm.upcomingEmployeeEmail}
+                  onChange={(e) => setPreparationForm({
+                    ...preparationForm,
+                    upcomingEmployeeEmail: e.target.value
+                  })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="prep-buddy">Buddy</Label>
+                <Select
+                  value={preparationForm.buddyId}
+                  onValueChange={(value) => setPreparationForm({
+                    ...preparationForm,
+                    buddyId: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj buddy..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buddies.map(buddy => (
+                      <SelectItem key={buddy.id} value={buddy.id}>
+                        {buddy.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="prep-notes">Anteckningar (valfritt)</Label>
+                <Textarea
+                  id="prep-notes"
+                  placeholder="Särskilda instruktioner eller anteckningar..."
+                  value={preparationForm.notes}
+                  onChange={(e) => setPreparationForm({
+                    ...preparationForm,
+                    notes: e.target.value
+                  })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Avbryt</Button>
+              </DialogClose>
+              <Button
+                onClick={editingPreparation ? handleUpdatePreparation : handleCreatePreparation}
+                disabled={submitting || !preparationForm.upcomingEmployeeName.trim()}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {editingPreparation ? 'Uppdaterar...' : 'Skapar...'}
+                  </>
+                ) : (
+                  editingPreparation ? 'Uppdatera' : 'Skapa'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Dialog för att tilldela buddy */}
       {buddyEnabled && (

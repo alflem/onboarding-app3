@@ -25,6 +25,24 @@ model User {
   buddy          User?          @relation("BuddyRelation", fields: [buddyId], references: [id])
   buddyFor       User[]         @relation("BuddyRelation")
   organization   Organization?  @relation(fields: [organizationId], references: [id])
+  buddyPreparations BuddyPreparation[] @relation("BuddyPreparations")
+  linkedPreparation BuddyPreparation? @relation("LinkedEmployee")
+}
+
+model BuddyPreparation {
+  id                    String        @id @default(cuid())
+  buddyId              String
+  upcomingEmployeeName String
+  upcomingEmployeeEmail String?
+  organizationId       String
+  linkedUserId         String?       @unique
+  isActive             Boolean       @default(true)
+  notes                String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  buddy                User          @relation("BuddyPreparations", fields: [buddyId], references: [id])
+  organization         Organization  @relation(fields: [organizationId], references: [id])
+  linkedUser           User?         @relation("LinkedEmployee", fields: [linkedUserId], references: [id])
 }
 
 model Account {
@@ -70,6 +88,7 @@ model Organization {
   updatedAt    DateTime  @updatedAt
   checklist    Checklist?
   users        User[]
+  buddyPreparations BuddyPreparation[]
 }
 
 model Checklist {

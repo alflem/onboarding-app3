@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/app/api/auth/auth-options";
 import { prisma } from "@/lib/prisma";
+import { hasBuddyPreparationModel } from "@/types/prisma-extended";
 
 // GET /api/employees - Hämta alla medarbetare för användarens organisation
 export async function GET() {
@@ -194,6 +195,40 @@ export async function POST(request: NextRequest) {
           data: progressData
         });
       }
+    }
+
+    // Koppla ihop med buddy preparation om det finns en som matchar e-post eller namn
+    if (hasBuddyPreparationModel(prisma)) {
+      try {
+        const matchingPreparations = await (prisma as any).buddyPreparation.findMany({
+          where: {
+            organizationId: organizationId,
+            isActive: true,
+            linkedUserId: null,
+            OR: [
+              { upcomingEmployeeEmail: body.email.trim().toLowerCase() },
+              { upcomingEmployeeName: body.name.trim() }
+            ]
+          }
+        });
+
+        // Koppla den första matchande preparationen till den nya användaren
+        if (matchingPreparations.length > 0) {
+          const preparation = matchingPreparations[0];
+          await (prisma as any).buddyPreparation.update({
+            where: { id: preparation.id },
+            data: { linkedUserId: newEmployee.id }
+          });
+
+          // Tilldela även buddy från preparationen
+          await prisma.user.update({
+            where: { id: newEmployee.id },
+            data: { buddyId: preparation.buddyId }
+          });
+        }
+             } catch (_error) {
+         console.log('BuddyPreparation model not available yet');
+       }
     }
 
     // Returnera den skapade medarbetaren med progress satt till 0 och hasBuddy satt till false
