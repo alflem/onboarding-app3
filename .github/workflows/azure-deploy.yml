@@ -37,11 +37,32 @@ jobs:
       run: |
         npm run build
 
-    - name: 'Run Prisma Migrations'
+    - name: 'Handle Database Schema'
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
-        npx prisma migrate deploy
+        echo "Attempting to run migrations..."
+
+        # Try to run migrations normally first
+        if npx prisma migrate deploy; then
+          echo "✅ Migrations completed successfully!"
+        elif npx prisma migrate status 2>&1 | grep -q "P3005\|not empty"; then
+          echo "⚠️  Database has existing schema. Creating baseline..."
+
+          # Mark existing migrations as applied (baseline)
+          echo "Marking existing migrations as applied..."
+          npx prisma migrate resolve --applied 20250527114024_initial || true
+          npx prisma migrate resolve --applied 20250527125728_add_task_link || true
+
+          # Now try to deploy the new migration
+          echo "Deploying new buddy preparation migration..."
+          npx prisma migrate deploy
+
+          echo "✅ Database schema updated successfully!"
+        else
+          echo "❌ Migration failed with unexpected error"
+          exit 1
+        fi
 
     - name: 'Create deployment package'
       run: |

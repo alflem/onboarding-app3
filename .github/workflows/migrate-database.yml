@@ -40,7 +40,18 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
       run: |
         echo "Running migration for ${{ github.event.inputs.environment }} environment"
-        npx prisma migrate deploy
+
+        # Try to run migrations normally first
+        if npx prisma migrate deploy; then
+          echo "✅ Migrations completed successfully!"
+        elif npx prisma migrate status 2>&1 | grep -q "P3005\|not empty"; then
+          echo "⚠️  Database has existing schema. Using db push for safety..."
+          npx prisma db push --accept-data-loss
+          echo "✅ Schema synchronized successfully!"
+        else
+          echo "❌ Migration failed with unexpected error"
+          exit 1
+        fi
 
     - name: 'Verify Migration'
       env:

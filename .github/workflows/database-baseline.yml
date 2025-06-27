@@ -1,0 +1,82 @@
+name: Database Baseline Setup
+
+# This workflow is for existing databases that need baseline migration setup
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "CONFIRM" to baseline existing database'
+        required: true
+        default: ''
+      environment:
+        description: 'Environment to baseline'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Validate Input'
+      run: |
+        if [ "${{ github.event.inputs.confirm }}" != "CONFIRM" ]; then
+          echo "❌ Please type CONFIRM to proceed with baseline setup"
+          exit 1
+        fi
+        echo "✅ Confirmation received, proceeding with baseline..."
+
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+        cache: 'npm'
+
+    - name: 'Install dependencies'
+      run: |
+        npm ci
+        npm install prisma @prisma/client
+
+    - name: 'Generate Prisma Client'
+      run: |
+        npx prisma generate
+
+    - name: 'Setup Database Baseline'
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        echo "🔍 Checking current migration status..."
+        npx prisma migrate status || true
+
+        echo "📝 Setting up baseline for existing database..."
+        echo "This will mark existing migrations as applied without running them."
+
+        # Mark existing migrations as applied (baseline)
+        echo "Marking initial migration as applied..."
+        npx prisma migrate resolve --applied 20250527114024_initial || echo "Migration already applied or doesn't exist"
+
+        echo "Marking task link migration as applied..."
+        npx prisma migrate resolve --applied 20250527125728_add_task_link || echo "Migration already applied or doesn't exist"
+
+        echo "✅ Baseline setup complete!"
+
+    - name: 'Deploy New Migrations'
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        echo "🚀 Deploying any new migrations..."
+        npx prisma migrate deploy
+
+    - name: 'Verify Final State'
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        echo "🔍 Final migration status:"
+        npx prisma migrate status

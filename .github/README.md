@@ -23,22 +23,48 @@ postgresql://username:password@server.postgres.database.azure.com:5432/database?
 
 ## Användning
 
-### Automatisk Deployment
+### 🚀 Automatisk Deployment (`azure-deploy.yml`)
 - Push till `main` eller `master` branch triggar automatisk deployment
-- Workflow kör migreringar och deployar till Azure
+- Workflow hanterar både nya och befintliga databaser automatiskt
+- Kör migreringar och deployar till Azure
 
-### Manuell Migration
+### 🔄 Manuell Migration (`migrate-database.yml`)
+För att köra migreringar utan full deployment:
 1. Gå till GitHub → Actions → "Database Migration"
 2. Klicka "Run workflow"
 3. Välj environment (production/staging)
 4. Klicka "Run workflow"
 
+### 📋 Database Baseline Setup (`database-baseline.yml`)
+**Endast för första gången** med befintlig databas:
+1. Gå till GitHub → Actions → "Database Baseline Setup"
+2. Klicka "Run workflow"
+3. Skriv "CONFIRM" i confirm-fältet
+4. Välj environment
+5. Klicka "Run workflow"
+
+> ⚠️ **OBS:** Baseline behövs bara första gången för befintliga databaser. Efter det fungerar automatiska deployments.
+
 ## Felsökning
 
-Om deployment misslyckas:
-1. Kontrollera att secrets är korrekt satta
+### ❌ Migration Error P3005 (Database not empty)
+**Symptom:** `The database schema is not empty`
+
+**Lösning:**
+1. Kör "Database Baseline Setup" workflow först (engångsjobb)
+2. Sedan fungerar vanliga deployments automatiskt
+
+### ❌ Deployment misslyckas
+1. Kontrollera att secrets är korrekt satta:
+   - `AZURE_WEBAPP_PUBLISH_PROFILE`
+   - `DATABASE_URL`
 2. Verifiera att Azure App Service namn matchar i workflow
-3. Kolla logs i GitHub Actions
+3. Kolla detaljerade logs i GitHub Actions
+
+### ❌ Prisma Client fel
+Om du ser `@prisma/engines` fel:
+- Workflows hanterar detta automatiskt med rätt engine-konfiguration
+- Kontrollera att Azure Application Settings är korrekta
 
 ## Azure App Service Settings
 
