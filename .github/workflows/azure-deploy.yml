@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: onboarding-55f7be69    # Ändra till ditt Azure App Service namn
+  AZURE_WEBAPP_NAME: onboarding-app          # Azure App Service namn
   AZURE_WEBAPP_PACKAGE_PATH: '.'            # path to your web app project
   NODE_VERSION: '22.x'                      # Node.js version
 
