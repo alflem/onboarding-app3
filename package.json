@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx prisma generate",
+    "postinstall": "npm install --include=dev && npx prisma generate",
     "migrate:deploy": "npx prisma migrate deploy",
-    "db:push": "npx prisma db push"
+    "db:push": "npx prisma db push",
+    "azure:setup": "npm install --include=dev && npx prisma generate && npx prisma db push"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
