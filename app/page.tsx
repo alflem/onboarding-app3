@@ -65,7 +65,7 @@ export default function Home() {
           if (!response.ok) {
             if (response.status === 401) {
               // Session expired, redirect to signin
-              window.location.href = "/auth/signin";
+              window.location.href = "/api/auth/signin";
               return;
             }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -230,7 +230,7 @@ export default function Home() {
                   {t('platform_intro')}
                 </p>
                 <Button asChild>
-                  <Link href="/auth/signin">{t('get_started_now')}</Link>
+                  <Link href="/api/auth/signin">{t('get_started_now')}</Link>
                 </Button>
               </CardContent>
             </Card>
