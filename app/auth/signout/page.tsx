@@ -7,7 +7,7 @@ export default function SignOutPage() {
   useEffect(() => {
     // Automatically sign out when this page loads
     signOut({
-      callbackUrl: "/api/auth/signin",
+      callbackUrl: "/api/auth/signin/azure-ad",
       redirect: true
     });
   }, []);

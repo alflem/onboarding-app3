@@ -19,7 +19,7 @@ export default withAuth(
       },
     },
     pages: {
-      signIn: '/api/auth/signin',
+      signIn: '/api/auth/signin/azure-ad',
       error: '/auth/error',
     }
   }
