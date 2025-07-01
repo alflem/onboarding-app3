@@ -52,9 +52,9 @@ export async function GET(_request: NextRequest) {
 
     // Beräkna statistik för varje checklist
     const checklistsWithStats = checklists.map((checklist: typeof checklists[0]) => {
-      const totalTasks = checklist.categories.reduce((sum, category) => sum + category.tasks.length, 0);
-      const buddyTasks = checklist.categories.reduce((sum, category) =>
-        sum + category.tasks.filter((task) => task.isBuddyTask).length, 0
+      const totalTasks = checklist.categories.reduce((sum: number, category: typeof checklist.categories[0]) => sum + category.tasks.length, 0);
+      const buddyTasks = checklist.categories.reduce((sum: number, category: typeof checklist.categories[0]) =>
+        sum + category.tasks.filter((task: typeof category.tasks[0]) => task.isBuddyTask).length, 0
       );
 
       return {

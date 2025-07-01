@@ -3,9 +3,12 @@ import { NextAuthOptions } from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { CustomPrismaAdapter } from "@/lib/auth/custom-prisma-adapter";
 import { updateUserOrganizationIfNeeded } from "@/lib/auth/organization-seeder";
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+
+// Define Role type manually since Prisma client generation has issues
+type Role = "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
 
 // Define type for Azure AD profile
 interface AzureADProfile {
