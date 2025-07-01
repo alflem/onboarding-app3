@@ -12,11 +12,6 @@ interface AzureADProfile {
   email: string;
   picture?: string;
   companyName?: string;
-  company_name?: string;
-  organization?: string;
-  org?: string;
-  company?: string;
-  employer?: string;
 }
 
 // Updated to trigger database reset and Demo Company creation
@@ -33,25 +28,8 @@ export const authOptions: NextAuthOptions = {
         }
       },
       profile(profile) {
-        // Try multiple possible fields for company name from Azure AD
         const azureProfile = profile as AzureADProfile;
-        let companyName =
-          profile.companyName ||
-          azureProfile.company_name ||
-          azureProfile.organization ||
-          azureProfile.org ||
-          azureProfile.company ||
-          azureProfile.employer ||
-          undefined;
-
-        // If we still don't have company name, try to extract from email domain
-        if (!companyName && profile.email) {
-          const domain = profile.email.split('@')[1];
-          if (domain && domain !== 'outlook.com' && domain !== 'hotmail.com' && domain !== 'gmail.com') {
-            // Convert domain to a reasonable company name (e.g., xlent.se -> XLENT)
-            companyName = domain.split('.')[0].toUpperCase();
-          }
-        }
+        const companyName = azureProfile.companyName || undefined;
 
         console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email})`);
 
@@ -78,29 +56,8 @@ export const authOptions: NextAuthOptions = {
       // Try to get company name from Azure AD profile
       if (account?.provider === "azure-ad" && profile) {
         const azureProfile = profile as AzureADProfile;
-        if (azureProfile.companyName || azureProfile.company_name) {
-          token.companyName = azureProfile.companyName || azureProfile.company_name;
-        } else if (account.access_token) {
-          try {
-            // Try to get company name from Microsoft Graph API
-            const graphResponse = await fetch('https://graph.microsoft.com/v1.0/me?$select=companyName,department', {
-              headers: {
-                'Authorization': `Bearer ${account.access_token}`,
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (graphResponse.ok) {
-              const graphData = await graphResponse.json();
-              if (graphData.companyName) {
-                token.companyName = graphData.companyName;
-              } else if (graphData.department) {
-                token.companyName = graphData.department;
-              }
-            }
-          } catch (error) {
-            console.error("Error fetching company information:", error);
-          }
+        if (azureProfile.companyName) {
+          token.companyName = azureProfile.companyName;
         }
       }
 
