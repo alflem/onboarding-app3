@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+import { signIn } from "next-auth/react";
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
@@ -34,12 +35,12 @@ function AuthErrorContent() {
             {getErrorMessage(error)}
           </p>
           <div className="mt-6">
-            <Link
-              href="/auth/signin"
+            <button
+              onClick={() => signIn("azure-ad", { callbackUrl: "/" })}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Try Again
-            </Link>
+            </button>
           </div>
         </div>
       </div>

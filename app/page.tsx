@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
+import { signIn } from "next-auth/react";
 
 interface Organization {
   id: string;
@@ -65,7 +66,7 @@ export default function Home() {
           if (!response.ok) {
             if (response.status === 401) {
               // Session expired, redirect to signin
-              window.location.href = "/auth/signin";
+              window.location.href = "/api/auth/signin";
               return;
             }
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -229,8 +230,8 @@ export default function Home() {
                 <p>
                   {t('platform_intro')}
                 </p>
-                <Button asChild>
-                  <Link href="/auth/signin">{t('get_started_now')}</Link>
+                <Button onClick={() => signIn("azure-ad", { callbackUrl: "/" })}>
+                  {t('get_started_now')}
                 </Button>
               </CardContent>
             </Card>
