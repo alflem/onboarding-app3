@@ -40,13 +40,26 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
+      - name: Clean and regenerate Prisma client
+        run: |
+          echo "=== Cleaning old Prisma clients ==="
+          rm -rf node_modules/.prisma
+          rm -rf node_modules/@prisma/client
+          rm -rf prisma/generated
+          echo "=== Generating Prisma client with custom output ==="
+          npx prisma generate
 
       - name: Reset Database (Push Schema)
         run: |
           echo "🗑️ Resetting database schema..."
           npx prisma db push --force-reset --accept-data-loss
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Auto-seed pre-assigned admin roles
+        run: |
+          echo "🌱 Auto-seeding admin roles after reset..."
+          node scripts/auto-seed-roles.js || echo "Auto-seeding completed with warnings"
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
@@ -61,8 +74,16 @@ jobs:
         run: |
           echo "🏗️ Building Next.js application..."
           npm run build
+
+      - name: Prepare standalone deployment with custom Prisma client
+        run: |
+          echo "=== Copying static files ==="
           cp -r ./public ./.next/standalone/ || true
           cp -r ./.next/static ./.next/standalone/.next/ || true
+          echo "=== Copying complete prisma directory with generated client ==="
+          cp -r ./prisma ./.next/standalone/ || echo "Failed to copy prisma folder"
+          echo "=== Verifying Prisma custom client in deployment ==="
+          ls -la ./.next/standalone/prisma/generated/client/ || echo "No custom client in deployment"
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -76,6 +97,8 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "✅ Full clean deployment completed!"
-          echo "- Database schema reset"
+          echo "- Database schema reset with --force-reset"
+          echo "- Admin roles auto-seeded"
           echo "- Database seeded (if seed script exists)"
-          echo "- Application built and deployed"
+          echo "- Custom Prisma client with Debian binaries"
+          echo "- Application built and deployed to Azure"

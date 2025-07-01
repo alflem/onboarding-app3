@@ -6,9 +6,10 @@ const prisma = new PrismaClient();
 
 // Define the email addresses and their roles
 const PRE_ASSIGNED_ROLES = [
-  { email: "albin.flemstrom@xlent.se", role: "SUPER_ADMIN" },
-  { email: "admin@xlent.se", role: "SUPER_ADMIN" },
-  { email: "manager@xlent.se", role: "ADMIN" },
+  { email: "albin.flemstrom@xlent.se", role: "SUPER_ADMIN"},
+  { email: "emmy.valfridsson@xlent.se", role: "SUPER_ADMIN"},
+  { email: "christian.werme@xlent.se", role: "SUPER_ADMIN"},
+  { email: "anders.falkeholm@xlent.se", role: "SUPER_ADMIN"},
   // Add more email addresses as needed - just add them to this array
   // { email: "another-admin@xlent.se", role: "ADMIN" },
 ];
