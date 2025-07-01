@@ -9,6 +9,7 @@ on:
 env:
   APPLICATION_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
   WEBAPP_NAME: "onboarding-app"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
 jobs:
   build:
@@ -22,9 +23,25 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: npm install, build, and test
+      - name: npm install and generate Prisma client
         run: |
           npm install
+          npx prisma generate
+
+      - name: Run database migrations
+        run: |
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Seed database (optional)
+        run: |
+          npx prisma db seed || echo "No seed script found, skipping..."
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Build application
+        run: |
           npm run build
           cp -r ./public ./.next/standalone/ || true
           cp -r ./.next/static ./.next/standalone/.next/ || true
