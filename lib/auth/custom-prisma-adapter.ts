@@ -1,6 +1,6 @@
 // lib/auth/custom-prisma-adapter.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@/lib/prisma";
+import { PrismaClient } from "@/prisma/generated/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { findOrCreateOrganization } from "./organization-seeder";
 
@@ -10,7 +10,7 @@ interface ExtendedAdapterUser extends AdapterUser {
 }
 
 export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
-  const standardAdapter = PrismaAdapter(prisma as any);
+  const standardAdapter = PrismaAdapter(prisma as Parameters<typeof PrismaAdapter>[0]);
 
   return {
     ...standardAdapter,
@@ -79,7 +79,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         // Check for active buddy preparation and link automatically
         if (user.email) {
           try {
-            const buddyPreparation = await prisma.buddyPreparation.findFirst({
+            const buddyPreparation = await (prisma as any).buddyPreparation.findFirst({
               where: {
                 email: user.email.toLowerCase(),
                 organizationId: organization.id,
@@ -99,7 +99,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
               });
 
               // Update buddy preparation to mark as completed and link to user
-              await prisma.buddyPreparation.update({
+              await (prisma as any).buddyPreparation.update({
                 where: { id: buddyPreparation.id },
                 data: {
                   userId: newUser.id,

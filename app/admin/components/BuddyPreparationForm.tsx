@@ -87,7 +87,7 @@ export default function BuddyPreparationForm({
     if (isOpen && !potentialBuddies.length) {
       fetchPotentialBuddies();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchPotentialBuddies, potentialBuddies.length]);
 
   const fetchPotentialBuddies = async () => {
     try {
