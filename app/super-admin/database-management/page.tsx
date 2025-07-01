@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3 } from "lucide-react";
+import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import OrganizationForm from "./components/OrganizationForm";
 import UserForm from "./components/UserForm";
+import PreAssignedRoleForm from "./components/PreAssignedRoleForm";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
 
@@ -112,6 +113,14 @@ interface BuddyData {
   };
 }
 
+interface PreAssignedRole {
+  id: string;
+  email: string;
+  role: "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE";
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function DatabaseManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -125,6 +134,7 @@ export default function DatabaseManagementPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [buddyData, setBuddyData] = useState<BuddyData[]>([]);
+  const [preAssignedRoles, setPreAssignedRoles] = useState<PreAssignedRole[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -143,12 +153,13 @@ export default function DatabaseManagementPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [orgRes, userRes, taskRes, checklistRes, buddyRes] = await Promise.all([
+      const [orgRes, userRes, taskRes, checklistRes, buddyRes, preAssignedRes] = await Promise.all([
         fetch("/api/super-admin/organizations"),
         fetch("/api/super-admin/users"),
         fetch("/api/super-admin/tasks"),
         fetch("/api/super-admin/checklists"),
-        fetch("/api/super-admin/buddies")
+        fetch("/api/super-admin/buddies"),
+        fetch("/api/super-admin/pre-assigned-roles")
       ]);
 
       if (orgRes.ok) {
@@ -174,6 +185,11 @@ export default function DatabaseManagementPage() {
       if (buddyRes.ok) {
         const buddyDataRes = await buddyRes.json();
         setBuddyData(buddyDataRes.data);
+      }
+
+      if (preAssignedRes.ok) {
+        const preAssignedData = await preAssignedRes.json();
+        setPreAssignedRoles(preAssignedData.data || []);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -204,6 +220,31 @@ export default function DatabaseManagementPage() {
       }
     } catch (error) {
       console.error("Error deleting:", error);
+      alert("Fel vid borttagning");
+    }
+  };
+
+  // Hantera borttagning av fördefinierade roller
+  const handleDeletePreAssignedRole = async (email: string) => {
+    if (!confirm(`Är du säker på att du vill ta bort den fördefinierade rollen för ${email}?`)) return;
+
+    try {
+      const response = await fetch("/api/super-admin/pre-assigned-roles", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        fetchData(); // Ladda om data
+      } else {
+        const error = await response.json();
+        alert(error.error || "Fel vid borttagning");
+      }
+    } catch (error) {
+      console.error("Error deleting pre-assigned role:", error);
       alert("Fel vid borttagning");
     }
   };
@@ -309,7 +350,7 @@ export default function DatabaseManagementPage() {
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             {t('organizations')} ({organizations.length})
@@ -325,6 +366,10 @@ export default function DatabaseManagementPage() {
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             {t('users')} ({users.length})
+          </TabsTrigger>
+          <TabsTrigger value="pre-assigned-roles" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Fördefinierade Roller ({preAssignedRoles.length})
           </TabsTrigger>
           <TabsTrigger value="tasks" className="flex items-center gap-2">
             <CheckSquare className="h-4 w-4" />
@@ -806,8 +851,143 @@ export default function DatabaseManagementPage() {
               </div>
             </CardContent>
           </Card>
+                </TabsContent>
+
+        {/* Fördefinierade Roller */}
+        <TabsContent value="pre-assigned-roles">
+          <div className="space-y-6">
+            {/* Formulär för att lägga till nya fördefinierade roller */}
+            <PreAssignedRoleForm onRoleAdded={fetchData} />
+
+            {/* Lista över befintliga fördefinierade roller */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Befintliga Fördefinierade Roller
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {preAssignedRoles.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Inga fördefinierade roller finns ännu</p>
+                    <p className="text-sm">Använd formuläret ovan för att lägga till roller</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>E-postadress</TableHead>
+                            <TableHead>Roll</TableHead>
+                            <TableHead>Skapad</TableHead>
+                            <TableHead>Uppdaterad</TableHead>
+                            <TableHead className="text-right">Åtgärder</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {preAssignedRoles.map((preRole) => (
+                            <TableRow key={preRole.id}>
+                              <TableCell className="font-medium">{preRole.email}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    preRole.role === "SUPER_ADMIN" ? "destructive" :
+                                    preRole.role === "ADMIN" ? "default" : "secondary"
+                                  }
+                                >
+                                  {preRole.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(preRole.createdAt).toLocaleDateString("sv-SE")}</TableCell>
+                              <TableCell>{new Date(preRole.updatedAt).toLocaleDateString("sv-SE")}</TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeletePreAssignedRole(preRole.email)}
+                                  title={`Ta bort fördefinierad roll för ${preRole.email}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
+                      {preAssignedRoles.map((preRole) => (
+                        <Card key={preRole.id} className="border">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="font-medium">{preRole.email}</div>
+                              <Badge
+                                variant={
+                                  preRole.role === "SUPER_ADMIN" ? "destructive" :
+                                  preRole.role === "ADMIN" ? "default" : "secondary"
+                                }
+                              >
+                                {preRole.role}
+                              </Badge>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground mb-3">
+                              <div>
+                                <span className="font-medium">Skapad:</span> {new Date(preRole.createdAt).toLocaleDateString("sv-SE")}
+                              </div>
+                              <div>
+                                <span className="font-medium">Uppdaterad:</span> {new Date(preRole.updatedAt).toLocaleDateString("sv-SE")}
+                              </div>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeletePreAssignedRole(preRole.email)}
+                                title={`Ta bort fördefinierad roll för ${preRole.email}`}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Ta bort
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Summary Stats */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-red-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                          {preAssignedRoles.filter(r => r.role === "SUPER_ADMIN").length}
+                        </div>
+                        <div className="text-sm text-red-700">Super Admin</div>
+                      </div>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {preAssignedRoles.filter(r => r.role === "ADMIN").length}
+                        </div>
+                        <div className="text-sm text-blue-700">Admin</div>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-600">
+                          {preAssignedRoles.filter(r => r.role === "EMPLOYEE").length}
+                        </div>
+                        <div className="text-sm text-gray-700">Employee</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
-            </Tabs>
+      </Tabs>
 
       {/* Formulär för organisationer */}
       <OrganizationForm
