@@ -63,6 +63,11 @@ export type TaskProgress = $Result.DefaultSelection<Prisma.$TaskProgressPayload>
  * 
  */
 export type PreAssignedRole = $Result.DefaultSelection<Prisma.$PreAssignedRolePayload>
+/**
+ * Model BuddyPreparation
+ * 
+ */
+export type BuddyPreparation = $Result.DefaultSelection<Prisma.$BuddyPreparationPayload>
 
 /**
  * Enums
@@ -306,6 +311,16 @@ export class PrismaClient<
     * ```
     */
   get preAssignedRole(): Prisma.PreAssignedRoleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.buddyPreparation`: Exposes CRUD operations for the **BuddyPreparation** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BuddyPreparations
+    * const buddyPreparations = await prisma.buddyPreparation.findMany()
+    * ```
+    */
+  get buddyPreparation(): Prisma.BuddyPreparationDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -755,7 +770,8 @@ export namespace Prisma {
     Category: 'Category',
     Task: 'Task',
     TaskProgress: 'TaskProgress',
-    PreAssignedRole: 'PreAssignedRole'
+    PreAssignedRole: 'PreAssignedRole',
+    BuddyPreparation: 'BuddyPreparation'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -774,7 +790,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "organization" | "checklist" | "category" | "task" | "taskProgress" | "preAssignedRole"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "organization" | "checklist" | "category" | "task" | "taskProgress" | "preAssignedRole" | "buddyPreparation"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1518,6 +1534,80 @@ export namespace Prisma {
           }
         }
       }
+      BuddyPreparation: {
+        payload: Prisma.$BuddyPreparationPayload<ExtArgs>
+        fields: Prisma.BuddyPreparationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BuddyPreparationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BuddyPreparationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          findFirst: {
+            args: Prisma.BuddyPreparationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BuddyPreparationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          findMany: {
+            args: Prisma.BuddyPreparationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>[]
+          }
+          create: {
+            args: Prisma.BuddyPreparationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          createMany: {
+            args: Prisma.BuddyPreparationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BuddyPreparationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>[]
+          }
+          delete: {
+            args: Prisma.BuddyPreparationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          update: {
+            args: Prisma.BuddyPreparationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          deleteMany: {
+            args: Prisma.BuddyPreparationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BuddyPreparationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BuddyPreparationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>[]
+          }
+          upsert: {
+            args: Prisma.BuddyPreparationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationPayload>
+          }
+          aggregate: {
+            args: Prisma.BuddyPreparationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBuddyPreparation>
+          }
+          groupBy: {
+            args: Prisma.BuddyPreparationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BuddyPreparationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BuddyPreparationCountArgs<ExtArgs>
+            result: $Utils.Optional<BuddyPreparationCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1612,6 +1702,7 @@ export namespace Prisma {
     task?: TaskOmit
     taskProgress?: TaskProgressOmit
     preAssignedRole?: PreAssignedRoleOmit
+    buddyPreparation?: BuddyPreparationOmit
   }
 
   /* Types for Logging */
@@ -1710,6 +1801,7 @@ export namespace Prisma {
     sessions: number
     progress: number
     buddyFor: number
+    buddyPreparationsAsBuddy: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1717,6 +1809,7 @@ export namespace Prisma {
     sessions?: boolean | UserCountOutputTypeCountSessionsArgs
     progress?: boolean | UserCountOutputTypeCountProgressArgs
     buddyFor?: boolean | UserCountOutputTypeCountBuddyForArgs
+    buddyPreparationsAsBuddy?: boolean | UserCountOutputTypeCountBuddyPreparationsAsBuddyArgs
   }
 
   // Custom InputTypes
@@ -1758,6 +1851,13 @@ export namespace Prisma {
     where?: UserWhereInput
   }
 
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountBuddyPreparationsAsBuddyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationWhereInput
+  }
+
 
   /**
    * Count Type OrganizationCountOutputType
@@ -1765,10 +1865,12 @@ export namespace Prisma {
 
   export type OrganizationCountOutputType = {
     users: number
+    buddyPreparations: number
   }
 
   export type OrganizationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | OrganizationCountOutputTypeCountUsersArgs
+    buddyPreparations?: boolean | OrganizationCountOutputTypeCountBuddyPreparationsArgs
   }
 
   // Custom InputTypes
@@ -1787,6 +1889,13 @@ export namespace Prisma {
    */
   export type OrganizationCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
+  }
+
+  /**
+   * OrganizationCountOutputType without action
+   */
+  export type OrganizationCountOutputTypeCountBuddyPreparationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationWhereInput
   }
 
 
@@ -2105,6 +2214,8 @@ export namespace Prisma {
     buddy?: boolean | User$buddyArgs<ExtArgs>
     buddyFor?: boolean | User$buddyForArgs<ExtArgs>
     organization?: boolean | User$organizationArgs<ExtArgs>
+    buddyPreparationsAsBuddy?: boolean | User$buddyPreparationsAsBuddyArgs<ExtArgs>
+    buddyPreparationAsUser?: boolean | User$buddyPreparationAsUserArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2162,6 +2273,8 @@ export namespace Prisma {
     buddy?: boolean | User$buddyArgs<ExtArgs>
     buddyFor?: boolean | User$buddyForArgs<ExtArgs>
     organization?: boolean | User$organizationArgs<ExtArgs>
+    buddyPreparationsAsBuddy?: boolean | User$buddyPreparationsAsBuddyArgs<ExtArgs>
+    buddyPreparationAsUser?: boolean | User$buddyPreparationAsUserArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2182,6 +2295,8 @@ export namespace Prisma {
       buddy: Prisma.$UserPayload<ExtArgs> | null
       buddyFor: Prisma.$UserPayload<ExtArgs>[]
       organization: Prisma.$OrganizationPayload<ExtArgs> | null
+      buddyPreparationsAsBuddy: Prisma.$BuddyPreparationPayload<ExtArgs>[]
+      buddyPreparationAsUser: Prisma.$BuddyPreparationPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2595,6 +2710,8 @@ export namespace Prisma {
     buddy<T extends User$buddyArgs<ExtArgs> = {}>(args?: Subset<T, User$buddyArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     buddyFor<T extends User$buddyForArgs<ExtArgs> = {}>(args?: Subset<T, User$buddyForArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     organization<T extends User$organizationArgs<ExtArgs> = {}>(args?: Subset<T, User$organizationArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    buddyPreparationsAsBuddy<T extends User$buddyPreparationsAsBuddyArgs<ExtArgs> = {}>(args?: Subset<T, User$buddyPreparationsAsBuddyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    buddyPreparationAsUser<T extends User$buddyPreparationAsUserArgs<ExtArgs> = {}>(args?: Subset<T, User$buddyPreparationAsUserArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3162,6 +3279,49 @@ export namespace Prisma {
      */
     include?: OrganizationInclude<ExtArgs> | null
     where?: OrganizationWhereInput
+  }
+
+  /**
+   * User.buddyPreparationsAsBuddy
+   */
+  export type User$buddyPreparationsAsBuddyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    where?: BuddyPreparationWhereInput
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    cursor?: BuddyPreparationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BuddyPreparationScalarFieldEnum | BuddyPreparationScalarFieldEnum[]
+  }
+
+  /**
+   * User.buddyPreparationAsUser
+   */
+  export type User$buddyPreparationAsUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    where?: BuddyPreparationWhereInput
   }
 
   /**
@@ -6555,6 +6715,7 @@ export namespace Prisma {
     updatedAt?: boolean
     checklist?: boolean | Organization$checklistArgs<ExtArgs>
     users?: boolean | Organization$usersArgs<ExtArgs>
+    buddyPreparations?: boolean | Organization$buddyPreparationsArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
@@ -6586,6 +6747,7 @@ export namespace Prisma {
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     checklist?: boolean | Organization$checklistArgs<ExtArgs>
     users?: boolean | Organization$usersArgs<ExtArgs>
+    buddyPreparations?: boolean | Organization$buddyPreparationsArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -6596,6 +6758,7 @@ export namespace Prisma {
     objects: {
       checklist: Prisma.$ChecklistPayload<ExtArgs> | null
       users: Prisma.$UserPayload<ExtArgs>[]
+      buddyPreparations: Prisma.$BuddyPreparationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6999,6 +7162,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     checklist<T extends Organization$checklistArgs<ExtArgs> = {}>(args?: Subset<T, Organization$checklistArgs<ExtArgs>>): Prisma__ChecklistClient<$Result.GetResult<Prisma.$ChecklistPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     users<T extends Organization$usersArgs<ExtArgs> = {}>(args?: Subset<T, Organization$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    buddyPreparations<T extends Organization$buddyPreparationsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$buddyPreparationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7461,6 +7625,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Organization.buddyPreparations
+   */
+  export type Organization$buddyPreparationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    where?: BuddyPreparationWhereInput
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    cursor?: BuddyPreparationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BuddyPreparationScalarFieldEnum | BuddyPreparationScalarFieldEnum[]
   }
 
   /**
@@ -12941,6 +13129,1177 @@ export namespace Prisma {
 
 
   /**
+   * Model BuddyPreparation
+   */
+
+  export type AggregateBuddyPreparation = {
+    _count: BuddyPreparationCountAggregateOutputType | null
+    _min: BuddyPreparationMinAggregateOutputType | null
+    _max: BuddyPreparationMaxAggregateOutputType | null
+  }
+
+  export type BuddyPreparationMinAggregateOutputType = {
+    id: string | null
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    buddyId: string | null
+    organizationId: string | null
+    isActive: boolean | null
+    userId: string | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BuddyPreparationMaxAggregateOutputType = {
+    id: string | null
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    buddyId: string | null
+    organizationId: string | null
+    isActive: boolean | null
+    userId: string | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BuddyPreparationCountAggregateOutputType = {
+    id: number
+    firstName: number
+    lastName: number
+    email: number
+    buddyId: number
+    organizationId: number
+    isActive: number
+    userId: number
+    notes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BuddyPreparationMinAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    buddyId?: true
+    organizationId?: true
+    isActive?: true
+    userId?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BuddyPreparationMaxAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    buddyId?: true
+    organizationId?: true
+    isActive?: true
+    userId?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BuddyPreparationCountAggregateInputType = {
+    id?: true
+    firstName?: true
+    lastName?: true
+    email?: true
+    buddyId?: true
+    organizationId?: true
+    isActive?: true
+    userId?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BuddyPreparationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BuddyPreparation to aggregate.
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparations to fetch.
+     */
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BuddyPreparationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BuddyPreparations
+    **/
+    _count?: true | BuddyPreparationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BuddyPreparationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BuddyPreparationMaxAggregateInputType
+  }
+
+  export type GetBuddyPreparationAggregateType<T extends BuddyPreparationAggregateArgs> = {
+        [P in keyof T & keyof AggregateBuddyPreparation]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBuddyPreparation[P]>
+      : GetScalarType<T[P], AggregateBuddyPreparation[P]>
+  }
+
+
+
+
+  export type BuddyPreparationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationWhereInput
+    orderBy?: BuddyPreparationOrderByWithAggregationInput | BuddyPreparationOrderByWithAggregationInput[]
+    by: BuddyPreparationScalarFieldEnum[] | BuddyPreparationScalarFieldEnum
+    having?: BuddyPreparationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BuddyPreparationCountAggregateInputType | true
+    _min?: BuddyPreparationMinAggregateInputType
+    _max?: BuddyPreparationMaxAggregateInputType
+  }
+
+  export type BuddyPreparationGroupByOutputType = {
+    id: string
+    firstName: string
+    lastName: string
+    email: string | null
+    buddyId: string
+    organizationId: string
+    isActive: boolean
+    userId: string | null
+    notes: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BuddyPreparationCountAggregateOutputType | null
+    _min: BuddyPreparationMinAggregateOutputType | null
+    _max: BuddyPreparationMaxAggregateOutputType | null
+  }
+
+  type GetBuddyPreparationGroupByPayload<T extends BuddyPreparationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BuddyPreparationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BuddyPreparationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BuddyPreparationGroupByOutputType[P]>
+            : GetScalarType<T[P], BuddyPreparationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BuddyPreparationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    buddyId?: boolean
+    organizationId?: boolean
+    isActive?: boolean
+    userId?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparation"]>
+
+  export type BuddyPreparationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    buddyId?: boolean
+    organizationId?: boolean
+    isActive?: boolean
+    userId?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparation"]>
+
+  export type BuddyPreparationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    buddyId?: boolean
+    organizationId?: boolean
+    isActive?: boolean
+    userId?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparation"]>
+
+  export type BuddyPreparationSelectScalar = {
+    id?: boolean
+    firstName?: boolean
+    lastName?: boolean
+    email?: boolean
+    buddyId?: boolean
+    organizationId?: boolean
+    isActive?: boolean
+    userId?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BuddyPreparationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "firstName" | "lastName" | "email" | "buddyId" | "organizationId" | "isActive" | "userId" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["buddyPreparation"]>
+  export type BuddyPreparationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }
+  export type BuddyPreparationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }
+  export type BuddyPreparationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    buddy?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+  }
+
+  export type $BuddyPreparationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BuddyPreparation"
+    objects: {
+      buddy: Prisma.$UserPayload<ExtArgs>
+      organization: Prisma.$OrganizationPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      firstName: string
+      lastName: string
+      email: string | null
+      buddyId: string
+      organizationId: string
+      isActive: boolean
+      userId: string | null
+      notes: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["buddyPreparation"]>
+    composites: {}
+  }
+
+  type BuddyPreparationGetPayload<S extends boolean | null | undefined | BuddyPreparationDefaultArgs> = $Result.GetResult<Prisma.$BuddyPreparationPayload, S>
+
+  type BuddyPreparationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BuddyPreparationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BuddyPreparationCountAggregateInputType | true
+    }
+
+  export interface BuddyPreparationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BuddyPreparation'], meta: { name: 'BuddyPreparation' } }
+    /**
+     * Find zero or one BuddyPreparation that matches the filter.
+     * @param {BuddyPreparationFindUniqueArgs} args - Arguments to find a BuddyPreparation
+     * @example
+     * // Get one BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BuddyPreparationFindUniqueArgs>(args: SelectSubset<T, BuddyPreparationFindUniqueArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BuddyPreparation that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BuddyPreparationFindUniqueOrThrowArgs} args - Arguments to find a BuddyPreparation
+     * @example
+     * // Get one BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BuddyPreparationFindUniqueOrThrowArgs>(args: SelectSubset<T, BuddyPreparationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BuddyPreparation that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationFindFirstArgs} args - Arguments to find a BuddyPreparation
+     * @example
+     * // Get one BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BuddyPreparationFindFirstArgs>(args?: SelectSubset<T, BuddyPreparationFindFirstArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BuddyPreparation that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationFindFirstOrThrowArgs} args - Arguments to find a BuddyPreparation
+     * @example
+     * // Get one BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BuddyPreparationFindFirstOrThrowArgs>(args?: SelectSubset<T, BuddyPreparationFindFirstOrThrowArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BuddyPreparations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BuddyPreparations
+     * const buddyPreparations = await prisma.buddyPreparation.findMany()
+     * 
+     * // Get first 10 BuddyPreparations
+     * const buddyPreparations = await prisma.buddyPreparation.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const buddyPreparationWithIdOnly = await prisma.buddyPreparation.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BuddyPreparationFindManyArgs>(args?: SelectSubset<T, BuddyPreparationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BuddyPreparation.
+     * @param {BuddyPreparationCreateArgs} args - Arguments to create a BuddyPreparation.
+     * @example
+     * // Create one BuddyPreparation
+     * const BuddyPreparation = await prisma.buddyPreparation.create({
+     *   data: {
+     *     // ... data to create a BuddyPreparation
+     *   }
+     * })
+     * 
+     */
+    create<T extends BuddyPreparationCreateArgs>(args: SelectSubset<T, BuddyPreparationCreateArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BuddyPreparations.
+     * @param {BuddyPreparationCreateManyArgs} args - Arguments to create many BuddyPreparations.
+     * @example
+     * // Create many BuddyPreparations
+     * const buddyPreparation = await prisma.buddyPreparation.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BuddyPreparationCreateManyArgs>(args?: SelectSubset<T, BuddyPreparationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BuddyPreparations and returns the data saved in the database.
+     * @param {BuddyPreparationCreateManyAndReturnArgs} args - Arguments to create many BuddyPreparations.
+     * @example
+     * // Create many BuddyPreparations
+     * const buddyPreparation = await prisma.buddyPreparation.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BuddyPreparations and only return the `id`
+     * const buddyPreparationWithIdOnly = await prisma.buddyPreparation.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BuddyPreparationCreateManyAndReturnArgs>(args?: SelectSubset<T, BuddyPreparationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BuddyPreparation.
+     * @param {BuddyPreparationDeleteArgs} args - Arguments to delete one BuddyPreparation.
+     * @example
+     * // Delete one BuddyPreparation
+     * const BuddyPreparation = await prisma.buddyPreparation.delete({
+     *   where: {
+     *     // ... filter to delete one BuddyPreparation
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BuddyPreparationDeleteArgs>(args: SelectSubset<T, BuddyPreparationDeleteArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BuddyPreparation.
+     * @param {BuddyPreparationUpdateArgs} args - Arguments to update one BuddyPreparation.
+     * @example
+     * // Update one BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BuddyPreparationUpdateArgs>(args: SelectSubset<T, BuddyPreparationUpdateArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BuddyPreparations.
+     * @param {BuddyPreparationDeleteManyArgs} args - Arguments to filter BuddyPreparations to delete.
+     * @example
+     * // Delete a few BuddyPreparations
+     * const { count } = await prisma.buddyPreparation.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BuddyPreparationDeleteManyArgs>(args?: SelectSubset<T, BuddyPreparationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BuddyPreparations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BuddyPreparations
+     * const buddyPreparation = await prisma.buddyPreparation.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BuddyPreparationUpdateManyArgs>(args: SelectSubset<T, BuddyPreparationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BuddyPreparations and returns the data updated in the database.
+     * @param {BuddyPreparationUpdateManyAndReturnArgs} args - Arguments to update many BuddyPreparations.
+     * @example
+     * // Update many BuddyPreparations
+     * const buddyPreparation = await prisma.buddyPreparation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BuddyPreparations and only return the `id`
+     * const buddyPreparationWithIdOnly = await prisma.buddyPreparation.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BuddyPreparationUpdateManyAndReturnArgs>(args: SelectSubset<T, BuddyPreparationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BuddyPreparation.
+     * @param {BuddyPreparationUpsertArgs} args - Arguments to update or create a BuddyPreparation.
+     * @example
+     * // Update or create a BuddyPreparation
+     * const buddyPreparation = await prisma.buddyPreparation.upsert({
+     *   create: {
+     *     // ... data to create a BuddyPreparation
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BuddyPreparation we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BuddyPreparationUpsertArgs>(args: SelectSubset<T, BuddyPreparationUpsertArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BuddyPreparations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationCountArgs} args - Arguments to filter BuddyPreparations to count.
+     * @example
+     * // Count the number of BuddyPreparations
+     * const count = await prisma.buddyPreparation.count({
+     *   where: {
+     *     // ... the filter for the BuddyPreparations we want to count
+     *   }
+     * })
+    **/
+    count<T extends BuddyPreparationCountArgs>(
+      args?: Subset<T, BuddyPreparationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BuddyPreparationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BuddyPreparation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BuddyPreparationAggregateArgs>(args: Subset<T, BuddyPreparationAggregateArgs>): Prisma.PrismaPromise<GetBuddyPreparationAggregateType<T>>
+
+    /**
+     * Group by BuddyPreparation.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BuddyPreparationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BuddyPreparationGroupByArgs['orderBy'] }
+        : { orderBy?: BuddyPreparationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BuddyPreparationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBuddyPreparationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BuddyPreparation model
+   */
+  readonly fields: BuddyPreparationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BuddyPreparation.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BuddyPreparationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    buddy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends BuddyPreparation$userArgs<ExtArgs> = {}>(args?: Subset<T, BuddyPreparation$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BuddyPreparation model
+   */
+  interface BuddyPreparationFieldRefs {
+    readonly id: FieldRef<"BuddyPreparation", 'String'>
+    readonly firstName: FieldRef<"BuddyPreparation", 'String'>
+    readonly lastName: FieldRef<"BuddyPreparation", 'String'>
+    readonly email: FieldRef<"BuddyPreparation", 'String'>
+    readonly buddyId: FieldRef<"BuddyPreparation", 'String'>
+    readonly organizationId: FieldRef<"BuddyPreparation", 'String'>
+    readonly isActive: FieldRef<"BuddyPreparation", 'Boolean'>
+    readonly userId: FieldRef<"BuddyPreparation", 'String'>
+    readonly notes: FieldRef<"BuddyPreparation", 'String'>
+    readonly createdAt: FieldRef<"BuddyPreparation", 'DateTime'>
+    readonly updatedAt: FieldRef<"BuddyPreparation", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BuddyPreparation findUnique
+   */
+  export type BuddyPreparationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparation to fetch.
+     */
+    where: BuddyPreparationWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparation findUniqueOrThrow
+   */
+  export type BuddyPreparationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparation to fetch.
+     */
+    where: BuddyPreparationWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparation findFirst
+   */
+  export type BuddyPreparationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparation to fetch.
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparations to fetch.
+     */
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BuddyPreparations.
+     */
+    cursor?: BuddyPreparationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BuddyPreparations.
+     */
+    distinct?: BuddyPreparationScalarFieldEnum | BuddyPreparationScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparation findFirstOrThrow
+   */
+  export type BuddyPreparationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparation to fetch.
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparations to fetch.
+     */
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BuddyPreparations.
+     */
+    cursor?: BuddyPreparationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BuddyPreparations.
+     */
+    distinct?: BuddyPreparationScalarFieldEnum | BuddyPreparationScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparation findMany
+   */
+  export type BuddyPreparationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparations to fetch.
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparations to fetch.
+     */
+    orderBy?: BuddyPreparationOrderByWithRelationInput | BuddyPreparationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BuddyPreparations.
+     */
+    cursor?: BuddyPreparationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparations.
+     */
+    skip?: number
+    distinct?: BuddyPreparationScalarFieldEnum | BuddyPreparationScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparation create
+   */
+  export type BuddyPreparationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BuddyPreparation.
+     */
+    data: XOR<BuddyPreparationCreateInput, BuddyPreparationUncheckedCreateInput>
+  }
+
+  /**
+   * BuddyPreparation createMany
+   */
+  export type BuddyPreparationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BuddyPreparations.
+     */
+    data: BuddyPreparationCreateManyInput | BuddyPreparationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BuddyPreparation createManyAndReturn
+   */
+  export type BuddyPreparationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * The data used to create many BuddyPreparations.
+     */
+    data: BuddyPreparationCreateManyInput | BuddyPreparationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BuddyPreparation update
+   */
+  export type BuddyPreparationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BuddyPreparation.
+     */
+    data: XOR<BuddyPreparationUpdateInput, BuddyPreparationUncheckedUpdateInput>
+    /**
+     * Choose, which BuddyPreparation to update.
+     */
+    where: BuddyPreparationWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparation updateMany
+   */
+  export type BuddyPreparationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BuddyPreparations.
+     */
+    data: XOR<BuddyPreparationUpdateManyMutationInput, BuddyPreparationUncheckedUpdateManyInput>
+    /**
+     * Filter which BuddyPreparations to update
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * Limit how many BuddyPreparations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BuddyPreparation updateManyAndReturn
+   */
+  export type BuddyPreparationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * The data used to update BuddyPreparations.
+     */
+    data: XOR<BuddyPreparationUpdateManyMutationInput, BuddyPreparationUncheckedUpdateManyInput>
+    /**
+     * Filter which BuddyPreparations to update
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * Limit how many BuddyPreparations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BuddyPreparation upsert
+   */
+  export type BuddyPreparationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BuddyPreparation to update in case it exists.
+     */
+    where: BuddyPreparationWhereUniqueInput
+    /**
+     * In case the BuddyPreparation found by the `where` argument doesn't exist, create a new BuddyPreparation with this data.
+     */
+    create: XOR<BuddyPreparationCreateInput, BuddyPreparationUncheckedCreateInput>
+    /**
+     * In case the BuddyPreparation was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BuddyPreparationUpdateInput, BuddyPreparationUncheckedUpdateInput>
+  }
+
+  /**
+   * BuddyPreparation delete
+   */
+  export type BuddyPreparationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+    /**
+     * Filter which BuddyPreparation to delete.
+     */
+    where: BuddyPreparationWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparation deleteMany
+   */
+  export type BuddyPreparationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BuddyPreparations to delete
+     */
+    where?: BuddyPreparationWhereInput
+    /**
+     * Limit how many BuddyPreparations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BuddyPreparation.user
+   */
+  export type BuddyPreparation$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * BuddyPreparation without action
+   */
+  export type BuddyPreparationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparation
+     */
+    select?: BuddyPreparationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparation
+     */
+    omit?: BuddyPreparationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -13078,6 +14437,23 @@ export namespace Prisma {
   };
 
   export type PreAssignedRoleScalarFieldEnum = (typeof PreAssignedRoleScalarFieldEnum)[keyof typeof PreAssignedRoleScalarFieldEnum]
+
+
+  export const BuddyPreparationScalarFieldEnum: {
+    id: 'id',
+    firstName: 'firstName',
+    lastName: 'lastName',
+    email: 'email',
+    buddyId: 'buddyId',
+    organizationId: 'organizationId',
+    isActive: 'isActive',
+    userId: 'userId',
+    notes: 'notes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BuddyPreparationScalarFieldEnum = (typeof BuddyPreparationScalarFieldEnum)[keyof typeof BuddyPreparationScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -13241,6 +14617,8 @@ export namespace Prisma {
     buddy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     buddyFor?: UserListRelationFilter
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
+    buddyPreparationsAsBuddy?: BuddyPreparationListRelationFilter
+    buddyPreparationAsUser?: XOR<BuddyPreparationNullableScalarRelationFilter, BuddyPreparationWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -13261,6 +14639,8 @@ export namespace Prisma {
     buddy?: UserOrderByWithRelationInput
     buddyFor?: UserOrderByRelationAggregateInput
     organization?: OrganizationOrderByWithRelationInput
+    buddyPreparationsAsBuddy?: BuddyPreparationOrderByRelationAggregateInput
+    buddyPreparationAsUser?: BuddyPreparationOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -13284,6 +14664,8 @@ export namespace Prisma {
     buddy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     buddyFor?: UserListRelationFilter
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
+    buddyPreparationsAsBuddy?: BuddyPreparationListRelationFilter
+    buddyPreparationAsUser?: XOR<BuddyPreparationNullableScalarRelationFilter, BuddyPreparationWhereInput> | null
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -13522,6 +14904,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
     checklist?: XOR<ChecklistNullableScalarRelationFilter, ChecklistWhereInput> | null
     users?: UserListRelationFilter
+    buddyPreparations?: BuddyPreparationListRelationFilter
   }
 
   export type OrganizationOrderByWithRelationInput = {
@@ -13532,6 +14915,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     checklist?: ChecklistOrderByWithRelationInput
     users?: UserOrderByRelationAggregateInput
+    buddyPreparations?: BuddyPreparationOrderByRelationAggregateInput
   }
 
   export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -13545,6 +14929,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
     checklist?: XOR<ChecklistNullableScalarRelationFilter, ChecklistWhereInput> | null
     users?: UserListRelationFilter
+    buddyPreparations?: BuddyPreparationListRelationFilter
   }, "id">
 
   export type OrganizationOrderByWithAggregationInput = {
@@ -13883,6 +15268,98 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"PreAssignedRole"> | Date | string
   }
 
+  export type BuddyPreparationWhereInput = {
+    AND?: BuddyPreparationWhereInput | BuddyPreparationWhereInput[]
+    OR?: BuddyPreparationWhereInput[]
+    NOT?: BuddyPreparationWhereInput | BuddyPreparationWhereInput[]
+    id?: StringFilter<"BuddyPreparation"> | string
+    firstName?: StringFilter<"BuddyPreparation"> | string
+    lastName?: StringFilter<"BuddyPreparation"> | string
+    email?: StringNullableFilter<"BuddyPreparation"> | string | null
+    buddyId?: StringFilter<"BuddyPreparation"> | string
+    organizationId?: StringFilter<"BuddyPreparation"> | string
+    isActive?: BoolFilter<"BuddyPreparation"> | boolean
+    userId?: StringNullableFilter<"BuddyPreparation"> | string | null
+    notes?: StringNullableFilter<"BuddyPreparation"> | string | null
+    createdAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+    buddy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type BuddyPreparationOrderByWithRelationInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrderInput | SortOrder
+    buddyId?: SortOrder
+    organizationId?: SortOrder
+    isActive?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    buddy?: UserOrderByWithRelationInput
+    organization?: OrganizationOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type BuddyPreparationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    userId?: string
+    email_organizationId?: BuddyPreparationEmailOrganizationIdCompoundUniqueInput
+    AND?: BuddyPreparationWhereInput | BuddyPreparationWhereInput[]
+    OR?: BuddyPreparationWhereInput[]
+    NOT?: BuddyPreparationWhereInput | BuddyPreparationWhereInput[]
+    firstName?: StringFilter<"BuddyPreparation"> | string
+    lastName?: StringFilter<"BuddyPreparation"> | string
+    email?: StringNullableFilter<"BuddyPreparation"> | string | null
+    buddyId?: StringFilter<"BuddyPreparation"> | string
+    organizationId?: StringFilter<"BuddyPreparation"> | string
+    isActive?: BoolFilter<"BuddyPreparation"> | boolean
+    notes?: StringNullableFilter<"BuddyPreparation"> | string | null
+    createdAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+    buddy?: XOR<UserScalarRelationFilter, UserWhereInput>
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id" | "userId" | "email_organizationId">
+
+  export type BuddyPreparationOrderByWithAggregationInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrderInput | SortOrder
+    buddyId?: SortOrder
+    organizationId?: SortOrder
+    isActive?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BuddyPreparationCountOrderByAggregateInput
+    _max?: BuddyPreparationMaxOrderByAggregateInput
+    _min?: BuddyPreparationMinOrderByAggregateInput
+  }
+
+  export type BuddyPreparationScalarWhereWithAggregatesInput = {
+    AND?: BuddyPreparationScalarWhereWithAggregatesInput | BuddyPreparationScalarWhereWithAggregatesInput[]
+    OR?: BuddyPreparationScalarWhereWithAggregatesInput[]
+    NOT?: BuddyPreparationScalarWhereWithAggregatesInput | BuddyPreparationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BuddyPreparation"> | string
+    firstName?: StringWithAggregatesFilter<"BuddyPreparation"> | string
+    lastName?: StringWithAggregatesFilter<"BuddyPreparation"> | string
+    email?: StringNullableWithAggregatesFilter<"BuddyPreparation"> | string | null
+    buddyId?: StringWithAggregatesFilter<"BuddyPreparation"> | string
+    organizationId?: StringWithAggregatesFilter<"BuddyPreparation"> | string
+    isActive?: BoolWithAggregatesFilter<"BuddyPreparation"> | boolean
+    userId?: StringNullableWithAggregatesFilter<"BuddyPreparation"> | string | null
+    notes?: StringNullableWithAggregatesFilter<"BuddyPreparation"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"BuddyPreparation"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BuddyPreparation"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -13899,6 +15376,8 @@ export namespace Prisma {
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -13917,6 +15396,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -13935,6 +15416,8 @@ export namespace Prisma {
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -13953,6 +15436,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -14204,6 +15689,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     checklist?: ChecklistCreateNestedOneWithoutOrganizationInput
     users?: UserCreateNestedManyWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateInput = {
@@ -14214,6 +15700,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     checklist?: ChecklistUncheckedCreateNestedOneWithoutOrganizationInput
     users?: UserUncheckedCreateNestedManyWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUpdateInput = {
@@ -14224,6 +15711,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUpdateOneWithoutOrganizationNestedInput
     users?: UserUpdateManyWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateInput = {
@@ -14234,6 +15722,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUncheckedUpdateOneWithoutOrganizationNestedInput
     users?: UserUncheckedUpdateManyWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationCreateManyInput = {
@@ -14582,6 +16071,101 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BuddyPreparationCreateInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
+    organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
+    user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+  }
+
+  export type BuddyPreparationUncheckedCreateInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    organizationId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
+    user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+  }
+
+  export type BuddyPreparationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationCreateManyInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    organizationId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -14675,6 +16259,17 @@ export namespace Prisma {
     isNot?: OrganizationWhereInput | null
   }
 
+  export type BuddyPreparationListRelationFilter = {
+    every?: BuddyPreparationWhereInput
+    some?: BuddyPreparationWhereInput
+    none?: BuddyPreparationWhereInput
+  }
+
+  export type BuddyPreparationNullableScalarRelationFilter = {
+    is?: BuddyPreparationWhereInput | null
+    isNot?: BuddyPreparationWhereInput | null
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -14693,6 +16288,10 @@ export namespace Prisma {
   }
 
   export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type BuddyPreparationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -15261,6 +16860,53 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type BuddyPreparationEmailOrganizationIdCompoundUniqueInput = {
+    email: string
+    organizationId: string
+  }
+
+  export type BuddyPreparationCountOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    buddyId?: SortOrder
+    organizationId?: SortOrder
+    isActive?: SortOrder
+    userId?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BuddyPreparationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    buddyId?: SortOrder
+    organizationId?: SortOrder
+    isActive?: SortOrder
+    userId?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BuddyPreparationMinOrderByAggregateInput = {
+    id?: SortOrder
+    firstName?: SortOrder
+    lastName?: SortOrder
+    email?: SortOrder
+    buddyId?: SortOrder
+    organizationId?: SortOrder
+    isActive?: SortOrder
+    userId?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
   export type AccountCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -15301,6 +16947,19 @@ export namespace Prisma {
     connect?: OrganizationWhereUniqueInput
   }
 
+  export type BuddyPreparationCreateNestedManyWithoutBuddyInput = {
+    create?: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput> | BuddyPreparationCreateWithoutBuddyInput[] | BuddyPreparationUncheckedCreateWithoutBuddyInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutBuddyInput | BuddyPreparationCreateOrConnectWithoutBuddyInput[]
+    createMany?: BuddyPreparationCreateManyBuddyInputEnvelope
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationCreateNestedOneWithoutUserInput = {
+    create?: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutUserInput
+    connect?: BuddyPreparationWhereUniqueInput
+  }
+
   export type AccountUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -15327,6 +16986,19 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutBuddyInput | UserCreateOrConnectWithoutBuddyInput[]
     createMany?: UserCreateManyBuddyInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput = {
+    create?: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput> | BuddyPreparationCreateWithoutBuddyInput[] | BuddyPreparationUncheckedCreateWithoutBuddyInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutBuddyInput | BuddyPreparationCreateOrConnectWithoutBuddyInput[]
+    createMany?: BuddyPreparationCreateManyBuddyInputEnvelope
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutUserInput
+    connect?: BuddyPreparationWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -15425,6 +17097,30 @@ export namespace Prisma {
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutUsersInput, OrganizationUpdateWithoutUsersInput>, OrganizationUncheckedUpdateWithoutUsersInput>
   }
 
+  export type BuddyPreparationUpdateManyWithoutBuddyNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput> | BuddyPreparationCreateWithoutBuddyInput[] | BuddyPreparationUncheckedCreateWithoutBuddyInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutBuddyInput | BuddyPreparationCreateOrConnectWithoutBuddyInput[]
+    upsert?: BuddyPreparationUpsertWithWhereUniqueWithoutBuddyInput | BuddyPreparationUpsertWithWhereUniqueWithoutBuddyInput[]
+    createMany?: BuddyPreparationCreateManyBuddyInputEnvelope
+    set?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    disconnect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    delete?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    update?: BuddyPreparationUpdateWithWhereUniqueWithoutBuddyInput | BuddyPreparationUpdateWithWhereUniqueWithoutBuddyInput[]
+    updateMany?: BuddyPreparationUpdateManyWithWhereWithoutBuddyInput | BuddyPreparationUpdateManyWithWhereWithoutBuddyInput[]
+    deleteMany?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
+  }
+
+  export type BuddyPreparationUpdateOneWithoutUserNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutUserInput
+    upsert?: BuddyPreparationUpsertWithoutUserInput
+    disconnect?: BuddyPreparationWhereInput | boolean
+    delete?: BuddyPreparationWhereInput | boolean
+    connect?: BuddyPreparationWhereUniqueInput
+    update?: XOR<XOR<BuddyPreparationUpdateToOneWithWhereWithoutUserInput, BuddyPreparationUpdateWithoutUserInput>, BuddyPreparationUncheckedUpdateWithoutUserInput>
+  }
+
   export type AccountUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<AccountCreateWithoutUserInput, AccountUncheckedCreateWithoutUserInput> | AccountCreateWithoutUserInput[] | AccountUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AccountCreateOrConnectWithoutUserInput | AccountCreateOrConnectWithoutUserInput[]
@@ -15481,6 +17177,30 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput> | BuddyPreparationCreateWithoutBuddyInput[] | BuddyPreparationUncheckedCreateWithoutBuddyInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutBuddyInput | BuddyPreparationCreateOrConnectWithoutBuddyInput[]
+    upsert?: BuddyPreparationUpsertWithWhereUniqueWithoutBuddyInput | BuddyPreparationUpsertWithWhereUniqueWithoutBuddyInput[]
+    createMany?: BuddyPreparationCreateManyBuddyInputEnvelope
+    set?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    disconnect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    delete?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    update?: BuddyPreparationUpdateWithWhereUniqueWithoutBuddyInput | BuddyPreparationUpdateWithWhereUniqueWithoutBuddyInput[]
+    updateMany?: BuddyPreparationUpdateManyWithWhereWithoutBuddyInput | BuddyPreparationUpdateManyWithWhereWithoutBuddyInput[]
+    deleteMany?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
+  }
+
+  export type BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutUserInput
+    upsert?: BuddyPreparationUpsertWithoutUserInput
+    disconnect?: BuddyPreparationWhereInput | boolean
+    delete?: BuddyPreparationWhereInput | boolean
+    connect?: BuddyPreparationWhereUniqueInput
+    update?: XOR<XOR<BuddyPreparationUpdateToOneWithWhereWithoutUserInput, BuddyPreparationUpdateWithoutUserInput>, BuddyPreparationUncheckedUpdateWithoutUserInput>
+  }
+
   export type UserCreateNestedOneWithoutAccountsInput = {
     create?: XOR<UserCreateWithoutAccountsInput, UserUncheckedCreateWithoutAccountsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAccountsInput
@@ -15530,6 +17250,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type BuddyPreparationCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput> | BuddyPreparationCreateWithoutOrganizationInput[] | BuddyPreparationUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutOrganizationInput | BuddyPreparationCreateOrConnectWithoutOrganizationInput[]
+    createMany?: BuddyPreparationCreateManyOrganizationInputEnvelope
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+  }
+
   export type ChecklistUncheckedCreateNestedOneWithoutOrganizationInput = {
     create?: XOR<ChecklistCreateWithoutOrganizationInput, ChecklistUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: ChecklistCreateOrConnectWithoutOrganizationInput
@@ -15541,6 +17268,13 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutOrganizationInput | UserCreateOrConnectWithoutOrganizationInput[]
     createMany?: UserCreateManyOrganizationInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationUncheckedCreateNestedManyWithoutOrganizationInput = {
+    create?: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput> | BuddyPreparationCreateWithoutOrganizationInput[] | BuddyPreparationUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutOrganizationInput | BuddyPreparationCreateOrConnectWithoutOrganizationInput[]
+    createMany?: BuddyPreparationCreateManyOrganizationInputEnvelope
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -15571,6 +17305,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type BuddyPreparationUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput> | BuddyPreparationCreateWithoutOrganizationInput[] | BuddyPreparationUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutOrganizationInput | BuddyPreparationCreateOrConnectWithoutOrganizationInput[]
+    upsert?: BuddyPreparationUpsertWithWhereUniqueWithoutOrganizationInput | BuddyPreparationUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: BuddyPreparationCreateManyOrganizationInputEnvelope
+    set?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    disconnect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    delete?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    update?: BuddyPreparationUpdateWithWhereUniqueWithoutOrganizationInput | BuddyPreparationUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: BuddyPreparationUpdateManyWithWhereWithoutOrganizationInput | BuddyPreparationUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
+  }
+
   export type ChecklistUncheckedUpdateOneWithoutOrganizationNestedInput = {
     create?: XOR<ChecklistCreateWithoutOrganizationInput, ChecklistUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: ChecklistCreateOrConnectWithoutOrganizationInput
@@ -15593,6 +17341,20 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutOrganizationInput | UserUpdateWithWhereUniqueWithoutOrganizationInput[]
     updateMany?: UserUpdateManyWithWhereWithoutOrganizationInput | UserUpdateManyWithWhereWithoutOrganizationInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type BuddyPreparationUncheckedUpdateManyWithoutOrganizationNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput> | BuddyPreparationCreateWithoutOrganizationInput[] | BuddyPreparationUncheckedCreateWithoutOrganizationInput[]
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutOrganizationInput | BuddyPreparationCreateOrConnectWithoutOrganizationInput[]
+    upsert?: BuddyPreparationUpsertWithWhereUniqueWithoutOrganizationInput | BuddyPreparationUpsertWithWhereUniqueWithoutOrganizationInput[]
+    createMany?: BuddyPreparationCreateManyOrganizationInputEnvelope
+    set?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    disconnect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    delete?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    connect?: BuddyPreparationWhereUniqueInput | BuddyPreparationWhereUniqueInput[]
+    update?: BuddyPreparationUpdateWithWhereUniqueWithoutOrganizationInput | BuddyPreparationUpdateWithWhereUniqueWithoutOrganizationInput[]
+    updateMany?: BuddyPreparationUpdateManyWithWhereWithoutOrganizationInput | BuddyPreparationUpdateManyWithWhereWithoutOrganizationInput[]
+    deleteMany?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
   }
 
   export type CategoryCreateNestedManyWithoutChecklistInput = {
@@ -15797,6 +17559,50 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutProgressInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProgressInput, UserUpdateWithoutProgressInput>, UserUncheckedUpdateWithoutProgressInput>
+  }
+
+  export type UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput = {
+    create?: XOR<UserCreateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBuddyPreparationsAsBuddyInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type OrganizationCreateNestedOneWithoutBuddyPreparationsInput = {
+    create?: XOR<OrganizationCreateWithoutBuddyPreparationsInput, OrganizationUncheckedCreateWithoutBuddyPreparationsInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutBuddyPreparationsInput
+    connect?: OrganizationWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutBuddyPreparationAsUserInput = {
+    create?: XOR<UserCreateWithoutBuddyPreparationAsUserInput, UserUncheckedCreateWithoutBuddyPreparationAsUserInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBuddyPreparationAsUserInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput = {
+    create?: XOR<UserCreateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBuddyPreparationsAsBuddyInput
+    upsert?: UserUpsertWithoutBuddyPreparationsAsBuddyInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutBuddyPreparationsAsBuddyInput, UserUpdateWithoutBuddyPreparationsAsBuddyInput>, UserUncheckedUpdateWithoutBuddyPreparationsAsBuddyInput>
+  }
+
+  export type OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput = {
+    create?: XOR<OrganizationCreateWithoutBuddyPreparationsInput, OrganizationUncheckedCreateWithoutBuddyPreparationsInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutBuddyPreparationsInput
+    upsert?: OrganizationUpsertWithoutBuddyPreparationsInput
+    connect?: OrganizationWhereUniqueInput
+    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutBuddyPreparationsInput, OrganizationUpdateWithoutBuddyPreparationsInput>, OrganizationUncheckedUpdateWithoutBuddyPreparationsInput>
+  }
+
+  export type UserUpdateOneWithoutBuddyPreparationAsUserNestedInput = {
+    create?: XOR<UserCreateWithoutBuddyPreparationAsUserInput, UserUncheckedCreateWithoutBuddyPreparationAsUserInput>
+    connectOrCreate?: UserCreateOrConnectWithoutBuddyPreparationAsUserInput
+    upsert?: UserUpsertWithoutBuddyPreparationAsUserInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutBuddyPreparationAsUserInput, UserUpdateWithoutBuddyPreparationAsUserInput>, UserUncheckedUpdateWithoutBuddyPreparationAsUserInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -16143,6 +17949,8 @@ export namespace Prisma {
     progress?: TaskProgressCreateNestedManyWithoutUserInput
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBuddyForInput = {
@@ -16160,6 +17968,8 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBuddyForInput = {
@@ -16182,6 +17992,8 @@ export namespace Prisma {
     progress?: TaskProgressCreateNestedManyWithoutUserInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutBuddyInput = {
@@ -16199,6 +18011,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutBuddyInput = {
@@ -16218,6 +18032,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     checklist?: ChecklistCreateNestedOneWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutUsersInput = {
@@ -16227,11 +18042,79 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     checklist?: ChecklistUncheckedCreateNestedOneWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutUsersInput = {
     where: OrganizationWhereUniqueInput
     create: XOR<OrganizationCreateWithoutUsersInput, OrganizationUncheckedCreateWithoutUsersInput>
+  }
+
+  export type BuddyPreparationCreateWithoutBuddyInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
+    user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+  }
+
+  export type BuddyPreparationUncheckedCreateWithoutBuddyInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    organizationId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationCreateOrConnectWithoutBuddyInput = {
+    where: BuddyPreparationWhereUniqueInput
+    create: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput>
+  }
+
+  export type BuddyPreparationCreateManyBuddyInputEnvelope = {
+    data: BuddyPreparationCreateManyBuddyInput | BuddyPreparationCreateManyBuddyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BuddyPreparationCreateWithoutUserInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
+    organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
+  }
+
+  export type BuddyPreparationUncheckedCreateWithoutUserInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    organizationId: string
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationCreateOrConnectWithoutUserInput = {
+    where: BuddyPreparationWhereUniqueInput
+    create: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
   }
 
   export type AccountUpsertWithWhereUniqueWithoutUserInput = {
@@ -16349,6 +18232,8 @@ export namespace Prisma {
     progress?: TaskProgressUpdateManyWithoutUserNestedInput
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBuddyForInput = {
@@ -16366,6 +18251,8 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutBuddyInput = {
@@ -16419,6 +18306,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUpdateOneWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutUsersInput = {
@@ -16428,6 +18316,77 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUncheckedUpdateOneWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUncheckedUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type BuddyPreparationUpsertWithWhereUniqueWithoutBuddyInput = {
+    where: BuddyPreparationWhereUniqueInput
+    update: XOR<BuddyPreparationUpdateWithoutBuddyInput, BuddyPreparationUncheckedUpdateWithoutBuddyInput>
+    create: XOR<BuddyPreparationCreateWithoutBuddyInput, BuddyPreparationUncheckedCreateWithoutBuddyInput>
+  }
+
+  export type BuddyPreparationUpdateWithWhereUniqueWithoutBuddyInput = {
+    where: BuddyPreparationWhereUniqueInput
+    data: XOR<BuddyPreparationUpdateWithoutBuddyInput, BuddyPreparationUncheckedUpdateWithoutBuddyInput>
+  }
+
+  export type BuddyPreparationUpdateManyWithWhereWithoutBuddyInput = {
+    where: BuddyPreparationScalarWhereInput
+    data: XOR<BuddyPreparationUpdateManyMutationInput, BuddyPreparationUncheckedUpdateManyWithoutBuddyInput>
+  }
+
+  export type BuddyPreparationScalarWhereInput = {
+    AND?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
+    OR?: BuddyPreparationScalarWhereInput[]
+    NOT?: BuddyPreparationScalarWhereInput | BuddyPreparationScalarWhereInput[]
+    id?: StringFilter<"BuddyPreparation"> | string
+    firstName?: StringFilter<"BuddyPreparation"> | string
+    lastName?: StringFilter<"BuddyPreparation"> | string
+    email?: StringNullableFilter<"BuddyPreparation"> | string | null
+    buddyId?: StringFilter<"BuddyPreparation"> | string
+    organizationId?: StringFilter<"BuddyPreparation"> | string
+    isActive?: BoolFilter<"BuddyPreparation"> | boolean
+    userId?: StringNullableFilter<"BuddyPreparation"> | string | null
+    notes?: StringNullableFilter<"BuddyPreparation"> | string | null
+    createdAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparation"> | Date | string
+  }
+
+  export type BuddyPreparationUpsertWithoutUserInput = {
+    update: XOR<BuddyPreparationUpdateWithoutUserInput, BuddyPreparationUncheckedUpdateWithoutUserInput>
+    create: XOR<BuddyPreparationCreateWithoutUserInput, BuddyPreparationUncheckedCreateWithoutUserInput>
+    where?: BuddyPreparationWhereInput
+  }
+
+  export type BuddyPreparationUpdateToOneWithWhereWithoutUserInput = {
+    where?: BuddyPreparationWhereInput
+    data: XOR<BuddyPreparationUpdateWithoutUserInput, BuddyPreparationUncheckedUpdateWithoutUserInput>
+  }
+
+  export type BuddyPreparationUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
+  }
+
+  export type BuddyPreparationUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -16445,6 +18404,8 @@ export namespace Prisma {
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAccountsInput = {
@@ -16462,6 +18423,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAccountsInput = {
@@ -16495,6 +18458,8 @@ export namespace Prisma {
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -16512,6 +18477,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSessionsInput = {
@@ -16529,6 +18496,8 @@ export namespace Prisma {
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSessionsInput = {
@@ -16546,6 +18515,8 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSessionsInput = {
@@ -16579,6 +18550,8 @@ export namespace Prisma {
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -16596,6 +18569,8 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ChecklistCreateWithoutOrganizationInput = {
@@ -16632,6 +18607,8 @@ export namespace Prisma {
     progress?: TaskProgressCreateNestedManyWithoutUserInput
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutOrganizationInput = {
@@ -16649,6 +18626,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutOrganizationInput = {
@@ -16658,6 +18637,42 @@ export namespace Prisma {
 
   export type UserCreateManyOrganizationInputEnvelope = {
     data: UserCreateManyOrganizationInput | UserCreateManyOrganizationInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BuddyPreparationCreateWithoutOrganizationInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
+    user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+  }
+
+  export type BuddyPreparationUncheckedCreateWithoutOrganizationInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationCreateOrConnectWithoutOrganizationInput = {
+    where: BuddyPreparationWhereUniqueInput
+    create: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type BuddyPreparationCreateManyOrganizationInputEnvelope = {
+    data: BuddyPreparationCreateManyOrganizationInput | BuddyPreparationCreateManyOrganizationInput[]
     skipDuplicates?: boolean
   }
 
@@ -16702,6 +18717,22 @@ export namespace Prisma {
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutOrganizationInput>
   }
 
+  export type BuddyPreparationUpsertWithWhereUniqueWithoutOrganizationInput = {
+    where: BuddyPreparationWhereUniqueInput
+    update: XOR<BuddyPreparationUpdateWithoutOrganizationInput, BuddyPreparationUncheckedUpdateWithoutOrganizationInput>
+    create: XOR<BuddyPreparationCreateWithoutOrganizationInput, BuddyPreparationUncheckedCreateWithoutOrganizationInput>
+  }
+
+  export type BuddyPreparationUpdateWithWhereUniqueWithoutOrganizationInput = {
+    where: BuddyPreparationWhereUniqueInput
+    data: XOR<BuddyPreparationUpdateWithoutOrganizationInput, BuddyPreparationUncheckedUpdateWithoutOrganizationInput>
+  }
+
+  export type BuddyPreparationUpdateManyWithWhereWithoutOrganizationInput = {
+    where: BuddyPreparationScalarWhereInput
+    data: XOR<BuddyPreparationUpdateManyMutationInput, BuddyPreparationUncheckedUpdateManyWithoutOrganizationInput>
+  }
+
   export type CategoryCreateWithoutChecklistInput = {
     id?: string
     name: string
@@ -16737,6 +18768,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: UserCreateNestedManyWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationUncheckedCreateWithoutChecklistInput = {
@@ -16746,6 +18778,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: UserUncheckedCreateNestedManyWithoutOrganizationInput
+    buddyPreparations?: BuddyPreparationUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
   export type OrganizationCreateOrConnectWithoutChecklistInput = {
@@ -16799,6 +18832,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: UserUpdateManyWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUpdateManyWithoutOrganizationNestedInput
   }
 
   export type OrganizationUncheckedUpdateWithoutChecklistInput = {
@@ -16808,6 +18842,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: UserUncheckedUpdateManyWithoutOrganizationNestedInput
+    buddyPreparations?: BuddyPreparationUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
   export type ChecklistCreateWithoutCategoriesInput = {
@@ -17057,6 +19092,8 @@ export namespace Prisma {
     buddy?: UserCreateNestedOneWithoutBuddyForInput
     buddyFor?: UserCreateNestedManyWithoutBuddyInput
     organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutProgressInput = {
@@ -17074,6 +19111,8 @@ export namespace Prisma {
     accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
     sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
     buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutProgressInput = {
@@ -17142,6 +19181,8 @@ export namespace Prisma {
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutProgressInput = {
@@ -17159,6 +19200,248 @@ export namespace Prisma {
     accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserCreateWithoutBuddyPreparationsAsBuddyInput = {
+    id?: string
+    name: string
+    email: string
+    password?: string | null
+    image?: string | null
+    emailVerified?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.Role
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    progress?: TaskProgressCreateNestedManyWithoutUserInput
+    buddy?: UserCreateNestedOneWithoutBuddyForInput
+    buddyFor?: UserCreateNestedManyWithoutBuddyInput
+    organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationAsUser?: BuddyPreparationCreateNestedOneWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput = {
+    id?: string
+    name: string
+    email: string
+    password?: string | null
+    image?: string | null
+    emailVerified?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organizationId?: string | null
+    role?: $Enums.Role
+    buddyId?: string | null
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
+    buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedCreateNestedOneWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutBuddyPreparationsAsBuddyInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput>
+  }
+
+  export type OrganizationCreateWithoutBuddyPreparationsInput = {
+    id?: string
+    name: string
+    buddyEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checklist?: ChecklistCreateNestedOneWithoutOrganizationInput
+    users?: UserCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationUncheckedCreateWithoutBuddyPreparationsInput = {
+    id?: string
+    name: string
+    buddyEnabled?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    checklist?: ChecklistUncheckedCreateNestedOneWithoutOrganizationInput
+    users?: UserUncheckedCreateNestedManyWithoutOrganizationInput
+  }
+
+  export type OrganizationCreateOrConnectWithoutBuddyPreparationsInput = {
+    where: OrganizationWhereUniqueInput
+    create: XOR<OrganizationCreateWithoutBuddyPreparationsInput, OrganizationUncheckedCreateWithoutBuddyPreparationsInput>
+  }
+
+  export type UserCreateWithoutBuddyPreparationAsUserInput = {
+    id?: string
+    name: string
+    email: string
+    password?: string | null
+    image?: string | null
+    emailVerified?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role?: $Enums.Role
+    accounts?: AccountCreateNestedManyWithoutUserInput
+    sessions?: SessionCreateNestedManyWithoutUserInput
+    progress?: TaskProgressCreateNestedManyWithoutUserInput
+    buddy?: UserCreateNestedOneWithoutBuddyForInput
+    buddyFor?: UserCreateNestedManyWithoutBuddyInput
+    organization?: OrganizationCreateNestedOneWithoutUsersInput
+    buddyPreparationsAsBuddy?: BuddyPreparationCreateNestedManyWithoutBuddyInput
+  }
+
+  export type UserUncheckedCreateWithoutBuddyPreparationAsUserInput = {
+    id?: string
+    name: string
+    email: string
+    password?: string | null
+    image?: string | null
+    emailVerified?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    organizationId?: string | null
+    role?: $Enums.Role
+    buddyId?: string | null
+    accounts?: AccountUncheckedCreateNestedManyWithoutUserInput
+    sessions?: SessionUncheckedCreateNestedManyWithoutUserInput
+    progress?: TaskProgressUncheckedCreateNestedManyWithoutUserInput
+    buddyFor?: UserUncheckedCreateNestedManyWithoutBuddyInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedCreateNestedManyWithoutBuddyInput
+  }
+
+  export type UserCreateOrConnectWithoutBuddyPreparationAsUserInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutBuddyPreparationAsUserInput, UserUncheckedCreateWithoutBuddyPreparationAsUserInput>
+  }
+
+  export type UserUpsertWithoutBuddyPreparationsAsBuddyInput = {
+    update: XOR<UserUpdateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedUpdateWithoutBuddyPreparationsAsBuddyInput>
+    create: XOR<UserCreateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutBuddyPreparationsAsBuddyInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedUpdateWithoutBuddyPreparationsAsBuddyInput>
+  }
+
+  export type UserUpdateWithoutBuddyPreparationsAsBuddyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    progress?: TaskProgressUpdateManyWithoutUserNestedInput
+    buddy?: UserUpdateOneWithoutBuddyForNestedInput
+    buddyFor?: UserUpdateManyWithoutBuddyNestedInput
+    organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutBuddyPreparationsAsBuddyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    buddyId?: NullableStringFieldUpdateOperationsInput | string | null
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
+    buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
+  }
+
+  export type OrganizationUpsertWithoutBuddyPreparationsInput = {
+    update: XOR<OrganizationUpdateWithoutBuddyPreparationsInput, OrganizationUncheckedUpdateWithoutBuddyPreparationsInput>
+    create: XOR<OrganizationCreateWithoutBuddyPreparationsInput, OrganizationUncheckedCreateWithoutBuddyPreparationsInput>
+    where?: OrganizationWhereInput
+  }
+
+  export type OrganizationUpdateToOneWithWhereWithoutBuddyPreparationsInput = {
+    where?: OrganizationWhereInput
+    data: XOR<OrganizationUpdateWithoutBuddyPreparationsInput, OrganizationUncheckedUpdateWithoutBuddyPreparationsInput>
+  }
+
+  export type OrganizationUpdateWithoutBuddyPreparationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    buddyEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checklist?: ChecklistUpdateOneWithoutOrganizationNestedInput
+    users?: UserUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type OrganizationUncheckedUpdateWithoutBuddyPreparationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    buddyEnabled?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    checklist?: ChecklistUncheckedUpdateOneWithoutOrganizationNestedInput
+    users?: UserUncheckedUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type UserUpsertWithoutBuddyPreparationAsUserInput = {
+    update: XOR<UserUpdateWithoutBuddyPreparationAsUserInput, UserUncheckedUpdateWithoutBuddyPreparationAsUserInput>
+    create: XOR<UserCreateWithoutBuddyPreparationAsUserInput, UserUncheckedCreateWithoutBuddyPreparationAsUserInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutBuddyPreparationAsUserInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutBuddyPreparationAsUserInput, UserUncheckedUpdateWithoutBuddyPreparationAsUserInput>
+  }
+
+  export type UserUpdateWithoutBuddyPreparationAsUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    accounts?: AccountUpdateManyWithoutUserNestedInput
+    sessions?: SessionUpdateManyWithoutUserNestedInput
+    progress?: TaskProgressUpdateManyWithoutUserNestedInput
+    buddy?: UserUpdateOneWithoutBuddyForNestedInput
+    buddyFor?: UserUpdateManyWithoutBuddyNestedInput
+    organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutBuddyPreparationAsUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerified?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organizationId?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    buddyId?: NullableStringFieldUpdateOperationsInput | string | null
+    accounts?: AccountUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
+    progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
+    buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
   }
 
   export type AccountCreateManyUserInput = {
@@ -17201,6 +19484,19 @@ export namespace Prisma {
     updatedAt?: Date | string
     organizationId?: string | null
     role?: $Enums.Role
+  }
+
+  export type BuddyPreparationCreateManyBuddyInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    organizationId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type AccountUpdateWithoutUserInput = {
@@ -17305,6 +19601,8 @@ export namespace Prisma {
     progress?: TaskProgressUpdateManyWithoutUserNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
     organization?: OrganizationUpdateOneWithoutUsersNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutBuddyInput = {
@@ -17322,6 +19620,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutBuddyInput = {
@@ -17337,6 +19637,45 @@ export namespace Prisma {
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
   }
 
+  export type BuddyPreparationUpdateWithoutBuddyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
+    user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+  }
+
+  export type BuddyPreparationUncheckedUpdateWithoutBuddyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationUncheckedUpdateManyWithoutBuddyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateManyOrganizationInput = {
     id?: string
     name: string
@@ -17348,6 +19687,19 @@ export namespace Prisma {
     updatedAt?: Date | string
     role?: $Enums.Role
     buddyId?: string | null
+  }
+
+  export type BuddyPreparationCreateManyOrganizationInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type UserUpdateWithoutOrganizationInput = {
@@ -17365,6 +19717,8 @@ export namespace Prisma {
     progress?: TaskProgressUpdateManyWithoutUserNestedInput
     buddy?: UserUpdateOneWithoutBuddyForNestedInput
     buddyFor?: UserUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutOrganizationInput = {
@@ -17382,6 +19736,8 @@ export namespace Prisma {
     sessions?: SessionUncheckedUpdateManyWithoutUserNestedInput
     progress?: TaskProgressUncheckedUpdateManyWithoutUserNestedInput
     buddyFor?: UserUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
+    buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutOrganizationInput = {
@@ -17395,6 +19751,45 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     buddyId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BuddyPreparationUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
+    user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+  }
+
+  export type BuddyPreparationUncheckedUpdateWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationUncheckedUpdateManyWithoutOrganizationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CategoryCreateManyChecklistInput = {

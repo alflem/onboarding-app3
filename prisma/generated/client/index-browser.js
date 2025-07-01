@@ -216,6 +216,20 @@ exports.Prisma.PreAssignedRoleScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BuddyPreparationScalarFieldEnum = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  email: 'email',
+  buddyId: 'buddyId',
+  organizationId: 'organizationId',
+  isActive: 'isActive',
+  userId: 'userId',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -257,7 +271,8 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Task: 'Task',
   TaskProgress: 'TaskProgress',
-  PreAssignedRole: 'PreAssignedRole'
+  PreAssignedRole: 'PreAssignedRole',
+  BuddyPreparation: 'BuddyPreparation'
 };
 
 /**

@@ -76,6 +76,45 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
 
         console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id})`);
 
+        // Check for active buddy preparation and link automatically
+        if (user.email) {
+          try {
+            const buddyPreparation = await prisma.buddyPreparation.findFirst({
+              where: {
+                email: user.email.toLowerCase(),
+                organizationId: organization.id,
+                isActive: true,
+              },
+            });
+
+            if (buddyPreparation) {
+              console.log(`Found active buddy preparation for ${user.email}, linking to user and assigning buddy`);
+
+              // Update user with buddy assignment
+              await prisma.user.update({
+                where: { id: newUser.id },
+                data: {
+                  buddyId: buddyPreparation.buddyId,
+                },
+              });
+
+              // Update buddy preparation to mark as completed and link to user
+              await prisma.buddyPreparation.update({
+                where: { id: buddyPreparation.id },
+                data: {
+                  userId: newUser.id,
+                  isActive: false,
+                },
+              });
+
+              console.log(`Buddy preparation completed: ${newUser.email} assigned to buddy ${buddyPreparation.buddyId}`);
+            }
+          } catch (buddyPrepError) {
+            console.error("Error processing buddy preparation:", buddyPrepError);
+            // Don't fail user creation if buddy preparation fails
+          }
+        }
+
         return {
           id: newUser.id,
           email: newUser.email,

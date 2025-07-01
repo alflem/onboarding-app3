@@ -10,23 +10,25 @@ datasource db {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  name           String
-  email          String         @unique
-  password       String?
-  image          String?
-  emailVerified  DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  organizationId String?
-  role           Role           @default(EMPLOYEE)
-  buddyId        String?
-  accounts       Account[]
-  sessions       Session[]
-  progress       TaskProgress[]
-  buddy          User?          @relation("BuddyRelation", fields: [buddyId], references: [id])
-  buddyFor       User[]         @relation("BuddyRelation")
-  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  id                    String              @id @default(cuid())
+  name                  String
+  email                 String              @unique
+  password              String?
+  image                 String?
+  emailVerified         DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  organizationId        String?
+  role                  Role                @default(EMPLOYEE)
+  buddyId               String?
+  accounts              Account[]
+  sessions              Session[]
+  progress              TaskProgress[]
+  buddy                 User?               @relation("BuddyRelation", fields: [buddyId], references: [id])
+  buddyFor              User[]              @relation("BuddyRelation")
+  organization          Organization?       @relation(fields: [organizationId], references: [id])
+  buddyPreparationsAsBuddy BuddyPreparation[] @relation("BuddyPreparationBuddy")
+  buddyPreparationAsUser   BuddyPreparation?  @relation("BuddyPreparationUser")
 }
 
 model Account {
@@ -65,13 +67,14 @@ model VerificationToken {
 }
 
 model Organization {
-  id           String    @id @default(cuid())
-  name         String
-  buddyEnabled Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  checklist    Checklist?
-  users        User[]
+  id                String             @id @default(cuid())
+  name              String
+  buddyEnabled      Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  checklist         Checklist?
+  users             User[]
+  buddyPreparations BuddyPreparation[]
 }
 
 model Checklist {
@@ -127,6 +130,27 @@ model PreAssignedRole {
   role      Role
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model BuddyPreparation {
+  id             String        @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?       // Optional email för automatisk koppling
+  buddyId        String        // Den som ska vara buddy
+  organizationId String
+  isActive       Boolean       @default(true) // true = väntar på användare, false = kopplad
+  userId         String?       @unique // null tills användaren skapar konto
+  notes          String?       // Valfria anteckningar
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  buddy          User          @relation("BuddyPreparationBuddy", fields: [buddyId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation("BuddyPreparationUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([email, organizationId]) // Prevent duplicate preparations for same email in same org
 }
 
 enum Role {
