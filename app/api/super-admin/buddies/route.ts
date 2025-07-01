@@ -119,7 +119,7 @@ export async function GET(_request: NextRequest) {
     const organizationBuddyData: Record<string, OrganizationBuddyData> = {};
 
     // Gruppera buddyrelationer per organisation
-    buddyRelations.forEach(user => {
+    buddyRelations.forEach((user: typeof buddyRelations[0]) => {
       const orgId = user.organizationId;
       if (orgId && !organizationBuddyData[orgId]) {
         organizationBuddyData[orgId] = {
@@ -134,7 +134,7 @@ export async function GET(_request: NextRequest) {
     });
 
     // Gruppera potentiella buddies per organisation
-    potentialBuddies.forEach(user => {
+    potentialBuddies.forEach((user: typeof potentialBuddies[0]) => {
       const orgId = user.organizationId;
       if (orgId && !organizationBuddyData[orgId]) {
         organizationBuddyData[orgId] = {
