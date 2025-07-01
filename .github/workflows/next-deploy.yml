@@ -23,10 +23,25 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: npm install and generate Prisma client
+      - name: npm install
+        run: npm install
+
+      - name: Force regenerate Prisma client with correct binaries
         run: |
-          npm install
+          echo "=== Cleaning existing Prisma client ==="
+          rm -rf node_modules/.prisma
+          rm -rf node_modules/@prisma/client/runtime
+          echo "=== Generating Prisma client with Linux binaries ==="
+          npx prisma generate --no-engine
           npx prisma generate
+
+      - name: Debug - Verify Prisma binaries
+        run: |
+          echo "=== Checking generated Prisma files ==="
+          ls -la node_modules/.prisma/client/ || echo "No .prisma/client found"
+          echo "=== Looking for Linux query engine binary ==="
+          find node_modules -name "*query*engine*debian*" -type f || echo "No Linux query engine found"
+          find node_modules -name "libquery_engine*" -type f || echo "No libquery_engine found"
 
       - name: Run database migrations
         run: |
@@ -43,15 +58,21 @@ jobs:
       - name: Build application
         run: |
           npm run build
+
+      - name: Prepare standalone deployment
+        run: |
+          echo "=== Copying static files ==="
           cp -r ./public ./.next/standalone/ || true
           cp -r ./.next/static ./.next/standalone/.next/ || true
-
-      - name: Copy Prisma client to standalone build
-        run: |
+          echo "=== Copying Prisma client to standalone build ==="
           mkdir -p ./.next/standalone/node_modules/.prisma
           mkdir -p ./.next/standalone/node_modules/@prisma
-          cp -r ./node_modules/.prisma/client ./.next/standalone/node_modules/.prisma/ || true
-          cp -r ./node_modules/@prisma/client ./.next/standalone/node_modules/@prisma/ || true
+          cp -r ./node_modules/.prisma/client ./.next/standalone/node_modules/.prisma/
+          cp -r ./node_modules/@prisma/client ./.next/standalone/node_modules/@prisma/
+          echo "=== Copying prisma folder ==="
+          cp -r ./prisma ./.next/standalone/
+          echo "=== Verifying Linux binaries in standalone build ==="
+          find ./.next/standalone/node_modules -name "*query*engine*debian*" -type f || echo "No Linux query engine in standalone"
 
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
