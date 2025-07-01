@@ -121,6 +121,14 @@ model TaskProgress {
   @@unique([userId, taskId])
 }
 
+model PreAssignedRole {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum Role {
   SUPER_ADMIN
   ADMIN

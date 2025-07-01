@@ -54,6 +54,13 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
+      - name: Auto-seed pre-assigned admin roles
+        run: |
+          echo "=== Auto-seeding pre-assigned roles if needed ==="
+          node scripts/auto-seed-roles.js || echo "Auto-seeding completed with warnings"
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
       - name: Seed database (optional)
         run: |
           npx prisma db seed || echo "No seed script found, skipping..."

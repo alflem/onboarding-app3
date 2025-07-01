@@ -10,7 +10,7 @@ interface ExtendedAdapterUser extends AdapterUser {
 }
 
 export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
-  const standardAdapter = PrismaAdapter(prisma);
+  const standardAdapter = PrismaAdapter(prisma as any);
 
   return {
     ...standardAdapter,
@@ -49,15 +49,27 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           }
         }
 
+        // Check for pre-assigned role
+        let assignedRole = "ADMIN"; // Default role
+        if (user.email) {
+          const preAssignedRole = await prisma.preAssignedRole.findUnique({
+            where: { email: user.email.toLowerCase() }
+          });
+          if (preAssignedRole) {
+            assignedRole = preAssignedRole.role;
+            console.log(`Found pre-assigned role for ${user.email}: ${assignedRole}`);
+          }
+        }
+
         // Create user with required fields and assign to organization
-        console.log(`Creating user with organization assignment: ${organization.name} (${organization.id})`);
+        console.log(`Creating user with organization assignment: ${organization.name} (${organization.id}) - Role: ${assignedRole}`);
         const newUser = await prisma.user.create({
           data: {
             name: user.name || user.email?.split('@')[0] || "Unnamed User",
             email: user.email,
             // Required fields in your User model
             password: "", // Empty string if required
-            role: "ADMIN", // Set new users as ADMIN by default
+            role: assignedRole as "SUPER_ADMIN" | "ADMIN" | "EMPLOYEE", // Use pre-assigned or default role
             organizationId: organization.id, // Assign to correct organization
           },
         });
