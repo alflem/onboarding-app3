@@ -50,7 +50,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@prisma/nextjs-monorepo-workaround-plugin": "^6.7.0",
     "@shadcn/ui": "^0.0.4",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.15"

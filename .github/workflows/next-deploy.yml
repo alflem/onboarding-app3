@@ -26,18 +26,27 @@ jobs:
       - name: npm install
         run: npm install
 
-      - name: Generate Prisma client with Linux binaries
+      - name: Clean and regenerate Prisma client
         run: |
-          echo "=== Generating Prisma client ==="
+          echo "=== Current Prisma schema configuration ==="
+          grep -A 7 "generator client" prisma/schema.prisma
+          echo "=== Cleaning old Prisma clients (forum user solution) ==="
+          rm -rf node_modules/.prisma
+          rm -rf node_modules/@prisma/client
+          rm -rf prisma/generated
+          echo "=== Generating Prisma client with custom output ==="
           npx prisma generate
+          echo "=== Prisma client generation completed ==="
 
-      - name: Verify Prisma client generation
+      - name: Verify Debian binaries are generated
         run: |
-          echo "=== Verifying Prisma client files ==="
-          ls -la node_modules/.prisma/client/ || echo "No .prisma/client found"
-          ls -la node_modules/@prisma/client/runtime/ || echo "No runtime found"
-          echo "=== Checking for Linux binaries ==="
-          find node_modules -name "*query*engine*debian*" -type f | head -5 || echo "No Linux query engine found"
+          echo "=== Checking custom output location ==="
+          ls -la prisma/generated/client/ || echo "No custom client found"
+          echo "=== Looking for Debian binaries ==="
+          find prisma/generated -name "*debian*" -type f || echo "No Debian binaries found"
+          find node_modules -name "*debian*" -type f || echo "No Debian binaries in node_modules"
+          echo "=== Checking all available engines ==="
+          find prisma/generated -name "*query*engine*" -type f || echo "No query engines in custom location"
 
       - name: Run database migrations
         run: |
@@ -55,20 +64,20 @@ jobs:
         run: |
           npm run build
 
-      - name: Prepare standalone deployment
+      - name: Prepare standalone deployment with custom Prisma client
         run: |
           echo "=== Copying static files ==="
           cp -r ./public ./.next/standalone/ || true
           cp -r ./.next/static ./.next/standalone/.next/ || true
-          echo "=== Copying Prisma client ==="
-          mkdir -p ./.next/standalone/node_modules/.prisma
-          mkdir -p ./.next/standalone/node_modules/@prisma
-          cp -r ./node_modules/.prisma/client ./.next/standalone/node_modules/.prisma/ || echo "Failed to copy .prisma/client"
-          cp -r ./node_modules/@prisma/client ./.next/standalone/node_modules/@prisma/ || echo "Failed to copy @prisma/client"
-          echo "=== Copying prisma schema ==="
+          echo "=== Copying complete prisma directory with generated client ==="
           cp -r ./prisma ./.next/standalone/ || echo "Failed to copy prisma folder"
-          echo "=== Final verification ==="
-          ls -la ./.next/standalone/node_modules/@prisma/client/runtime/ || echo "No runtime in standalone"
+          echo "=== Copying essential node_modules for Prisma ==="
+          mkdir -p ./.next/standalone/node_modules
+          cp -r ./node_modules/@next-auth ./.next/standalone/node_modules/ || true
+          cp -r ./node_modules/next-auth ./.next/standalone/node_modules/ || true
+          echo "=== Verifying Prisma custom client in deployment ==="
+          ls -la ./.next/standalone/prisma/generated/client/ || echo "No custom client in deployment"
+          find ./.next/standalone/prisma/generated -name "*debian*" -type f || echo "No Debian binaries in deployment"
 
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp

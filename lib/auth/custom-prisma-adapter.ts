@@ -1,6 +1,6 @@
 // lib/auth/custom-prisma-adapter.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/lib/prisma";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { findOrCreateOrganization } from "./organization-seeder";
 
