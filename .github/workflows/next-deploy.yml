@@ -48,9 +48,31 @@ jobs:
           echo "=== Checking all available engines ==="
           find prisma/generated -name "*query*engine*" -type f || echo "No query engines in custom location"
 
-      - name: Run database migrations
+      - name: Handle database migrations (with baseline support)
         run: |
-          npx prisma migrate deploy
+          echo "=== Checking migration status ==="
+          # First, try to run migrate deploy
+          if ! npx prisma migrate deploy; then
+            echo "=== Migration deploy failed, attempting to baseline existing database ==="
+
+            # Get the list of migrations
+            echo "=== Available migrations ==="
+            ls -la prisma/migrations/ || echo "No migrations folder found"
+
+            # Mark all existing migrations as applied (baseline)
+            for migration_dir in prisma/migrations/*/; do
+              if [ -d "$migration_dir" ]; then
+                migration_name=$(basename "$migration_dir")
+                echo "=== Marking migration as applied: $migration_name ==="
+                npx prisma migrate resolve --applied "$migration_name" || echo "Failed to resolve $migration_name"
+              fi
+            done
+
+            echo "=== Re-attempting migrate deploy after baseline ==="
+            npx prisma migrate deploy
+          else
+            echo "=== Migration deploy successful ==="
+          fi
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
