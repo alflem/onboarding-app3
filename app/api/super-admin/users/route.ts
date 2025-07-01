@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/auth-options";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // Kontrollera SUPER_ADMIN behörighet
 async function checkSuperAdminAccess() {
