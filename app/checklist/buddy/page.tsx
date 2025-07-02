@@ -285,35 +285,29 @@ export default function BuddyChecklistPage() {
 
       {/* Buddy relationships overview */}
       {buddyRelationships && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
+                <Card>
+          <CardHeader className="pb-0 py-0">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <UserCheck className="h-4 w-4" />
               Du är buddy för
             </CardTitle>
-            <CardDescription>
-              {buddyRelationships.stats.totalAll > 0
-                ? `Du ansvarar för ${buddyRelationships.stats.totalAll} personer (${buddyRelationships.stats.totalActiveUsers} anställda, ${buddyRelationships.stats.totalActivePreparations} förberedelser)`
-                : "Du är inte buddy för någon just nu"
-              }
-            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {buddyRelationships.stats.totalAll > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-2">
                 {/* Active Users */}
                 {buddyRelationships.activeUsers.length > 0 && (
                   <div>
-                    <h4 className="font-medium flex items-center gap-2 mb-3">
+                    <h4 className="font-medium flex items-center gap-2 mb-1 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-green-600" />
                       Anställda ({buddyRelationships.activeUsers.length})
                     </h4>
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div className={`grid gap-2 ${buddyRelationships.activeUsers.length === 1 ? 'grid-cols-1' : buddyRelationships.activeUsers.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.activeUsers.map((user) => (
-                        <div key={user.id} className="border rounded-lg p-3 bg-green-50 border-green-200">
-                          <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-muted-foreground">{user.email}</div>
-                          <div className="flex items-center gap-2 mt-2">
+                        <div key={user.id} className="border rounded-lg p-2 bg-green-50 border-green-200 w-full">
+                          <div className="font-medium text-sm">{user.name}</div>
+                          <div className="text-xs text-muted-foreground">{user.email}</div>
+                          <div className="flex items-center gap-1 mt-1">
                             <Badge variant="outline" className="text-xs">
                               {user.role}
                             </Badge>
@@ -330,24 +324,20 @@ export default function BuddyChecklistPage() {
                 {/* Active Preparations */}
                 {buddyRelationships.activePreparations.length > 0 && (
                   <div>
-                    <h4 className="font-medium flex items-center gap-2 mb-3">
-                      <Clock className="h-4 w-4 text-blue-600" />
-                      Förberedelser ({buddyRelationships.activePreparations.length})
-                    </h4>
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div className={`grid gap-2 ${buddyRelationships.activePreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.activePreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.activePreparations.map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-3 bg-blue-50 border-blue-200">
-                          <div className="font-medium">{prep.firstName} {prep.lastName}</div>
+                        <div key={prep.id} className="border rounded-lg p-2 bg-blue-50 border-blue-200 w-full">
+                          <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
                           {prep.email && (
-                            <div className="text-sm text-muted-foreground">{prep.email}</div>
+                            <div className="text-xs text-muted-foreground">{prep.email}</div>
                           )}
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-1 mt-1">
                             <Badge className="bg-blue-600 text-white text-xs">
                               Väntar på registrering
                             </Badge>
                           </div>
                           {prep.notes && (
-                            <div className="text-xs text-muted-foreground mt-2">
+                            <div className="text-xs text-muted-foreground mt-1">
                               📝 {prep.notes}
                             </div>
                           )}
@@ -363,18 +353,18 @@ export default function BuddyChecklistPage() {
                 {/* Completed Preparations */}
                 {buddyRelationships.completedPreparations.length > 0 && (
                   <div>
-                    <h4 className="font-medium flex items-center gap-2 mb-3">
+                    <h4 className="font-medium flex items-center gap-2 mb-1 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-gray-600" />
                       Tidigare förberedelser ({buddyRelationships.completedPreparations.length})
                     </h4>
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <div className={`grid gap-2 ${buddyRelationships.completedPreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.completedPreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.completedPreparations.slice(0, 6).map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-3 bg-gray-50 border-gray-200">
-                          <div className="font-medium">{prep.firstName} {prep.lastName}</div>
+                        <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 border-gray-200 w-full">
+                          <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
                           {prep.user && (
                             <>
-                              <div className="text-sm text-muted-foreground">{prep.user.email}</div>
-                              <div className="flex items-center gap-2 mt-2">
+                              <div className="text-xs text-muted-foreground">{prep.user.email}</div>
+                              <div className="flex items-center gap-1 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                   {prep.user.role}
                                 </Badge>
@@ -388,7 +378,7 @@ export default function BuddyChecklistPage() {
                       ))}
                     </div>
                     {buddyRelationships.completedPreparations.length > 6 && (
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-xs text-muted-foreground mt-1">
                         ... och {buddyRelationships.completedPreparations.length - 6} till
                       </p>
                     )}
@@ -396,10 +386,10 @@ export default function BuddyChecklistPage() {
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <UserCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Du är inte buddy för någon just nu</p>
-                <p className="text-sm">Kontakta din admin för att få tilldelad en buddy-roll</p>
+              <div className="text-center py-4 text-muted-foreground">
+                <UserCheck className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Du är inte buddy för någon just nu</p>
+                <p className="text-xs">Kontakta din admin för att få tilldelad en buddy-roll</p>
               </div>
             )}
           </CardContent>
