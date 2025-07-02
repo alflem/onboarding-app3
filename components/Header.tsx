@@ -48,9 +48,11 @@ const Header: React.FC = () => {
   useEffect(() => {
     // Kontrollera om användaren är buddy för någon
     if (session?.user?.id) {
+      console.log("Header: Checking buddy status for user:", session.user.id);
       fetch('/api/user/is-buddy')
         .then(response => response.json())
         .then(data => {
+          console.log("Header: Buddy status response:", data);
           setIsBuddy(data.isBuddy);
           setBuddyEnabled(data.buddyEnabled);
         })
