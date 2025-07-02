@@ -98,7 +98,7 @@ export default function BuddyPreparationForm({
         console.log("Received users data:", data);
 
         // API returns users directly as an array, not wrapped in data property
-        let allUsers = Array.isArray(data) ? data : [];
+        const allUsers = Array.isArray(data) ? data : [];
 
         // Filter out employees - only admins and above can be buddies
         let buddies = allUsers.filter((user: User) => user.role !== "EMPLOYEE");
