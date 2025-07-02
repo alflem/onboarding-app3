@@ -91,13 +91,34 @@ export default function BuddyPreparationForm({
       if (response.ok) {
         const data = await response.json();
         // Filter out employees - only admins and above can be buddies
-        const buddies = data.data?.filter((user: User) => user.role !== "EMPLOYEE") || [];
+        let buddies = data.data?.filter((user: User) => user.role !== "EMPLOYEE") || [];
+
+        // Put current user first in the list
+        if (session?.user?.id) {
+          const currentUserIndex = buddies.findIndex((user: User) => user.id === session.user.id);
+          if (currentUserIndex > -1) {
+            const currentUser = buddies.splice(currentUserIndex, 1)[0];
+            buddies = [currentUser, ...buddies];
+          }
+        }
+
         setPotentialBuddies(buddies);
+
+        // Auto-select current user as buddy if this is a new preparation
+        if (!preparation && session?.user?.id && buddies.length > 0) {
+          const currentUser = buddies.find((user: User) => user.id === session.user.id);
+          if (currentUser) {
+            setFormData(prev => ({
+              ...prev,
+              buddyId: currentUser.id,
+            }));
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching potential buddies:", error);
     }
-  }, [organizationId, session?.user?.organizationId]);
+  }, [organizationId, session?.user?.organizationId, session?.user?.id, preparation]);
 
   // Fetch potential buddies when dialog opens
   useEffect(() => {
@@ -232,6 +253,9 @@ export default function BuddyPreparationForm({
                   <SelectItem key={buddy.id} value={buddy.id}>
                     <div className="flex items-center gap-2">
                       <span>{buddy.name}</span>
+                      {buddy.id === session?.user?.id && (
+                        <span className="text-xs font-medium text-primary">(Du)</span>
+                      )}
                       <span className="text-xs text-muted-foreground">({buddy.role})</span>
                     </div>
                   </SelectItem>
