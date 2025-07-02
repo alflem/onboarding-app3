@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,7 +89,7 @@ export default function BuddyPreparationForm({
     }
   }, [isOpen, fetchPotentialBuddies, potentialBuddies.length]);
 
-  const fetchPotentialBuddies = async () => {
+  const fetchPotentialBuddies = useCallback(async () => {
     try {
       const orgId = organizationId || session?.user?.organizationId;
       if (!orgId) return;
@@ -104,7 +104,7 @@ export default function BuddyPreparationForm({
     } catch (error) {
       console.error("Error fetching potential buddies:", error);
     }
-  };
+  }, [organizationId, session?.user?.organizationId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

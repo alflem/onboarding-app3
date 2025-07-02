@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,7 +19,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await context.params;
 
     // Check if the preparation exists
     const preparation = await prisma.buddyPreparation.findUnique({
@@ -63,7 +63,7 @@ export async function DELETE(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -77,7 +77,7 @@ export async function PUT(
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await context.params;
     const body = await request.json();
     const { firstName, lastName, email, buddyId, notes } = body;
 
