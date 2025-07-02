@@ -82,16 +82,27 @@ export default function BuddyPreparationForm({
     setMessage(null);
   }, [preparation, isOpen]);
 
-  const fetchPotentialBuddies = useCallback(async () => {
+    const fetchPotentialBuddies = useCallback(async () => {
     try {
       const orgId = organizationId || session?.user?.organizationId;
-      if (!orgId) return;
+      if (!orgId) {
+        console.log("No organization ID found");
+        return;
+      }
 
-      const response = await fetch(`/api/organization/users?organizationId=${orgId}`);
+      console.log("Fetching users for organization:", orgId);
+      const response = await fetch(`/api/organization/users`);
+
       if (response.ok) {
         const data = await response.json();
+        console.log("Received users data:", data);
+
+        // API returns users directly as an array, not wrapped in data property
+        let allUsers = Array.isArray(data) ? data : [];
+
         // Filter out employees - only admins and above can be buddies
-        let buddies = data.data?.filter((user: User) => user.role !== "EMPLOYEE") || [];
+        let buddies = allUsers.filter((user: User) => user.role !== "EMPLOYEE");
+        console.log("Filtered buddies (non-employees):", buddies);
 
         // Put current user first in the list
         if (session?.user?.id) {
@@ -99,6 +110,7 @@ export default function BuddyPreparationForm({
           if (currentUserIndex > -1) {
             const currentUser = buddies.splice(currentUserIndex, 1)[0];
             buddies = [currentUser, ...buddies];
+            console.log("Moved current user to front:", currentUser);
           }
         }
 
@@ -112,8 +124,13 @@ export default function BuddyPreparationForm({
               ...prev,
               buddyId: currentUser.id,
             }));
+            console.log("Auto-selected current user as buddy:", currentUser);
           }
         }
+      } else {
+        console.error("Failed to fetch users:", response.status, response.statusText);
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
       }
     } catch (error) {
       console.error("Error fetching potential buddies:", error);
