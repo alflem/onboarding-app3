@@ -15,7 +15,7 @@ export async function DELETE(
     }
 
     // Only ADMIN and SUPER_ADMIN can delete buddy preparations
-    if (!["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
+    if (!session.user.role || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
     }
 
@@ -73,7 +73,7 @@ export async function PUT(
     }
 
     // Only ADMIN and SUPER_ADMIN can update buddy preparations
-    if (!["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
+    if (!session.user.role || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
       return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
     }
 

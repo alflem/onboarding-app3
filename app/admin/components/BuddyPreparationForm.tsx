@@ -82,13 +82,6 @@ export default function BuddyPreparationForm({
     setMessage(null);
   }, [preparation, isOpen]);
 
-  // Fetch potential buddies when dialog opens
-  useEffect(() => {
-    if (isOpen && !potentialBuddies.length) {
-      fetchPotentialBuddies();
-    }
-  }, [isOpen, fetchPotentialBuddies, potentialBuddies.length]);
-
   const fetchPotentialBuddies = useCallback(async () => {
     try {
       const orgId = organizationId || session?.user?.organizationId;
@@ -105,6 +98,13 @@ export default function BuddyPreparationForm({
       console.error("Error fetching potential buddies:", error);
     }
   }, [organizationId, session?.user?.organizationId]);
+
+  // Fetch potential buddies when dialog opens
+  useEffect(() => {
+    if (isOpen && !potentialBuddies.length) {
+      fetchPotentialBuddies();
+    }
+  }, [isOpen, fetchPotentialBuddies, potentialBuddies.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
