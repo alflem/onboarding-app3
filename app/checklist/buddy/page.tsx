@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Info, Users, HelpCircle, ExternalLink, UserCheck, Clock, CheckCircle2 } from "lucide-react";
+import { Info, Users, HelpCircle, ExternalLink, UserCheck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
