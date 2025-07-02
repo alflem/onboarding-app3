@@ -814,28 +814,6 @@ export default function AdminPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {buddyPreparations.filter(p => p.isActive).length}
-                    </div>
-                    <div className="text-sm text-blue-700">Aktiva förberedelser</div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {buddyPreparations.filter(p => !p.isActive).length}
-                    </div>
-                    <div className="text-sm text-green-700">Kopplade till användare</div>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-600">
-                      {buddyPreparations.length}
-                    </div>
-                    <div className="text-sm text-gray-700">Totalt</div>
-                  </div>
-                </div>
-
                 {/* Desktop Table */}
                 <div className="hidden md:block rounded-lg border overflow-hidden">
                   <Table>

@@ -41,7 +41,7 @@ export async function GET() {
       });
     }
 
-    // Check if user is a buddy for someone
+    // Check if user is a buddy for someone (existing users)
     const employeesWithThisBuddy = await prisma.user.findMany({
       where: {
         buddyId: session.user.id
@@ -53,9 +53,27 @@ export async function GET() {
       }
     });
 
+    // Check if user has active buddy preparations
+    const activeBuddyPreparations = await prisma.buddyPreparation.findMany({
+      where: {
+        buddyId: session.user.id,
+        isActive: true
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    });
+
+    // User is a buddy if they have either existing employees or active preparations
+    const isBuddy = employeesWithThisBuddy.length > 0 || activeBuddyPreparations.length > 0;
+
     return NextResponse.json({
-      isBuddy: employeesWithThisBuddy.length > 0,
+      isBuddy,
       buddyFor: employeesWithThisBuddy,
+      buddyPreparations: activeBuddyPreparations,
       buddyEnabled: true
     });
   } catch (error) {
