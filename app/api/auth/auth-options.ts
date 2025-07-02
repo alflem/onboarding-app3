@@ -12,6 +12,9 @@ interface AzureADProfile {
   email: string;
   picture?: string;
   companyName?: string;
+  company_name?: string;
+  tenant_display_name?: string;
+  tenant_name?: string;
 }
 
 // Updated to trigger database reset and Demo Company creation
@@ -29,9 +32,15 @@ export const authOptions: NextAuthOptions = {
       },
       profile(profile) {
         const azureProfile = profile as AzureADProfile;
-        const companyName = azureProfile.companyName || undefined;
 
-        console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email})`);
+        // Try multiple sources for company name
+        const companyName = azureProfile.companyName ||
+                           azureProfile.company_name ||
+                           azureProfile.tenant_display_name ||
+                           azureProfile.tenant_name ||
+                           undefined;
+
+        console.log(`Azure AD profile callback - companyName: ${companyName} (from email: ${profile.email}, sources: companyName=${azureProfile.companyName}, company_name=${azureProfile.company_name}, tenant_display_name=${azureProfile.tenant_display_name})`);
 
         return {
           id: profile.sub,
@@ -56,8 +65,12 @@ export const authOptions: NextAuthOptions = {
       // Try to get company name from Azure AD profile
       if (account?.provider === "azure-ad" && profile) {
         const azureProfile = profile as AzureADProfile;
-        if (azureProfile.companyName) {
-          token.companyName = azureProfile.companyName;
+        const profileCompanyName = azureProfile.companyName ||
+                                  azureProfile.company_name ||
+                                  azureProfile.tenant_display_name ||
+                                  azureProfile.tenant_name;
+        if (profileCompanyName) {
+          token.companyName = profileCompanyName;
         }
       }
 
