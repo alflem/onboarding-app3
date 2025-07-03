@@ -61,6 +61,13 @@ import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
 import BuddyPreparationForm from "./components/BuddyPreparationForm";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 // Typdefintioner
 type Checklist = {
@@ -163,6 +170,12 @@ export default function AdminPage() {
 
   // State for the test email input
   const [testEmailInput, setTestEmailInput] = useState("");
+
+  // 1. Add state for dialog visibility and selected preparation/user
+  const [manualLinkDialogOpen, setManualLinkDialogOpen] = useState(false);
+  const [preparationToLink, setPreparationToLink] = useState<BuddyPreparation | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [linking, setLinking] = useState(false);
 
   // Funktion för att hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {
@@ -589,6 +602,35 @@ export default function AdminPage() {
     }
   };
 
+  // 2. Add a function to open the dialog
+  const openManualLinkDialog = (prep: BuddyPreparation) => {
+    setPreparationToLink(prep);
+    setManualLinkDialogOpen(true);
+    setSelectedUserId("");
+  };
+
+  // 3. Add a function to perform the linking
+  const handleManualLink = async () => {
+    if (!preparationToLink || !selectedUserId) return;
+    setLinking(true);
+    try {
+      const response = await fetch(`/api/buddy-preparations/${preparationToLink.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: selectedUserId }),
+      });
+      if (!response.ok) throw new Error('Kunde inte koppla användare');
+      setManualLinkDialogOpen(false);
+      setPreparationToLink(null);
+      setSelectedUserId("");
+      await fetchBuddyPreparations();
+    } catch (error) {
+      alert('Fel vid manuell koppling');
+    } finally {
+      setLinking(false);
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -981,6 +1023,11 @@ export default function AdminPage() {
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
+                              {preparation.isActive && !preparation.userId && (
+                                <Button size="sm" variant="secondary" onClick={() => openManualLinkDialog(preparation)}>
+                                  Koppla till användare
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -1068,6 +1115,11 @@ export default function AdminPage() {
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
+                          {preparation.isActive && !preparation.userId && (
+                            <Button size="sm" variant="secondary" onClick={() => openManualLinkDialog(preparation)}>
+                              Koppla till användare
+                            </Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -1342,6 +1394,34 @@ export default function AdminPage() {
             <DialogClose asChild>
               <Button variant="outline">Stäng</Button>
             </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Linking Dialog */}
+      <Dialog open={manualLinkDialogOpen} onOpenChange={setManualLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Koppla till användare</DialogTitle>
+            <DialogDescription>
+              Välj en användare i organisationen att koppla till denna buddyförberedelse.
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Välj användare" />
+            </SelectTrigger>
+            <SelectContent>
+              {employees.filter(u => !buddyPreparations.some(p => p.userId === u.id)).map(user => (
+                <SelectItem key={user.id} value={user.id}>{user.name} ({user.email})</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setManualLinkDialogOpen(false)}>Avbryt</Button>
+            <Button onClick={handleManualLink} disabled={!selectedUserId || linking}>
+              {linking ? 'Kopplar...' : 'Koppla'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

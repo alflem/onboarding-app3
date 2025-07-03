@@ -191,3 +191,55 @@ export async function PUT(
     );
   }
 }
+
+export async function PATCH(request: NextRequest, context: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || !["ADMIN", "SUPER_ADMIN"].includes(session.user.role)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { id } = context.params;
+    const body = await request.json();
+    const { userId } = body;
+    if (!userId) {
+      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    }
+    // Update the buddy preparation
+    const updatedPreparation = await prisma.buddyPreparation.update({
+      where: { id },
+      data: {
+        userId,
+        isActive: false,
+      },
+      include: {
+        buddy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            buddyEnabled: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+    return NextResponse.json({ success: true, data: updatedPreparation });
+  } catch (error) {
+    console.error("Error manually linking buddy preparation:", error);
+    return NextResponse.json({ error: "Failed to link buddy preparation" }, { status: 500 });
+  }
+}
