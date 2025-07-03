@@ -921,12 +921,12 @@ export default function AdminPage() {
                             {preparation.firstName} {preparation.lastName}
                           </div>
                           {preparation.isActive ? (
-                            <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                            <Badge className="bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/30">
                               <UserPlus className="h-3 w-3 mr-1" />
                               Väntar
                             </Badge>
                           ) : (
-                            <Badge className="bg-green-50 text-green-700 hover:bg-green-100">
+                            <Badge className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/30">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
                               Kopplad
                             </Badge>

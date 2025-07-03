@@ -304,7 +304,7 @@ export default function BuddyChecklistPage() {
                     </h4>
                     <div className={`grid gap-2 ${buddyRelationships.activeUsers.length === 1 ? 'grid-cols-1' : buddyRelationships.activeUsers.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.activeUsers.map((user) => (
-                        <div key={user.id} className="border rounded-lg p-2 bg-green-50 border-green-200 w-full">
+                        <div key={user.id} className="border rounded-lg p-2 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30 w-full">
                           <div className="font-medium text-sm">{user.name}</div>
                           <div className="text-xs text-muted-foreground">{user.email}</div>
                           <div className="flex items-center gap-1 mt-1">
@@ -326,7 +326,7 @@ export default function BuddyChecklistPage() {
                   <div>
                     <div className={`grid gap-2 ${buddyRelationships.activePreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.activePreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.activePreparations.map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-2 bg-blue-50 border-blue-200 w-full">
+                        <div key={prep.id} className="border rounded-lg p-2 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30 w-full">
                           <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
                           {prep.email && (
                             <div className="text-xs text-muted-foreground">{prep.email}</div>
@@ -359,7 +359,7 @@ export default function BuddyChecklistPage() {
                     </h4>
                     <div className={`grid gap-2 ${buddyRelationships.completedPreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.completedPreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
                       {buddyRelationships.completedPreparations.slice(0, 6).map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 border-gray-200 w-full">
+                        <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800/30 w-full">
                           <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
                           {prep.user && (
                             <>

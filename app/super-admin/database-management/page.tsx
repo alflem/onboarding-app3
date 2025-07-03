@@ -582,13 +582,13 @@ export default function DatabaseManagementPage() {
                               Aktiva Buddy-relationer ({orgData.buddyRelations.length})
                             </h4>
                             {orgData.buddyRelations.length === 0 ? (
-                              <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded">
+                              <div className="text-sm text-muted-foreground bg-gray-50 dark:bg-gray-950/20 p-3 rounded">
                                 Inga aktiva buddyrelationer
                               </div>
                             ) : (
                               <div className="space-y-2">
                                 {orgData.buddyRelations.map((relation) => (
-                                  <div key={relation.id} className="border rounded-lg p-3 bg-green-50">
+                                  <div key={relation.id} className="border rounded-lg p-3 bg-green-50 dark:bg-green-950/20">
                                     <div className="font-medium">{relation.name}</div>
                                     <div className="text-sm text-muted-foreground">{relation.email}</div>
                                     <div className="flex items-center gap-2 mt-2">
@@ -613,13 +613,13 @@ export default function DatabaseManagementPage() {
                               Potentiella Buddies ({orgData.potentialBuddies.length})
                             </h4>
                             {orgData.potentialBuddies.length === 0 ? (
-                              <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded">
+                              <div className="text-sm text-muted-foreground bg-gray-50 dark:bg-gray-950/20 p-3 rounded">
                                 Inga potentiella buddies
                               </div>
                             ) : (
                               <div className="space-y-2 max-h-64 overflow-y-auto">
                                 {orgData.potentialBuddies.map((buddy) => (
-                                  <div key={buddy.id} className="border rounded-lg p-3 bg-blue-50">
+                                  <div key={buddy.id} className="border rounded-lg p-3 bg-blue-50 dark:bg-blue-950/20">
                                     <div className="font-medium">{buddy.name}</div>
                                     <div className="text-sm text-muted-foreground">{buddy.email}</div>
                                     <div className="flex items-center justify-between mt-2">
@@ -715,8 +715,8 @@ export default function DatabaseManagementPage() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-700">
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/30 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
                   <strong>Info:</strong> För att skapa, redigera eller ta bort uppgifter, använd knapparna nedan som navigerar till admin-panelen där fullständig uppgiftshantering finns tillgänglig.
                 </p>
               </div>
