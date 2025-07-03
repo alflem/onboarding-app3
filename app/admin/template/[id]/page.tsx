@@ -554,10 +554,18 @@ export default function TemplateEditPage() {
     isBuddyTask: false,
   });
 
-  // Skapa en sorterad lista av kategori-IDs för SortableContext
-  const categoryIds = useMemo(
-    () => checklist?.categories.map((category) => category.id) || [],
+  // Filtrera kategorier för att endast visa vanliga kategorier (som innehåller vanliga uppgifter)
+  const regularCategories = useMemo(
+    () => checklist?.categories.filter(category =>
+      category.tasks.some(task => !task.isBuddyTask)
+    ) || [],
     [checklist]
+  );
+
+  // Skapa en sorterad lista av kategori-IDs för SortableContext (endast vanliga kategorier)
+  const categoryIds = useMemo(
+    () => regularCategories.map((category) => category.id) || [],
+    [regularCategories]
   );
 
   const fetchChecklist = useCallback(async () => {
@@ -661,7 +669,7 @@ export default function TemplateEditPage() {
     setActiveId(active.id);
 
     // Kolla om vi drar en kategori
-    const draggedCategory = checklist?.categories.find(
+    const draggedCategory = regularCategories.find(
       (cat) => cat.id === active.id
     );
     if (draggedCategory) {
@@ -671,7 +679,7 @@ export default function TemplateEditPage() {
     }
 
     // Kolla om vi drar en uppgift (task)
-    for (const category of checklist?.categories || []) {
+    for (const category of regularCategories || []) {
       const draggedTask = category.tasks.find((task) => task.id === active.id);
       if (draggedTask) {
         setActiveTask(draggedTask);
@@ -1246,7 +1254,7 @@ export default function TemplateEditPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Återställ checklista?</AlertDialogTitle>
               <AlertDialogDescription>
-                Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Denna åtgärd kan inte ångras.
+                Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Buddyuppgifter påverkas inte. Denna åtgärd kan inte ångras.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -1283,10 +1291,10 @@ export default function TemplateEditPage() {
       {/* Kategorier och uppgifter */}
       <Card>
         <CardHeader>
-          <CardTitle>Checklista och uppgifter</CardTitle>
+          <CardTitle>Kategorier och uppgifter</CardTitle>
           <CardDescription>
             Hantera kategorier och uppgifter i checklistan. Dra och släpp för
-            att ändra ordning.
+            att ändra ordning. Buddyuppgifter hanteras separat.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1302,7 +1310,7 @@ export default function TemplateEditPage() {
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-4">
-                {checklist.categories.map((category) => (
+                {regularCategories.map((category) => (
                   <SortableCategory
                     key={category.id}
                     category={category}
@@ -1359,7 +1367,7 @@ export default function TemplateEditPage() {
                         <div className="flex items-center mt-1">
                           <span className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded-full flex items-center">
                             <ClipboardCheck className="h-3 w-3 mr-1" />
-                            Buddy-uppgift
+                            Buddyuppgift
                           </span>
                         </div>
                       )}

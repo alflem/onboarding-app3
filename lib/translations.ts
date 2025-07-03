@@ -258,7 +258,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     title: 'Titel',
     description: 'Beskrivning',
     category: 'Kategori',
-    buddy_task: 'Buddy-uppgift',
+    buddy_task: 'Buddyuppgift',
     link: 'Länk',
     order: 'Ordning',
     buddy_checklist_page: 'Buddy Checklista',

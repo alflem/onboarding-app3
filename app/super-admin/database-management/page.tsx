@@ -487,7 +487,7 @@ export default function DatabaseManagementPage() {
                           </div>
                           <div className="bg-purple-50 p-3 rounded-lg">
                             <div className="text-2xl font-bold text-purple-600">{checklist.stats.buddyTasks}</div>
-                            <div className="text-sm text-purple-700">Buddy-uppgifter</div>
+                            <div className="text-sm text-purple-700">Buddyuppgifter</div>
                           </div>
                         </div>
 

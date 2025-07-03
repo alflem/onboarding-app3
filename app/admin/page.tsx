@@ -609,7 +609,7 @@ export default function AdminPage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Återställ checklista?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Denna åtgärd kan inte ångras.
+                          Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Buddyuppgifter påverkas inte. Denna åtgärd kan inte ångras.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

@@ -1149,7 +1149,7 @@ export default function BuddyTemplatePage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Återställ buddy-checklista?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Detta kommer att ta bort alla befintliga buddy-uppgifter och ersätta dem med standardmallen för svenska processer (nyanställningsintroduktion). Vanliga uppgifter påverkas inte. Denna åtgärd kan inte ångras.
+                  Detta kommer att ta bort alla befintliga buddyuppgifter och ersätta dem med standardmallen för svenska processer (nyanställningsintroduktion). Vanliga uppgifter påverkas inte. Denna åtgärd kan inte ångras.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

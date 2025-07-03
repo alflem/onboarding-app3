@@ -48,32 +48,71 @@ export async function POST(
       return NextResponse.json({ error: "Ej behörig för denna organisation" }, { status: 403 });
     }
 
-    // Ta bort alla befintliga kategorier och uppgifter
+    // Ta bort endast vanliga uppgifter (inte buddy-uppgifter)
     await prisma.task.deleteMany({
       where: {
         category: {
           checklistId: id
+        },
+        isBuddyTask: false
+      }
+    });
+
+    // Ta bort kategorier som bara innehöll vanliga uppgifter
+    const categories = await prisma.category.findMany({
+      where: {
+        checklistId: id
+      },
+      include: {
+        tasks: true
+      }
+    });
+
+    // Identifiera kategorier som är tomma efter att vanliga uppgifter tagits bort
+    const emptyCategories = categories.filter(category =>
+      category.tasks.length === 0 || category.tasks.every(task => !task.isBuddyTask)
+    );
+
+    // Ta bort tomma kategorier
+    await prisma.category.deleteMany({
+      where: {
+        id: {
+          in: emptyCategories.map(cat => cat.id)
         }
       }
     });
 
-    await prisma.category.deleteMany({
+    // Hämta befintliga kategorier för att bestämma ordning
+    const remainingCategories = await prisma.category.findMany({
       where: {
         checklistId: id
+      },
+      orderBy: {
+        order: 'asc'
       }
     });
+
+    const maxOrder = remainingCategories.length > 0
+      ? Math.max(...remainingCategories.map(cat => cat.order))
+      : 0;
 
     // Skapa nya kategorier och uppgifter från mallen
     for (const categoryData of DEFAULT_CHECKLIST_CATEGORIES) {
       const { name, order, tasks } = categoryData;
 
-      const category = await prisma.category.create({
-        data: {
-          name,
-          order,
-          checklistId: id,
-        },
-      });
+      // Kontrollera om kategorin redan finns
+      let category = remainingCategories.find(cat => cat.name === name);
+
+      if (!category) {
+        // Skapa ny kategori om den inte finns
+        category = await prisma.category.create({
+          data: {
+            name,
+            order: maxOrder + order,
+            checklistId: id,
+          },
+        });
+      }
 
       // Skapa uppgifter för denna kategori
       for (const taskData of tasks) {
@@ -82,9 +121,9 @@ export async function POST(
             title: taskData.title,
             description: taskData.description,
             order: taskData.order,
-            isBuddyTask: taskData.isBuddyTask,
+            isBuddyTask: false, // Explicit sätt till false för vanliga uppgifter
             categoryId: category.id,
-            ...(taskData.link && { link: taskData.link })
+            link: taskData.link || null
           },
         });
       }
