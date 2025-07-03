@@ -1,6 +1,6 @@
 // lib/auth/custom-prisma-adapter.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@/prisma/generated/client";
+import { PrismaClient, BuddyPreparation } from "@/prisma/generated/client";
 import { Adapter, AdapterUser, AdapterAccount } from "next-auth/adapters";
 import { findOrCreateOrganization } from "./organization-seeder";
 
@@ -82,14 +82,14 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             console.log(`Checking for buddy preparation for email: ${user.email} in organization: ${organization.id}`);
 
             // First, let's check what buddy preparations exist for this organization
-            const allPreparations = await (prisma as any).buddyPreparation.findMany({
+            const allPreparations = await prisma.buddyPreparation.findMany({
               where: {
                 organizationId: organization.id,
                 isActive: true,
               },
             });
             console.log(`Found ${allPreparations.length} active buddy preparations in organization ${organization.id}:`,
-              allPreparations.map((p: any) => ({ id: p.id, email: p.email, firstName: p.firstName, lastName: p.lastName }))
+              allPreparations.map((p: BuddyPreparation) => ({ id: p.id, email: p.email, firstName: p.firstName, lastName: p.lastName }))
             );
 
             // Try multiple matching strategies
@@ -97,7 +97,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             let buddyPreparation = null;
 
             // Strategy 1: Exact match
-            buddyPreparation = await (prisma as any).buddyPreparation.findFirst({
+            buddyPreparation = await prisma.buddyPreparation.findFirst({
               where: {
                 email: userEmailLower,
                 organizationId: organization.id,
@@ -108,7 +108,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
             // Strategy 2: Case-insensitive match if exact match failed
             if (!buddyPreparation) {
               console.log(`No exact match found, trying case-insensitive search for: ${userEmailLower}`);
-              const allActivePreparations = await (prisma as any).buddyPreparation.findMany({
+              const allActivePreparations = await prisma.buddyPreparation.findMany({
                 where: {
                   organizationId: organization.id,
                   isActive: true,
@@ -116,7 +116,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
                 },
               });
 
-              buddyPreparation = allActivePreparations.find((p: any) =>
+              buddyPreparation = allActivePreparations.find((p: BuddyPreparation) =>
                 p.email && p.email.toLowerCase().trim() === userEmailLower
               );
             }
@@ -126,7 +126,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
               console.log(`No email match found, checking domain match for: ${userEmailLower}`);
               const userDomain = userEmailLower.split('@')[1];
               if (userDomain) {
-                const domainPreparations = await (prisma as any).buddyPreparation.findMany({
+                const domainPreparations = await prisma.buddyPreparation.findMany({
                   where: {
                     organizationId: organization.id,
                     isActive: true,
@@ -134,7 +134,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
                   },
                 });
 
-                buddyPreparation = domainPreparations.find((p: any) =>
+                buddyPreparation = domainPreparations.find((p: BuddyPreparation) =>
                   p.email && p.email.toLowerCase().includes(userDomain)
                 );
               }
@@ -154,7 +154,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
               });
 
               // Update buddy preparation to mark as completed and link to user
-              await (prisma as any).buddyPreparation.update({
+              await prisma.buddyPreparation.update({
                 where: { id: buddyPreparation.id },
                 data: {
                   userId: newUser.id,

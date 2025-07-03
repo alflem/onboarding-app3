@@ -160,10 +160,6 @@ export default function AdminPage() {
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
 
-  const [showBuddyForm, setShowBuddyForm] = useState(false);
-  const [selectedPreparation, setSelectedPreparation] = useState<BuddyPreparation | null>(null);
-  const [debugMode, setDebugMode] = useState(false);
-
   // Funktion för att hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {
     try {
