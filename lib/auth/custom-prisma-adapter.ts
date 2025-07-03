@@ -79,13 +79,68 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         // Check for active buddy preparation and link automatically
         if (user.email) {
           try {
-            const buddyPreparation = await (prisma as any).buddyPreparation.findFirst({
+            console.log(`Checking for buddy preparation for email: ${user.email} in organization: ${organization.id}`);
+
+            // First, let's check what buddy preparations exist for this organization
+            const allPreparations = await (prisma as any).buddyPreparation.findMany({
               where: {
-                email: user.email.toLowerCase(),
                 organizationId: organization.id,
                 isActive: true,
               },
             });
+            console.log(`Found ${allPreparations.length} active buddy preparations in organization ${organization.id}:`,
+              allPreparations.map((p: any) => ({ id: p.id, email: p.email, firstName: p.firstName, lastName: p.lastName }))
+            );
+
+            // Try multiple matching strategies
+            const userEmailLower = user.email.toLowerCase().trim();
+            let buddyPreparation = null;
+
+            // Strategy 1: Exact match
+            buddyPreparation = await (prisma as any).buddyPreparation.findFirst({
+              where: {
+                email: userEmailLower,
+                organizationId: organization.id,
+                isActive: true,
+              },
+            });
+
+            // Strategy 2: Case-insensitive match if exact match failed
+            if (!buddyPreparation) {
+              console.log(`No exact match found, trying case-insensitive search for: ${userEmailLower}`);
+              const allActivePreparations = await (prisma as any).buddyPreparation.findMany({
+                where: {
+                  organizationId: organization.id,
+                  isActive: true,
+                  email: { not: null },
+                },
+              });
+
+              buddyPreparation = allActivePreparations.find((p: any) =>
+                p.email && p.email.toLowerCase().trim() === userEmailLower
+              );
+            }
+
+            // Strategy 3: Check if email domain matches (fallback)
+            if (!buddyPreparation) {
+              console.log(`No email match found, checking domain match for: ${userEmailLower}`);
+              const userDomain = userEmailLower.split('@')[1];
+              if (userDomain) {
+                const domainPreparations = await (prisma as any).buddyPreparation.findMany({
+                  where: {
+                    organizationId: organization.id,
+                    isActive: true,
+                    email: { not: null },
+                  },
+                });
+
+                buddyPreparation = domainPreparations.find((p: any) =>
+                  p.email && p.email.toLowerCase().includes(userDomain)
+                );
+              }
+            }
+
+            console.log(`Final buddy preparation search result for ${userEmailLower}:`, buddyPreparation);
 
             if (buddyPreparation) {
               console.log(`Found active buddy preparation for ${user.email}, linking to user and assigning buddy`);
@@ -108,6 +163,8 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
               });
 
               console.log(`Buddy preparation completed: ${newUser.email} assigned to buddy ${buddyPreparation.buddyId}`);
+            } else {
+              console.log(`No active buddy preparation found for ${user.email} in organization ${organization.id}`);
             }
           } catch (buddyPrepError) {
             console.error("Error processing buddy preparation:", buddyPrepError);

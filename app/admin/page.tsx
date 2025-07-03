@@ -53,7 +53,9 @@ import {
   BarChart,
   RotateCcw,
   UserPlus,
-  Trash2
+  Trash2,
+  Bug,
+  Wrench
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -157,6 +159,10 @@ export default function AdminPage() {
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
+
+  const [showBuddyForm, setShowBuddyForm] = useState(false);
+  const [selectedPreparation, setSelectedPreparation] = useState<BuddyPreparation | null>(null);
+  const [debugMode, setDebugMode] = useState(false);
 
   // Funktion för att hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {
@@ -528,6 +534,55 @@ export default function AdminPage() {
     }
   };
 
+  const testEmailMatching = async () => {
+    if (!session?.user?.email) return;
+
+    try {
+      const response = await fetch('/api/buddy-preparations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          testEmail: session.user.email,
+          organizationId: session.user.organizationId,
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Email matching test result:', result);
+      alert(`Test result: ${JSON.stringify(result, null, 2)}`);
+    } catch (error) {
+      console.error('Error testing email matching:', error);
+      alert('Error testing email matching');
+    }
+  };
+
+  const fixEmailFormatting = async () => {
+    try {
+      const response = await fetch('/api/buddy-preparations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fixEmails: true,
+          organizationId: session?.user?.organizationId,
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Email fixing result:', result);
+      alert(`Fixed ${result.fixedCount} email formatting issues out of ${result.totalPreparations} total preparations`);
+
+      // Refresh buddy preparations
+      await fetchBuddyPreparations();
+    } catch (error) {
+      console.error('Error fixing email formatting:', error);
+      alert('Error fixing email formatting');
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -799,10 +854,20 @@ export default function AdminPage() {
                   Skapa förberedelser för nyanställda innan de har skapat sina konton
                 </CardDescription>
               </div>
-              <Button onClick={() => handleOpenBuddyPrepForm()}>
-                <Plus className="h-4 w-4 mr-2" />
-                Ny förberedelse
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={testEmailMatching}>
+                  <Bug className="h-4 w-4 mr-2" />
+                  Testa e-postmatchning
+                </Button>
+                <Button variant="outline" onClick={fixEmailFormatting}>
+                  <Wrench className="h-4 w-4 mr-2" />
+                  Fixa e-postformat
+                </Button>
+                <Button onClick={() => handleOpenBuddyPrepForm()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ny förberedelse
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>

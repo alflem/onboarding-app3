@@ -123,10 +123,11 @@ export async function PUT(
 
     // Check for email conflicts if email is being changed
     if (email && email !== existingPreparation.email) {
+      const emailNormalized = email.toLowerCase().trim();
       const conflictingPreparation = await prisma.buddyPreparation.findUnique({
         where: {
           email_organizationId: {
-            email: email.toLowerCase(),
+            email: emailNormalized,
             organizationId: existingPreparation.organizationId,
           },
         },
