@@ -54,13 +54,10 @@ import {
   RotateCcw,
   UserPlus,
   Trash2,
-  Bug,
-  Wrench
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
 import BuddyPreparationForm from "./components/BuddyPreparationForm";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -167,9 +164,6 @@ export default function AdminPage() {
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
-
-  // State for the test email input
-  const [testEmailInput, setTestEmailInput] = useState("");
 
   // 1. Add state for dialog visibility and selected preparation/user
   const [manualLinkDialogOpen, setManualLinkDialogOpen] = useState(false);
@@ -547,61 +541,6 @@ export default function AdminPage() {
     }
   };
 
-  const testEmailMatching = async () => {
-    const emailToTest = testEmailInput.trim();
-    if (!emailToTest) {
-      alert("Fyll i en e-postadress att testa!");
-      return;
-    }
-    if (!session || !session.user) {
-      alert("Ingen session eller användare hittad.");
-      return;
-    }
-    try {
-      const response = await fetch('/api/buddy-preparations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          testEmail: emailToTest,
-          organizationId: session.user.organizationId,
-        }),
-      });
-      const result = await response.json();
-      console.log('Email matching test result:', result);
-      alert(`Test result: ${JSON.stringify(result, null, 2)}`);
-    } catch (error) {
-      console.error('Error testing email matching:', error);
-      alert('Error testing email matching');
-    }
-  };
-
-  const fixEmailFormatting = async () => {
-    try {
-      const response = await fetch('/api/buddy-preparations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fixEmails: true,
-          organizationId: session?.user?.organizationId,
-        }),
-      });
-
-      const result = await response.json();
-      console.log('Email fixing result:', result);
-      alert(`Fixed ${result.fixedCount} email formatting issues out of ${result.totalPreparations} total preparations`);
-
-      // Refresh buddy preparations
-      await fetchBuddyPreparations();
-    } catch (error) {
-      console.error('Error fixing email formatting:', error);
-      alert('Error fixing email formatting');
-    }
-  };
-
   // 2. Add a function to open the dialog
   const openManualLinkDialog = (prep: BuddyPreparation) => {
     setPreparationToLink(prep);
@@ -903,21 +842,6 @@ export default function AdminPage() {
                 </CardDescription>
               </div>
               <div className="flex gap-2 items-center">
-                <Input
-                  type="email"
-                  placeholder="E-post att testa"
-                  value={testEmailInput}
-                  onChange={e => setTestEmailInput(e.target.value)}
-                  className="w-[220px]"
-                />
-                <Button variant="outline" onClick={testEmailMatching}>
-                  <Bug className="h-4 w-4 mr-2" />
-                  Testa e-postmatchning
-                </Button>
-                <Button variant="outline" onClick={fixEmailFormatting}>
-                  <Wrench className="h-4 w-4 mr-2" />
-                  Fixa e-postformat
-                </Button>
                 <Button onClick={() => handleOpenBuddyPrepForm()}>
                   <Plus className="h-4 w-4 mr-2" />
                   Ny förberedelse
