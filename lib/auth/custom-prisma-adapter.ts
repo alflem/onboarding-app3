@@ -74,9 +74,9 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           },
         });
 
-        console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id})`);
+        console.log(`New user ${newUser.email} created and assigned to ${organization.name} (${organization.id}) with role ${newUser.role}`);
 
-        // Check for active buddy preparation and link automatically
+        // Now perform buddy preparation matching and linking (after role is set)
         if (user.email) {
           try {
             console.log(`Checking for buddy preparation for email: ${user.email} in organization: ${organization.id}`);
