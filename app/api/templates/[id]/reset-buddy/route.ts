@@ -121,7 +121,7 @@ export async function POST(
             title: taskData.title,
             description: taskData.description,
             order: taskData.order,
-            isBuddyTask: taskData.isBuddyTask,
+            isBuddyTask: true, // Explicit sätt till true för buddy-uppgifter
             categoryId: category.id,
             link: taskData.link || null
           },
