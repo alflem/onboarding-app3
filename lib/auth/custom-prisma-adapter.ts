@@ -27,7 +27,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
           try {
             // Find or create organization based on companyName
             organization = await findOrCreateOrganization(prisma, companyName);
-          } catch (orgError) {
+          } catch {
             organization = null; // Will trigger fallback below
           }
         }

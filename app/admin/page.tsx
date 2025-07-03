@@ -182,8 +182,7 @@ export default function AdminPage() {
 
       const data = await response.json();
       setBuddyEnabled(data.buddyEnabled);
-    } catch (error) {
-      console.error("Fel vid hämtning av organisationsinställningar:", error);
+    } catch {
       // Sätt default till true om det inte går att hämta
       setBuddyEnabled(true);
     }
@@ -209,8 +208,7 @@ export default function AdminPage() {
       toast.success("Checklista skapad", {
         description: "En ny onboarding-checklista har skapats för din organisation."
       });
-    } catch (error) {
-      console.error("Fel vid skapande av checklista:", error);
+    } catch {
       toast.error("Kunde inte skapa checklista", {
         description: "Ett fel uppstod vid skapande av checklista."
       });
@@ -246,8 +244,7 @@ export default function AdminPage() {
       toast.success("Checklista återställd", {
         description: "Checklistan har återställts till standardmallen från organization_seeder."
       });
-    } catch (error) {
-      console.error("Fel vid återställning av checklista:", error);
+    } catch {
       toast.error("Kunde inte återställa checklista", {
         description: "Ett fel uppstod vid återställning av checklista."
       });
@@ -272,8 +269,7 @@ export default function AdminPage() {
         // Om ingen checklista finns, skapa en
         await createChecklist();
       }
-    } catch (error) {
-      console.error("Fel vid hämtning av checklista:", error);
+    } catch {
       toast.error("Kunde inte ladda checklista", {
         description: "Ett fel uppstod vid hämtning av checklista."
       });
@@ -293,8 +289,7 @@ export default function AdminPage() {
 
       const data = await response.json();
       setEmployees(data);
-    } catch (error) {
-      console.error("Fel vid hämtning av användare:", error);
+    } catch {
       toast.error("Kunde inte ladda användare", {
         description: "Ett fel uppstod vid hämtning av användare."
       });
@@ -312,8 +307,7 @@ export default function AdminPage() {
 
       const data = await response.json();
       setBuddies(data);
-    } catch (error) {
-      console.error("Fel vid hämtning av buddies:", error);
+    } catch {
       toast.error("Kunde inte ladda buddies", {
         description: "Ett fel uppstod vid hämtning av möjliga buddies."
       });
@@ -331,8 +325,7 @@ export default function AdminPage() {
 
       const data = await response.json();
       setBuddyPreparations(data.data || []);
-    } catch (error) {
-      console.error("Fel vid hämtning av buddyförberedelser:", error);
+    } catch {
       toast.error("Kunde inte ladda buddyförberedelser", {
         description: "Ett fel uppstod vid hämtning av buddyförberedelser."
       });
@@ -368,8 +361,7 @@ export default function AdminPage() {
 
       const data = await response.json();
       setEmployeeDetails(data);
-    } catch (error) {
-      console.error("Fel vid hämtning av medarbetardetaljer:", error);
+    } catch {
       toast.error("Kunde inte ladda medarbetardetaljer", {
         description: "Ett fel uppstod vid hämtning av medarbetarens information."
       });
@@ -403,8 +395,7 @@ export default function AdminPage() {
       toast.success("Medarbetare borttagen", {
         description: "Medarbetaren har tagits bort från systemet."
       });
-    } catch (error) {
-      console.error("Fel vid borttagning av medarbetare:", error);
+    } catch {
       toast.error("Kunde inte ta bort medarbetare", {
         description: "Ett fel uppstod vid borttagning av medarbetaren."
       });
@@ -444,8 +435,7 @@ export default function AdminPage() {
       toast.success("Buddy tilldelad", {
         description: "Medarbetaren har tilldelats en buddy."
       });
-    } catch (error) {
-      console.error("Fel vid tilldelning av buddy:", error);
+    } catch {
       toast.error("Kunde inte tilldela buddy", {
         description: "Ett fel uppstod vid tilldelning av buddy."
       });
@@ -484,8 +474,7 @@ export default function AdminPage() {
       toast.success(buddyId ? "Buddy tilldelad" : "Buddy borttagen", {
         description: buddyId ? "Medarbetaren har tilldelats en buddy." : "Buddy-tilldelningen har tagits bort."
       });
-    } catch (error) {
-      console.error("Fel vid uppdatering av buddy:", error);
+    } catch {
       toast.error("Kunde inte uppdatera buddy", {
         description: "Ett fel uppstod vid uppdatering av buddytilldelning."
       });
@@ -531,8 +520,7 @@ export default function AdminPage() {
       toast.success("Förberedelse borttagen", {
         description: "Buddyförberedelsen har tagits bort."
       });
-    } catch (error) {
-      console.error("Fel vid borttagning av förberedelse:", error);
+    } catch {
       toast.error("Kunde inte ta bort förberedelse", {
         description: "Ett fel uppstod vid borttagning av förberedelsen."
       });
@@ -563,7 +551,7 @@ export default function AdminPage() {
       setPreparationToLink(null);
       setSelectedUserId("");
       await fetchBuddyPreparations();
-    } catch (error) {
+    } catch {
       alert('Fel vid manuell koppling');
     } finally {
       setLinking(false);
