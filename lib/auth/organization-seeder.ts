@@ -133,6 +133,105 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
   },
 ];
 
+export const DEFAULT_BUDDY_CHECKLIST_CATEGORIES = [
+  {
+    name: 'När nyanställning är påskriven',
+    order: 1,
+    tasks: [
+      {
+        title: 'Välkomstmail inkl. information om IT-utrustning',
+        description: 'Skicka ett mail till den nyanställda för att hälsa välkommen samt berätta att denna redan nu ska få beställa den IT-utrustning som behövs. Be om den senaste listan över prylar att beställa från IT-ansvarig och bifoga i välkomstmailet. Förslag på utformning av välkomstmail hittar du via länken.',
+        order: 1,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Beställning av IT-utrustning',
+        description: 'Be IT-ansvarig hjälpa med beställning av dator, mobil samt ev. flytt av mobilabonnemang',
+        order: 2,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Anställningsstart och kontaktuppgifter',
+        description: 'På angiven plats, ange kontaktuppgifter till den nyanställde samt datum för anställningsstart',
+        order: 3,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Konto i Cinode',
+        description: 'Be VD beställa konto i Cinode',
+        order: 4,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Dörrtagg',
+        description: 'Be lokalansvarig beställa dörrtagg',
+        order: 5,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Den nyanställdes CV',
+        description: 'Be att den nyanställde skickar sitt CV till oss, om vi inte redan har fått det',
+        order: 6,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'CV i kortform, för säljpresentation',
+        description: 'Skapa en kortversion av CV:t som kan användas för säljpresentationer',
+        order: 7,
+        isBuddyTask: true,
+        link: undefined
+      },
+    ]
+  },
+  {
+    name: 'Veckan innan nyanställning börjar',
+    order: 2,
+    tasks: [
+      {
+        title: 'Maila mobilnummer till CSF Finance',
+        description: 'Maila den nyanställdes mobilnummer till CSF Finance: finance@xcg.se',
+        order: 1,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Boka in XLU-lunch/fika',
+        description: 'Bjud den nyanställde på lunch/fika under dennes första vecka',
+        order: 2,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Beställ blommor',
+        description: 'Beställ blommor, exempelvis från Interflora, till den nyanställdes hemadress. Kostnad ca 350 kr + budavgift',
+        order: 3,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Förbered välkomstpåse',
+        description: 'Förbered en välkomstpåse till den nyanställdes första dag. Fyll den med lite smått och gott, exempelvis med handduk, laddare, lypyl, vattenflaska, penna, reflex och en buff',
+        order: 4,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Möt upp den nyanställda första dagen på kontoret',
+        description: 'Säkerställ att du kan möta den nyanställda på kontoret dennes första dag. Om du inte kan, kom överens med en kollega som gör det istället.',
+        order: 5,
+        isBuddyTask: true,
+        link: undefined
+      },
+    ]
+  },
+];
+
 /**
  * Skapar en ny organisation och seedar den med standardchecklistan
  */
@@ -184,7 +283,7 @@ export async function createOrganizationWithChecklist(
           order: taskData.order,
           isBuddyTask: taskData.isBuddyTask,
           categoryId: category.id,
-          ...(taskData.link && { link: taskData.link })
+          link: taskData.link || null
         },
       });
     }
@@ -192,6 +291,195 @@ export async function createOrganizationWithChecklist(
 
   console.log(`Organization "${organizationName}" has been fully seeded with checklist`);
   return organization;
+}
+
+/**
+ * Skapar en ny organisation och seedar den med både standardchecklistan och buddy-checklistan
+ */
+export async function createOrganizationWithFullChecklist(
+  prisma: PrismaClient,
+  organizationName: string
+) {
+  console.log(`Creating organization with full checklist: ${organizationName}`);
+
+  // Skapa organisationen
+  const organization = await prisma.organization.create({
+    data: {
+      name: organizationName,
+      buddyEnabled: true,
+    },
+  });
+
+  console.log(`Organization created with ID: ${organization.id}`);
+
+  // Skapa checklista för organisationen
+  const checklist = await prisma.checklist.create({
+    data: {
+      organizationId: organization.id,
+    },
+  });
+
+  console.log(`Checklist created with ID: ${checklist.id}`);
+
+  // Skapa vanliga kategorier och tasks
+  for (const categoryData of DEFAULT_CHECKLIST_CATEGORIES) {
+    const { name, order, tasks } = categoryData;
+
+    const category = await prisma.category.create({
+      data: {
+        name,
+        order,
+        checklistId: checklist.id,
+      },
+    });
+
+    console.log(`Category "${name}" created with ID: ${category.id}`);
+
+    // Skapa tasks för denna kategori
+    for (const taskData of tasks) {
+      await prisma.task.create({
+        data: {
+          title: taskData.title,
+          description: taskData.description,
+          order: taskData.order,
+          isBuddyTask: taskData.isBuddyTask,
+          categoryId: category.id,
+          link: taskData.link || null
+        },
+      });
+    }
+  }
+
+  // Skapa buddy-kategorier och tasks
+  for (const categoryData of DEFAULT_BUDDY_CHECKLIST_CATEGORIES) {
+    const { name, order, tasks } = categoryData;
+
+    const category = await prisma.category.create({
+      data: {
+        name,
+        order: order + DEFAULT_CHECKLIST_CATEGORIES.length, // Lägg till efter de vanliga kategorierna
+        checklistId: checklist.id,
+      },
+    });
+
+    console.log(`Buddy category "${name}" created with ID: ${category.id}`);
+
+    // Skapa tasks för denna kategori
+    for (const taskData of tasks) {
+      await prisma.task.create({
+        data: {
+          title: taskData.title,
+          description: taskData.description,
+          order: taskData.order,
+          isBuddyTask: taskData.isBuddyTask,
+          categoryId: category.id,
+          link: taskData.link || null
+        },
+      });
+    }
+  }
+
+  console.log(`Organization "${organizationName}" has been fully seeded with complete checklist including buddy tasks`);
+  return organization;
+}
+
+/**
+ * Lägger till buddy-checklistan till en befintlig organisation
+ */
+export async function addBuddyChecklistToOrganization(
+  prisma: PrismaClient,
+  organizationId: string
+) {
+  console.log(`Adding buddy checklist to organization: ${organizationId}`);
+
+  // Hämta organisationen och dess checklista
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    include: {
+      checklist: {
+        include: {
+          categories: true
+        }
+      }
+    }
+  });
+
+  if (!organization) {
+    throw new Error(`Organization with ID ${organizationId} not found`);
+  }
+
+  if (!organization.checklist) {
+    throw new Error(`Organization ${organization.name} has no checklist to add buddy tasks to`);
+  }
+
+  const checklist = organization.checklist;
+
+  // Räkna befintliga kategorier för att bestämma order
+  const existingCategoriesCount = organization.checklist.categories.length;
+
+  // Skapa buddy-kategorier och tasks
+  for (const categoryData of DEFAULT_BUDDY_CHECKLIST_CATEGORIES) {
+    const { name, order, tasks } = categoryData;
+
+    const category = await prisma.category.create({
+      data: {
+        name,
+        order: order + existingCategoriesCount, // Lägg till efter befintliga kategorier
+        checklistId: checklist.id,
+      },
+    });
+
+    console.log(`Buddy category "${name}" created with ID: ${category.id}`);
+
+    // Skapa tasks för denna kategori
+    for (const taskData of tasks) {
+      await prisma.task.create({
+        data: {
+          title: taskData.title,
+          description: taskData.description,
+          order: taskData.order,
+          isBuddyTask: taskData.isBuddyTask,
+          categoryId: category.id,
+          link: taskData.link || null
+        },
+      });
+    }
+  }
+
+  console.log(`Buddy checklist successfully added to organization "${organization.name}"`);
+  return organization;
+}
+
+/**
+ * Lägger till buddy-checklistan till en befintlig organisation baserat på organisationsnamn
+ */
+export async function addBuddyChecklistToOrganizationByName(
+  prisma: PrismaClient,
+  organizationName: string
+) {
+  console.log(`Adding buddy checklist to organization: ${organizationName}`);
+
+  // Hitta organisationen
+  const organization = await prisma.organization.findFirst({
+    where: { name: organizationName },
+    include: {
+      checklist: {
+        include: {
+          categories: true
+        }
+      }
+    }
+  });
+
+  if (!organization) {
+    throw new Error(`Organization "${organizationName}" not found`);
+  }
+
+  if (!organization.checklist) {
+    throw new Error(`Organization "${organizationName}" has no checklist to add buddy tasks to`);
+  }
+
+  return await addBuddyChecklistToOrganization(prisma, organization.id);
 }
 
 /**
@@ -213,9 +501,9 @@ export async function findOrCreateOrganization(
     return organization;
   }
 
-  // Skapa ny organisation med checklista
-  console.log(`Organization "${companyName}" not found, creating new one...`);
-  return await createOrganizationWithChecklist(prisma, companyName);
+  // Skapa ny organisation med fullständig checklista (inkl. buddy-uppgifter)
+  console.log(`Organization "${companyName}" not found, creating new one with full checklist...`);
+  return await createOrganizationWithFullChecklist(prisma, companyName);
 }
 
 /**

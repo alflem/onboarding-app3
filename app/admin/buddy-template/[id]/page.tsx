@@ -42,7 +42,7 @@ import {
   GripVertical,
   ArrowLeft,
   Save,
-
+  RotateCcw,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -1050,6 +1050,41 @@ export default function BuddyTemplatePage() {
     }
   };
 
+  // Reset buddy checklist to standard template
+  const resetBuddyChecklist = async () => {
+    if (!checklist) return;
+
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/templates/${id}/reset-buddy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte återställa buddy-checklista');
+      }
+
+      const result = await response.json();
+
+      // Uppdatera checklistan med den nya data
+      setChecklist(result.data);
+
+      toast.success("Buddy-checklista återställd", {
+        description: "Buddy-checklistan har återställts till standardmallen med svenska processer."
+      });
+    } catch (error) {
+      console.error("Fel vid återställning av buddy-checklista:", error);
+      toast.error("Kunde inte återställa buddy-checklista", {
+        description: "Ett fel uppstod vid återställning av buddy-checklista."
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -1081,13 +1116,62 @@ export default function BuddyTemplatePage() {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/admin/template/${id}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Till Vanliga Uppgifter
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/admin/template/${id}`)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Till Vanliga Uppgifter
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="text-destructive hover:text-destructive"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Återställer...
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Återställ Buddy-checklista
+                  </>
+                )}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Återställ buddy-checklista?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Detta kommer att ta bort alla befintliga buddy-uppgifter och ersätta dem med standardmallen för svenska processer (nyanställningsintroduktion). Vanliga uppgifter påverkas inte. Denna åtgärd kan inte ångras.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={resetBuddyChecklist}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Återställer...
+                    </>
+                  ) : (
+                    "Återställ Buddy-checklista"
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {editingTaskId && (
