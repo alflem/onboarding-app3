@@ -313,15 +313,15 @@ export default function AdminPage() {
       const response = await fetch('/api/buddy-preparations');
 
       if (!response.ok) {
-        throw new Error('Kunde inte hämta buddy-förberedelser');
+        throw new Error('Kunde inte hämta buddyförberedelser');
       }
 
       const data = await response.json();
       setBuddyPreparations(data.data || []);
     } catch (error) {
-      console.error("Fel vid hämtning av buddy-förberedelser:", error);
-      toast.error("Kunde inte ladda buddy-förberedelser", {
-        description: "Ett fel uppstod vid hämtning av buddy-förberedelser."
+      console.error("Fel vid hämtning av buddyförberedelser:", error);
+      toast.error("Kunde inte ladda buddyförberedelser", {
+        description: "Ett fel uppstod vid hämtning av buddyförberedelser."
       });
     }
   }, []);
@@ -494,7 +494,7 @@ export default function AdminPage() {
 
   const handleBuddyPrepSuccess = () => {
     fetchBuddyPreparations();
-    toast.success("Buddy-förberedelse sparad", {
+          toast.success("Buddyförberedelse sparad", {
       description: "Förberedelsen har sparats framgångsrikt."
     });
   };
@@ -516,7 +516,7 @@ export default function AdminPage() {
       );
 
       toast.success("Förberedelse borttagen", {
-        description: "Buddy-förberedelsen har tagits bort."
+        description: "Buddyförberedelsen har tagits bort."
       });
     } catch (error) {
       console.error("Fel vid borttagning av förberedelse:", error);
@@ -785,7 +785,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Buddy-förberedelser sektion */}
+      {/* Buddyförberedelser sektion */}
       {buddyEnabled && (
         <Card>
           <CardHeader>
@@ -793,7 +793,7 @@ export default function AdminPage() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5" />
-                  Buddy-förberedelser
+                  Buddyförberedelser
                 </CardTitle>
                 <CardDescription>
                   Skapa förberedelser för nyanställda innan de har skapat sina konton
@@ -809,7 +809,7 @@ export default function AdminPage() {
             {buddyPreparations.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <UserPlus className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">Inga buddy-förberedelser ännu</p>
+                <p className="text-lg font-medium">Inga buddyförberedelser ännu</p>
                 <p className="text-sm">Skapa en förberedelse för att ge buddies tillgång till checklistan innan nyanställda loggar in</p>
               </div>
             ) : (

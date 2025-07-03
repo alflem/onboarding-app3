@@ -501,9 +501,9 @@ export async function findOrCreateOrganization(
     return organization;
   }
 
-  // Skapa ny organisation med fullständig checklista (inkl. buddy-uppgifter)
-  console.log(`Organization "${companyName}" not found, creating new one with full checklist...`);
-  return await createOrganizationWithFullChecklist(prisma, companyName);
+  // Skapa ny organisation med vanlig checklista (buddy-uppgifter läggs till separat vid behov)
+  console.log(`Organization "${companyName}" not found, creating new one...`);
+  return await createOrganizationWithChecklist(prisma, companyName);
 }
 
 /**

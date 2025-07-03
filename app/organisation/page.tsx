@@ -267,7 +267,7 @@ export default function OrganisationPage() {
           {/* Buddyinställningar */}
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Buddy-system</Label>
+              <Label>Buddysystem</Label>
               <p className="text-sm text-muted-foreground">
                 Aktivera buddyfunktionen för organisationen
               </p>

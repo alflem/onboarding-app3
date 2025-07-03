@@ -211,7 +211,7 @@ export default function BuddyPreparationForm({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            {preparation ? "Redigera Buddy-förberedelse" : "Skapa Buddy-förberedelse"}
+                          {preparation ? "Redigera Buddyförberedelse" : "Skapa Buddyförberedelse"}
           </DialogTitle>
         </DialogHeader>
 

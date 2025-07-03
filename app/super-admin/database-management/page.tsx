@@ -361,7 +361,7 @@ export default function DatabaseManagementPage() {
           </TabsTrigger>
           <TabsTrigger value="buddies" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
-            Buddy-system ({buddyData.reduce((sum, org) => sum + org.stats.totalBuddyRelations, 0)})
+                            Buddysystem ({buddyData.reduce((sum, org) => sum + org.stats.totalBuddyRelations, 0)})
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -547,7 +547,7 @@ export default function DatabaseManagementPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Heart className="h-5 w-5" />
-                Buddy-system per Organisation
+                Buddysystem per Organisation
               </CardTitle>
             </CardHeader>
             <CardContent>

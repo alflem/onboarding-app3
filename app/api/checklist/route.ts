@@ -55,6 +55,9 @@ export async function GET() {
       return NextResponse.json({ error: "User has no organization" }, { status: 404 });
     }
 
+    // Kontrollera om buddy-funktionen är aktiverad för organisationen
+    const buddyEnabled = user.organization?.buddyEnabled || false;
+
     // Hämta checklistan för användarens organisation
     const checklist = await prisma.checklist.findFirst({
       where: { organizationId: user.organizationId },
@@ -91,18 +94,23 @@ export async function GET() {
         id: category.id,
         name: category.name,
         order: category.order,
-        tasks: category.tasks.map(task => ({
-          id: task.id,
-          title: task.title,
-          description: task.description,
-          link: task.link,
-          isBuddyTask: task.isBuddyTask,
-          order: task.order,
-          // Använd progressMap för att avgöra om en uppgift är slutförd
-          // Om ingen framstegsinformation finns, är uppgiften inte slutförd
-          completed: progressMap.has(task.id) ? progressMap.get(task.id) : false
-        }))
+        tasks: category.tasks
+          // Filtrera bort buddy-uppgifter om buddy-funktionen är avslagen
+          .filter(task => buddyEnabled || !task.isBuddyTask)
+          .map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description,
+            link: task.link,
+            isBuddyTask: task.isBuddyTask,
+            order: task.order,
+            // Använd progressMap för att avgöra om en uppgift är slutförd
+            // Om ingen framstegsinformation finns, är uppgiften inte slutförd
+            completed: progressMap.has(task.id) ? progressMap.get(task.id) : false
+          }))
       }))
+      // Ta bort kategorier som inte har några uppgifter kvar efter filtrering
+      .filter(category => category.tasks.length > 0)
     };
 
     return NextResponse.json(checklistData);

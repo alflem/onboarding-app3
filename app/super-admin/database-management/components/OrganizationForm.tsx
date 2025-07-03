@@ -70,7 +70,7 @@ export default function OrganizationForm({ isOpen, onClose, organization, onSave
                 setFormData(prev => ({ ...prev, buddyEnabled: !!checked }))
               }
             />
-            <Label htmlFor="buddyEnabled">Buddy-system aktiverat</Label>
+                            <Label htmlFor="buddyEnabled">Buddysystem aktiverat</Label>
           </div>
 
           <div className="flex gap-2 pt-4">
