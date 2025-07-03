@@ -60,6 +60,7 @@ import {
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
 import BuddyPreparationForm from "./components/BuddyPreparationForm";
+import { Input } from "@/components/ui/input";
 
 // Typdefintioner
 type Checklist = {
@@ -159,6 +160,9 @@ export default function AdminPage() {
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
+
+  // State for the test email input
+  const [testEmailInput, setTestEmailInput] = useState("");
 
   // Funktion för att hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {
@@ -531,8 +535,15 @@ export default function AdminPage() {
   };
 
   const testEmailMatching = async () => {
-    if (!session?.user?.email) return;
-
+    const emailToTest = testEmailInput.trim();
+    if (!emailToTest) {
+      alert("Fyll i en e-postadress att testa!");
+      return;
+    }
+    if (!session || !session.user) {
+      alert("Ingen session eller användare hittad.");
+      return;
+    }
     try {
       const response = await fetch('/api/buddy-preparations', {
         method: 'POST',
@@ -540,11 +551,10 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          testEmail: session.user.email,
+          testEmail: emailToTest,
           organizationId: session.user.organizationId,
         }),
       });
-
       const result = await response.json();
       console.log('Email matching test result:', result);
       alert(`Test result: ${JSON.stringify(result, null, 2)}`);
@@ -850,7 +860,14 @@ export default function AdminPage() {
                   Skapa förberedelser för nyanställda innan de har skapat sina konton
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="email"
+                  placeholder="E-post att testa"
+                  value={testEmailInput}
+                  onChange={e => setTestEmailInput(e.target.value)}
+                  className="w-[220px]"
+                />
                 <Button variant="outline" onClick={testEmailMatching}>
                   <Bug className="h-4 w-4 mr-2" />
                   Testa e-postmatchning
