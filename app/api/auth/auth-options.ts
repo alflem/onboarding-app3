@@ -138,6 +138,16 @@ export const authOptions: NextAuthOptions = {
               if (needsOrgCheck) {
                 console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
               }
+
+              // Check if user should be connected to a buddy preparation
+              if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
+                try {
+                  await connectUserToBuddyPreparation(prisma, dbUser.id, dbUser.email, dbUser.organizationId);
+                } catch (buddyError) {
+                  console.error("Error connecting user to buddy preparation (continuing with login):", buddyError);
+                  // Don't stop the login process if buddy connection fails
+                }
+              }
             } else if (needsOrgCheck) {
               console.log(`JWT callback - User with ID ${token.id} not found in database`);
             }
@@ -204,3 +214,53 @@ export const authOptions: NextAuthOptions = {
     }
   },
 };
+
+/**
+ * Connects a user to a buddy preparation if there's an active preparation with their email
+ */
+async function connectUserToBuddyPreparation(
+  prisma: any,
+  userId: string,
+  userEmail: string,
+  organizationId: string
+) {
+  try {
+    // Look for an active buddy preparation with the user's email in their organization
+    const buddyPreparation = await prisma.buddyPreparation.findFirst({
+      where: {
+        email: userEmail.toLowerCase().trim(),
+        organizationId: organizationId,
+        isActive: true,
+        userId: null, // Not already connected to a user
+      },
+    });
+
+    if (buddyPreparation) {
+      console.log(`Found buddy preparation for user ${userEmail}, connecting...`);
+
+      // Connect the user to the buddy preparation
+      await prisma.buddyPreparation.update({
+        where: { id: buddyPreparation.id },
+        data: {
+          userId: userId,
+          isActive: false, // Mark as connected
+        },
+      });
+
+      // Set the user's buddy to the preparation's buddy
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          buddyId: buddyPreparation.buddyId,
+        },
+      });
+
+      console.log(`User ${userEmail} successfully connected to buddy preparation and assigned buddy ${buddyPreparation.buddyId}`);
+    } else {
+      console.log(`No active buddy preparation found for user ${userEmail}`);
+    }
+  } catch (error) {
+    console.error("Error connecting user to buddy preparation:", error);
+    throw error;
+  }
+}

@@ -724,7 +724,7 @@ export default function BuddyTemplatePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          taskIds: tasks.map((task) => ({
+          tasks: tasks.map((task) => ({
             id: task.id,
             order: task.order,
           })),
@@ -1122,7 +1122,7 @@ export default function BuddyTemplatePage() {
             onClick={() => router.push(`/admin/template/${id}`)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Till Vanliga Uppgifter
+            Till checklista för nyanställd
           </Button>
 
           <AlertDialog>

@@ -83,6 +83,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!userId) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
     }
+    // Fetch the preparation to get buddyId
+    const preparation = await prisma.buddyPreparation.findUnique({
+      where: { id },
+      select: { buddyId: true }
+    });
+    if (!preparation) {
+      return NextResponse.json({ error: "Buddy preparation not found" }, { status: 404 });
+    }
     // Update the buddy preparation
     const updatedPreparation = await prisma.buddyPreparation.update({
       where: { id },
@@ -115,6 +123,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           },
         },
       },
+    });
+    // Set the user's buddyId to the preparation's buddyId
+    await prisma.user.update({
+      where: { id: userId },
+      data: { buddyId: preparation.buddyId },
     });
     return NextResponse.json({ success: true, data: updatedPreparation });
   } catch (error) {
