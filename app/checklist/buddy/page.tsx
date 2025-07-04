@@ -304,12 +304,16 @@ export default function BuddyChecklistPage() {
                 {[...(buddyRelationships?.activePreparations ?? []), ...(buddyRelationships?.completedPreparations ?? [])].map((prep: BuddyPreparation | CompletedBuddyPreparation) => (
                   <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800/30 w-full flex flex-col md:flex-row md:items-center md:gap-4 text-sm">
                     <span>{prep.firstName} {prep.lastName}</span>
-                    <span className="text-muted-foreground">{prep.email}</span>
-                    {buddyRelationships && isCompletedBuddyPreparation(prep) ? (
-                      <span className="text-muted-foreground">{prep.user.role}</span>
-                    ) : null}
                     <span className="text-muted-foreground font-medium">
-                      {buddyRelationships && isCompletedBuddyPreparation(prep) ? 'Kopplad' : 'Väntar på registrering'}
+                      {buddyRelationships && isCompletedBuddyPreparation(prep) ? (
+                        <Badge className="bg-green-50 text-green-700 hover:bg-green-100">
+                          Anställd
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                          Väntar på anställning
+                        </Badge>
+                      )}
                     </span>
                     <span className="text-muted-foreground">Förberedd: {new Date(prep.createdAt).toLocaleDateString('sv-SE')}</span>
                   </div>

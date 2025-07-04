@@ -53,6 +53,7 @@ import {
   BarChart,
   RotateCcw,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -152,6 +153,7 @@ export default function AdminPage() {
   // State för dialog-kontroll
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
   const [buddyPrepFormOpen, setBuddyPrepFormOpen] = useState(false);
+  const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | undefined>(undefined);
 
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
@@ -482,11 +484,56 @@ export default function AdminPage() {
   };
 
   // Funktioner för buddy preparations
+  const handleOpenBuddyPrepForm = (preparation?: BuddyPreparation) => {
+    setEditingPreparation(preparation);
+    setBuddyPrepFormOpen(true);
+  };
+
+  const handleCloseBuddyPrepForm = () => {
+    setBuddyPrepFormOpen(false);
+    setEditingPreparation(undefined);
+  };
+
   const handleBuddyPrepSuccess = () => {
     fetchBuddyPreparations();
           toast.success("Buddyförberedelse sparad", {
       description: "Förberedelsen har sparats framgångsrikt."
     });
+  };
+
+  const handleDeleteBuddyPreparation = async (preparationId: string) => {
+    setSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/buddy-preparations/${preparationId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Kunde inte ta bort förberedelse');
+      }
+
+      setBuddyPreparations(preparations =>
+        preparations.filter(p => p.id !== preparationId)
+      );
+
+      toast.success("Förberedelse borttagen", {
+        description: "Buddyförberedelsen har tagits bort."
+      });
+    } catch {
+      toast.error("Kunde inte ta bort förberedelse", {
+        description: "Ett fel uppstod vid borttagning av förberedelsen."
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 2. Add a function to open the dialog
+  const openManualLinkDialog = (prep: BuddyPreparation) => {
+    setPreparationToLink(prep);
+    setManualLinkDialogOpen(true);
+    setSelectedUserId("");
   };
 
   // 3. Add a function to perform the linking
@@ -777,42 +824,228 @@ export default function AdminPage() {
         organizationId={session?.user?.organizationId}
       />
 
+      {/* Buddyförberedelser sektion */}
       {buddyEnabled && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
-              Buddyförberedelser
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5" />
+                  Buddyförberedelser
+                </CardTitle>
+                <CardDescription>
+                  Skapa förberedelser för nyanställda innan de har skapat sina konton
+                </CardDescription>
+              </div>
+              <div className="flex gap-2 items-center">
+                <Button onClick={() => handleOpenBuddyPrepForm()}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ny förberedelse
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {buddyPreparations.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <UserPlus className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg font-medium">Inga buddyförberedelser ännu</p>
+                <p className="text-sm">Skapa en förberedelse för att ge buddies tillgång till checklistan innan nyanställda loggar in</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Namn</TableHead>
-                      <TableHead>Roll</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {buddyPreparations.map((preparation) => (
-                      <TableRow key={preparation.id}>
-                        <TableCell>{preparation.firstName} {preparation.lastName}</TableCell>
-                        <TableCell>{preparation.buddy.role}</TableCell>
-                        <TableCell>
-                          {preparation.isActive ? "Väntar" : "Kopplad"}
-                        </TableCell>
+              <div className="space-y-4">
+                {/* Desktop Table */}
+                <div className="hidden md:block rounded-lg border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nyanställd</TableHead>
+                        <TableHead>E-post</TableHead>
+                        <TableHead>Buddy</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Skapad</TableHead>
+                        <TableHead className="text-right">Åtgärder</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {buddyPreparations.map((preparation) => (
+                        <TableRow key={preparation.id}>
+                          <TableCell className="font-medium">
+                            {preparation.firstName} {preparation.lastName}
+                          </TableCell>
+                          <TableCell>
+                            {preparation.email ? (
+                              <span className="text-sm">{preparation.email}</span>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Ej angiven</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{preparation.buddy.name}</TableCell>
+                          <TableCell>
+                            {preparation.isActive ? (
+                              <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                                <UserPlus className="h-3 w-3 mr-1" />
+                                Väntar
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-green-50 text-green-700 hover:bg-green-100">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Kopplad
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(preparation.createdAt).toLocaleDateString('sv-SE')}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => handleOpenBuddyPrepForm(preparation)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Ta bort förberedelse?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Detta kommer att ta bort förberedelsen för {preparation.firstName} {preparation.lastName}. Denna åtgärd kan inte ångras.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      onClick={() => handleDeleteBuddyPreparation(preparation.id)}
+                                      disabled={submitting}
+                                    >
+                                      {submitting ? (
+                                        <>
+                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                          Tar bort...
+                                        </>
+                                      ) : (
+                                        "Ta bort"
+                                      )}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                              {preparation.isActive && !preparation.userId && (
+                                <Button size="sm" variant="secondary" onClick={() => openManualLinkDialog(preparation)}>
+                                  Koppla till användare
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-4">
+                  {buddyPreparations.map((preparation) => (
+                    <Card key={preparation.id} className="border">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="font-medium">
+                            {preparation.firstName} {preparation.lastName}
+                          </div>
+                          {preparation.isActive ? (
+                            <Badge className="bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/30">
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              Väntar
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/30">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Kopplad
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="space-y-2 text-sm text-muted-foreground mb-3">
+                          <div>
+                            <span className="font-medium">E-post:</span> {preparation.email || "Ej angiven"}
+                          </div>
+                          <div>
+                            <span className="font-medium">Buddy:</span> {preparation.buddy.name}
+                          </div>
+                          <div>
+                            <span className="font-medium">Skapad:</span> {new Date(preparation.createdAt).toLocaleDateString('sv-SE')}
+                          </div>
+                          {preparation.notes && (
+                            <div>
+                              <span className="font-medium">Anteckningar:</span> {preparation.notes}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenBuddyPrepForm(preparation)}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Redigera
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Ta bort
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Ta bort förberedelse?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Detta kommer att ta bort förberedelsen för {preparation.firstName} {preparation.lastName}. Denna åtgärd kan inte ångras.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => handleDeleteBuddyPreparation(preparation.id)}
+                                  disabled={submitting}
+                                >
+                                  {submitting ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Tar bort...
+                                    </>
+                                  ) : (
+                                    "Ta bort"
+                                  )}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          {preparation.isActive && !preparation.userId && (
+                            <Button size="sm" variant="secondary" onClick={() => openManualLinkDialog(preparation)}>
+                              Koppla till användare
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>
@@ -1104,6 +1337,14 @@ export default function AdminPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Buddy Preparation Form Dialog */}
+      <BuddyPreparationForm
+        isOpen={buddyPrepFormOpen}
+        onClose={handleCloseBuddyPrepForm}
+        onSuccess={handleBuddyPrepSuccess}
+        preparation={editingPreparation}
+      />
     </div>
   );
 }
