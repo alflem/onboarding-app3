@@ -683,13 +683,13 @@ export default function BuddyTemplatePage() {
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/templates/${id}/categories/reorder`, {
+      const response = await fetch(`/api/categories/reorder`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          categoryIds: categories.map((cat) => ({
+          categories: categories.map((cat) => ({
             id: cat.id,
             order: cat.order,
           })),
