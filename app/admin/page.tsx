@@ -53,7 +53,6 @@ import {
   BarChart,
   RotateCcw,
   UserPlus,
-  Trash2,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -153,7 +152,6 @@ export default function AdminPage() {
   // State för dialog-kontroll
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
   const [buddyPrepFormOpen, setBuddyPrepFormOpen] = useState(false);
-  const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | undefined>(undefined);
 
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
@@ -484,56 +482,11 @@ export default function AdminPage() {
   };
 
   // Funktioner för buddy preparations
-  const handleOpenBuddyPrepForm = (preparation?: BuddyPreparation) => {
-    setEditingPreparation(preparation);
-    setBuddyPrepFormOpen(true);
-  };
-
-  const handleCloseBuddyPrepForm = () => {
-    setBuddyPrepFormOpen(false);
-    setEditingPreparation(undefined);
-  };
-
   const handleBuddyPrepSuccess = () => {
     fetchBuddyPreparations();
           toast.success("Buddyförberedelse sparad", {
       description: "Förberedelsen har sparats framgångsrikt."
     });
-  };
-
-  const handleDeleteBuddyPreparation = async (preparationId: string) => {
-    setSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/buddy-preparations/${preparationId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Kunde inte ta bort förberedelse');
-      }
-
-      setBuddyPreparations(preparations =>
-        preparations.filter(p => p.id !== preparationId)
-      );
-
-      toast.success("Förberedelse borttagen", {
-        description: "Buddyförberedelsen har tagits bort."
-      });
-    } catch {
-      toast.error("Kunde inte ta bort förberedelse", {
-        description: "Ett fel uppstod vid borttagning av förberedelsen."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // 2. Add a function to open the dialog
-  const openManualLinkDialog = (prep: BuddyPreparation) => {
-    setPreparationToLink(prep);
-    setManualLinkDialogOpen(true);
-    setSelectedUserId("");
   };
 
   // 3. Add a function to perform the linking
@@ -861,9 +814,9 @@ export default function AdminPage() {
       {/* Buddy Preparation Form Dialog */}
       <BuddyPreparationForm
         isOpen={buddyPrepFormOpen}
-        onClose={handleCloseBuddyPrepForm}
+        onClose={() => setBuddyPrepFormOpen(false)}
         onSuccess={handleBuddyPrepSuccess}
-        preparation={editingPreparation}
+        preparation={undefined}
         organizationId={session?.user?.organizationId}
       />
 

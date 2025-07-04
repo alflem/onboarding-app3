@@ -3,7 +3,7 @@ import { NextAuthOptions } from "next-auth";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import { CustomPrismaAdapter } from "@/lib/auth/custom-prisma-adapter";
 import { updateUserOrganizationIfNeeded } from "@/lib/auth/organization-seeder";
-import { prisma, type Role } from "@/lib/prisma";
+import { prisma, type Role, PrismaClient } from "@/lib/prisma";
 
 // Define type for Azure AD profile
 interface AzureADProfile {
@@ -219,7 +219,7 @@ export const authOptions: NextAuthOptions = {
  * Connects a user to a buddy preparation if there's an active preparation with their email
  */
 async function connectUserToBuddyPreparation(
-  prisma: any,
+  prisma: PrismaClient,
   userId: string,
   userEmail: string,
   organizationId: string
