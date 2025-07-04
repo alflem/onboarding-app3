@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Info, Users, HelpCircle, ExternalLink, UserCheck, CheckCircle2 } from "lucide-react";
+import { Info, Users, HelpCircle, ExternalLink, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -244,6 +244,12 @@ export default function BuddyChecklistPage() {
     }
   };
 
+  function isCompletedBuddyPreparation(
+    prep: BuddyPreparation | CompletedBuddyPreparation
+  ): prep is CompletedBuddyPreparation {
+    return (prep as CompletedBuddyPreparation).user !== undefined;
+  }
+
   if (status === "loading" || isLoading) {
     return <div className="container p-8 flex justify-center">{t('loading')}</div>;
   }
@@ -285,7 +291,7 @@ export default function BuddyChecklistPage() {
 
       {/* Buddy relationships overview */}
       {buddyRelationships && (
-                <Card>
+        <Card>
           <CardHeader className="pb-0 py-0">
             <CardTitle className="flex items-center gap-2 text-lg">
               <UserCheck className="h-4 w-4" />
@@ -293,97 +299,21 @@ export default function BuddyChecklistPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            {buddyRelationships.stats.totalAll > 0 ? (
+            {(buddyRelationships.activePreparations.length + buddyRelationships.completedPreparations.length) > 0 ? (
               <div className="space-y-2">
-                {/* Active Users */}
-                {buddyRelationships.activeUsers.length > 0 && (
-                  <div>
-                    <h4 className="font-medium flex items-center gap-2 mb-1 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      Anställda ({buddyRelationships.activeUsers.length})
-                    </h4>
-                    <div className={`grid gap-2 ${buddyRelationships.activeUsers.length === 1 ? 'grid-cols-1' : buddyRelationships.activeUsers.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-                      {buddyRelationships.activeUsers.map((user) => (
-                        <div key={user.id} className="border rounded-lg p-2 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30 w-full">
-                          <div className="font-medium text-sm">{user.name}</div>
-                          <div className="text-xs text-muted-foreground">{user.email}</div>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge variant="outline" className="text-xs">
-                              {user.role}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Startade: {new Date(user.createdAt).toLocaleDateString('sv-SE')}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {[...(buddyRelationships?.activePreparations ?? []), ...(buddyRelationships?.completedPreparations ?? [])].map((prep: BuddyPreparation | CompletedBuddyPreparation) => (
+                  <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800/30 w-full flex flex-col md:flex-row md:items-center md:gap-4 text-sm">
+                    <span>{prep.firstName} {prep.lastName}</span>
+                    <span className="text-muted-foreground">{prep.email}</span>
+                    {buddyRelationships && isCompletedBuddyPreparation(prep) ? (
+                      <span className="text-muted-foreground">{prep.user.role}</span>
+                    ) : null}
+                    <span className="text-muted-foreground font-medium">
+                      {buddyRelationships && isCompletedBuddyPreparation(prep) ? 'Kopplad' : 'Väntar på registrering'}
+                    </span>
+                    <span className="text-muted-foreground">Förberedd: {new Date(prep.createdAt).toLocaleDateString('sv-SE')}</span>
                   </div>
-                )}
-
-                {/* Active Preparations */}
-                {buddyRelationships.activePreparations.length > 0 && (
-                  <div>
-                    <div className={`grid gap-2 ${buddyRelationships.activePreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.activePreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-                      {buddyRelationships.activePreparations.map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-2 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30 w-full">
-                          <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
-                          {prep.email && (
-                            <div className="text-xs text-muted-foreground">{prep.email}</div>
-                          )}
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge className="bg-blue-600 text-white text-xs">
-                              Väntar på registrering
-                            </Badge>
-                          </div>
-                          {prep.notes && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              📝 {prep.notes}
-                            </div>
-                          )}
-                          <div className="text-xs text-muted-foreground mt-1">
-                            Förberedd: {new Date(prep.createdAt).toLocaleDateString('sv-SE')}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Completed Preparations */}
-                {buddyRelationships.completedPreparations.length > 0 && (
-                  <div>
-                    <h4 className="font-medium flex items-center gap-2 mb-1 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-gray-600" />
-                      Tidigare förberedelser ({buddyRelationships.completedPreparations.length})
-                    </h4>
-                    <div className={`grid gap-2 ${buddyRelationships.completedPreparations.length === 1 ? 'grid-cols-1' : buddyRelationships.completedPreparations.length === 2 ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-                      {buddyRelationships.completedPreparations.slice(0, 6).map((prep) => (
-                        <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800/30 w-full">
-                          <div className="font-medium text-sm">{prep.firstName} {prep.lastName}</div>
-                          {prep.user && (
-                            <>
-                              <div className="text-xs text-muted-foreground">{prep.user.email}</div>
-                              <div className="flex items-center gap-1 mt-1">
-                                <Badge variant="outline" className="text-xs">
-                                  {prep.user.role}
-                                </Badge>
-                                <Badge className="bg-green-600 text-white text-xs">
-                                  Kopplad
-                                </Badge>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                    {buddyRelationships.completedPreparations.length > 6 && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        ... och {buddyRelationships.completedPreparations.length - 6} till
-                      </p>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
             ) : (
               <div className="text-center py-4 text-muted-foreground">
@@ -399,9 +329,9 @@ export default function BuddyChecklistPage() {
       <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
         <Card className="w-full md:w-64 lg:w-80">
           <CardHeader className="pb-2">
-                            <CardTitle>{t('buddy_progress')}</CardTitle>
-                <CardDescription>
-                  {t('completed_buddy_tasks_desc', { progress: progress.toString() })}
+            <CardTitle>{t('buddy_progress')}</CardTitle>
+            <CardDescription>
+              {t('completed_buddy_tasks_desc', { progress: progress.toString() })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -458,12 +388,12 @@ export default function BuddyChecklistPage() {
                             </p>
                             {task.link && (
                               <div className="mt-2">
-                                                                  <a
-                                    href={task.link.startsWith('http') ? task.link : `https://${task.link}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
-                                  >
+                                <a
+                                  href={task.link.startsWith('http') ? task.link : `https://${task.link}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-primary bg-accent border border-border rounded-md hover:bg-accent/80 hover:border-primary/30 transition-all duration-200 group"
+                                >
                                   <ExternalLink className="h-3 w-3 group-hover:scale-110 transition-transform" />
                                   {t('open_link')}
                                 </a>

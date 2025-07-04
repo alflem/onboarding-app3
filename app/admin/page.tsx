@@ -768,7 +768,15 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Buddyförberedelser sektion */}
+      {/* Buddy Preparation Form Dialog */}
+      <BuddyPreparationForm
+        isOpen={buddyPrepFormOpen}
+        onClose={() => setBuddyPrepFormOpen(false)}
+        onSuccess={handleBuddyPrepSuccess}
+        preparation={undefined}
+        organizationId={session?.user?.organizationId}
+      />
+
       {buddyEnabled && (
         <Card>
           <CardHeader>
@@ -810,15 +818,6 @@ export default function AdminPage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Buddy Preparation Form Dialog */}
-      <BuddyPreparationForm
-        isOpen={buddyPrepFormOpen}
-        onClose={() => setBuddyPrepFormOpen(false)}
-        onSuccess={handleBuddyPrepSuccess}
-        preparation={undefined}
-        organizationId={session?.user?.organizationId}
-      />
 
       {/* Dialog för att tilldela buddy */}
       {buddyEnabled && (
