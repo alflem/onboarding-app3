@@ -139,58 +139,51 @@ export const DEFAULT_BUDDY_CHECKLIST_CATEGORIES = [
     order: 1,
     tasks: [
       {
-        title: 'Välkomstmail inkl. information om IT-utrustning',
-        description: 'Skicka ett mail till den nyanställda för att hälsa välkommen samt berätta att denna redan nu ska få beställa den IT-utrustning som behövs. Be om den senaste listan över prylar att beställa från IT-ansvarig och bifoga i välkomstmailet. Förslag på utformning av välkomstmail hittar du via länken.',
+        title: 'Välkomstmail inkl. info om IT-utrustning',
+        description: 'Skicka ett välkomstmail till den nyanställde! Bifoga lista över IT-utrusning som är möjlig att beställa och be den nyanställde att välja den utrusning hen behöver. Förslag på utformning av välkomstmail hittar du via länken!',
         order: 1,
         isBuddyTask: true,
         link: undefined
       },
       {
         title: 'Beställning av IT-utrustning',
-        description: 'Be IT-ansvarig hjälpa med beställning av dator, mobil samt ev. flytt av mobilabonnemang',
+        description: 'När den nyanställde valt IT-utrustning, prata med IT-ansvarig som fixar beställningen.',
         order: 2,
         isBuddyTask: true,
         link: undefined
       },
       {
-        title: 'Anställningsstart och kontaktuppgifter',
-        description: 'På angiven plats, ange kontaktuppgifter till den nyanställde samt datum för anställningsstart',
+        title: 'Konto i Cinode',
+        description: 'Be VD beställa konto till den nyanställde i Cinode.',
         order: 3,
         isBuddyTask: true,
         link: undefined
       },
       {
-        title: 'Konto i Cinode',
-        description: 'Be VD beställa konto i Cinode',
+        title: 'Dörrtagg',
+        description: 'Prata med lokalgruppen, de har koll på hur beställning görs.',
         order: 4,
         isBuddyTask: true,
         link: undefined
       },
       {
-        title: 'Dörrtagg',
-        description: 'Be lokalansvarig beställa dörrtagg',
+        title: 'Den nyanställdes CV',
+        description: 'Be att den nyanställde skickar sitt CV till oss, om det inte redan är gjort.',
         order: 5,
         isBuddyTask: true,
         link: undefined
       },
       {
-        title: 'Den nyanställdes CV',
-        description: 'Be att den nyanställde skickar sitt CV till oss, om vi inte redan har fått det',
+        title: 'Stäm av med säljgruppen!',
+        description: 'Behövs ett CV i kortform? En pitch? Prata med säljgruppen.',
         order: 6,
-        isBuddyTask: true,
-        link: undefined
-      },
-      {
-        title: 'CV i kortform, för säljpresentation',
-        description: 'Skapa en kortversion av CV:t som kan användas för säljpresentationer',
-        order: 7,
         isBuddyTask: true,
         link: undefined
       },
     ]
   },
   {
-    name: 'Veckan innan nyanställning börjar',
+    name: 'Veckan innan den nyanställde börjar',
     order: 2,
     tasks: [
       {
@@ -201,30 +194,133 @@ export const DEFAULT_BUDDY_CHECKLIST_CATEGORIES = [
         link: undefined
       },
       {
-        title: 'Boka in XLU-lunch/fika',
-        description: 'Bjud den nyanställde på lunch/fika under dennes första vecka',
-        order: 2,
-        isBuddyTask: true,
-        link: undefined
-      },
-      {
         title: 'Beställ blommor',
         description: 'Beställ blommor, exempelvis från Interflora, till den nyanställdes hemadress. Kostnad ca 350 kr + budavgift',
-        order: 3,
+        order: 2,
         isBuddyTask: true,
         link: undefined
       },
       {
         title: 'Förbered välkomstpåse',
         description: 'Förbered en välkomstpåse till den nyanställdes första dag. Fyll den med lite smått och gott, exempelvis med handduk, laddare, lypyl, vattenflaska, penna, reflex och en buff',
-        order: 4,
+        order: 3,
         isBuddyTask: true,
         link: undefined
       },
       {
         title: 'Möt upp den nyanställda första dagen på kontoret',
         description: 'Säkerställ att du kan möta den nyanställda på kontoret dennes första dag. Om du inte kan, kom överens med en kollega som gör det istället.',
+        order: 4,
+        isBuddyTask: true,
+        link: undefined
+      },
+    ]
+  },
+  {
+    name: 'När den nyanställde är på plats!',
+    order: 3,
+    tasks: [
+      {
+        title: 'Teams',
+        description: 'Se till att den nyanställde läggs upp i aktuella team och chattar.',
+        order: 1,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Onboardingappen',
+        description: 'Visa hur den nyanställde når onboardingappen och se till att hen kommer igång.',
+        order: 2,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Utlämning av dörrtagg + lokalinformation',
+        description: 'Be att någon ur lokalgruppen informerar om larm, nycklar och liknande. Se till att den nyanställde får sin dörrtagg.',
+        order: 3,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Bjud på lunch!',
+        description: 'Bjud den nyanställde på lunch under första veckan!',
+        order: 4,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Se till att den nyanställde får träffa sina nya kollegor!',
+        description: '',
         order: 5,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Informera om våra möten',
+        description: 'Informera om regelbunda möten och ev. kommande evenemang.',
+        order: 6,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Profilbutiken',
+        description: 'Visa profilbutiken. Den nyanställde får välja valfri pryl för max 700 kr.',
+        order: 7,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Presentera våra fokusgrupper',
+        description: '',
+        order: 8,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'IT-policy',
+        description: 'Be IT-ansvarig informera den nyanställda om vår IT-policy.',
+        order: 9,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Boka fotografering',
+        description: 'Prata med rekryteringsgruppen. Sambokning görs för nyanställda en gång per år.',
+        order: 10,
+        isBuddyTask: true,
+        link: undefined
+      },
+    ]
+  },
+  {
+    name: 'Säkerställ att VD informerar den nyanställde om följande:',
+    order: 4,
+    tasks: [
+      {
+        title: 'Personalhandboken samt medarbetarresan',
+        description: '',
+        order: 1,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Maconomy',
+        description: 'Inloggning är mailadress och lösenord "9ppuppu!" Tidkoder som är bra att känna till från början: 996-25 Semester 999-25 Interntid',
+        order: 2,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Sympa',
+        description: '',
+        order: 3,
+        isBuddyTask: true,
+        link: undefined
+      },
+      {
+        title: 'Genomgång affärsplan/årsplan',
+        description: '',
+        order: 4,
         isBuddyTask: true,
         link: undefined
       },
