@@ -22,28 +22,28 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Att trivas och må bra på jobbet ser vi som en självklarhet, därför har vi skapat Hållbara konsulter. Läs mer om XLENTs viktiga och pågående arbete inom social hållbarhet.',
         order: 1,
         isBuddyTask: false,
-        link: 'https://example.com/hallbara-konsulter'
+        link: 'https://www.xlent.se/hallbarakonsulter/'
       },
       {
         title: 'Intranätets startsida',
         description: 'På intranätets startsida finns mycket att läsa! Allt från information om våra processer till manualer om hur du tidrapporterar. Här hittar du också genvägar till våra viktigaste arbetsverktyg. Glöm inte att klicka dig in på Workplace - XLENTs sida för nyheter, kultur och samverkan!',
         order: 2,
         isBuddyTask: false,
-        link: 'https://example.com/intranet-startsida'
+        link: 'https://xlent.sharepoint.com/sites/XCg'
       },
       {
         title: 'Medarbetarresan',
         description: 'Här får du en samlad bild över våra delprocesser för dig som anställd.',
         order: 3,
         isBuddyTask: false,
-        link: 'https://example.com/medarbetarresan'
+        link: 'https://xlent.sharepoint.com/sites/Medarbetarresan/SitePages/Medarbetarresan.aspx'
       },
       {
         title: 'Teams',
         description: 'Teams är vår främsta kommunikationskanal samt samlingsyta för vårt interna arbete. Kika gärna runt för att bekanta dig med såväl innehåll som struktur.',
         order: 4,
         isBuddyTask: false,
-        link: 'https://example.com/teams'
+        link: 'https://teams.microsoft.com/v2/'
       },
       {
         title: 'Maconomy',
@@ -56,14 +56,14 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'XLENTs centrala support kallas CSF. Kontakta dem vid behov av support.',
         order: 6,
         isBuddyTask: false,
-        link: 'https://example.com/csf-support'
+        link: 'https://xcg.freshservice.com/support/home'
       },
       {
         title: 'Varumärkessidan',
         description: 'XLENT-koncernen består av många olika bolag och varumärken. På den här sidan hittar du info om varumärke, logotyper, mallar etc.',
         order: 7,
         isBuddyTask: false,
-        link: 'https://example.com/varumarkessidan'
+        link: 'https://xlent.sharepoint.com/sites/CentralSupportFunctions/SitePages/Varum%C3%A4rken.aspx'
       },
     ]
   },
@@ -76,7 +76,7 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Vi skulle gärna vilja ta ett foto på dig! Fotot skickas sedan till XLENTs varumärkesansvarig som lägger upp det på vår hemsida. Någon av dina nya kollegor hjälper dig med foto samt säkerställer att det skickas till rätt person.',
         order: 1,
         isBuddyTask: false,
-        link: 'https://example.com/foto-hemsidan'
+        link: 'https://www.xlent.se/kontor/lulea'
       },
       {
         title: 'Foto till digitala plattformar',
@@ -95,7 +95,7 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Vi vill presentera dig på vår Instagram! Prata med den som är ansvarig för våra sociala medier så guidar hen dig vidare.',
         order: 4,
         isBuddyTask: false,
-        link: 'https://example.com/presentation-instagram'
+        link: 'https://www.instagram.com/xlent_lulea/'
       },
       {
         title: 'Workplace',
@@ -114,7 +114,7 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Skapa en e-mailsignatur.',
         order: 7,
         isBuddyTask: false,
-        link: 'https://example.com/email-signatur'
+        link: 'https://xlent.sharepoint.com/sites/Files/Varumrken/Forms/AllItems.aspx?csf=1&web=1&e=ofLMyb&CID=fafad6b1%2Db396%2D4da1%2Db743%2D68de75e5dec1&FolderCTID=0x012000D15119D33081FB4BB68063DCB42EE7D5&id=%2Fsites%2FFiles%2FVarumrken%2FXLENT%2FMS%20Office%20mallar%20%28PPT%2C%20Word%2C%20Outlook%20sign%29%2FMailsignaturer%20Outlook%20NY'
       },
       {
         title: 'Kontaktuppgifter',
@@ -127,7 +127,7 @@ export const DEFAULT_CHECKLIST_CATEGORIES = [
         description: 'Anmäl sjukvårdsförsäkring till Söderberg & Partners (om aktuellt)',
         order: 9,
         isBuddyTask: false,
-        link: 'https://example.com/sjukvardsforsakring'
+        link: 'https://xlent.sharepoint.com/sites/Medarbetarresan/SitePages/F%C3%B6rm%C3%A5ner.aspx#f%C3%B6rs%C3%A4kringar'
       },
     ]
   },
