@@ -48,14 +48,31 @@ export async function POST(
       return NextResponse.json({ error: "Ej behörig för denna organisation" }, { status: 403 });
     }
 
-    // Ta bort endast vanliga uppgifter (inte buddy-uppgifter)
+    // Ta bort endast vanliga uppgifter (inte buddy-uppgifter): rensa först TaskProgress för dessa uppgifter
+    const regularTasksToDelete = await prisma.task.findMany({
+      where: {
+        category: {
+          checklistId: id,
+        },
+        isBuddyTask: false,
+      },
+      select: { id: true },
+    });
+
+    if (regularTasksToDelete.length > 0) {
+      const regularTaskIds = regularTasksToDelete.map((t) => t.id);
+      await prisma.taskProgress.deleteMany({
+        where: { taskId: { in: regularTaskIds } },
+      });
+    }
+
     await prisma.task.deleteMany({
       where: {
         category: {
-          checklistId: id
+          checklistId: id,
         },
-        isBuddyTask: false
-      }
+        isBuddyTask: false,
+      },
     });
 
     // Ta bort kategorier som bara innehöll vanliga uppgifter

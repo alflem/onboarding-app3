@@ -48,14 +48,31 @@ export async function POST(
       return NextResponse.json({ error: "Ej behörig för denna organisation" }, { status: 403 });
     }
 
-    // Ta bort endast buddy-uppgifter
+    // Ta bort endast buddy-uppgifter: rensa först TaskProgress som pekar på dessa uppgifter
+    const buddyTasksToDelete = await prisma.task.findMany({
+      where: {
+        category: {
+          checklistId: id,
+        },
+        isBuddyTask: true,
+      },
+      select: { id: true },
+    });
+
+    if (buddyTasksToDelete.length > 0) {
+      const buddyTaskIds = buddyTasksToDelete.map((t) => t.id);
+      await prisma.taskProgress.deleteMany({
+        where: { taskId: { in: buddyTaskIds } },
+      });
+    }
+
     await prisma.task.deleteMany({
       where: {
         category: {
-          checklistId: id
+          checklistId: id,
         },
-        isBuddyTask: true
-      }
+        isBuddyTask: true,
+      },
     });
 
     // Ta bort kategorier som bara innehöll buddy-uppgifter
@@ -121,6 +138,25 @@ export async function POST(
               name,
               order: maxOrder + order,
               checklistId: id,
+            },
+          });
+        }
+      } else {
+        // Om kategorin redan finns, markera den som buddy-kategori och uppdatera ordning
+        try {
+          category = await prisma.category.update({
+            where: { id: category.id },
+            data: {
+              isBuddyCategory: true,
+              order: maxOrder + order,
+            },
+          });
+        } catch (_err) {
+          // Om kolumnen inte finns ännu, uppdatera bara ordning
+          category = await prisma.category.update({
+            where: { id: category.id },
+            data: {
+              order: maxOrder + order,
             },
           });
         }
