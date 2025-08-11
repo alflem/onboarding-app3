@@ -110,6 +110,7 @@ export async function POST(
             name,
             order: maxOrder + order,
             checklistId: id,
+            isBuddyCategory: true,
           },
         });
       }

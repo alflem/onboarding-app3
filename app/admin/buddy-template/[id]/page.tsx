@@ -88,6 +88,7 @@ type Category = {
   id: string;
   name: string;
   order: number;
+  isBuddyCategory?: boolean;
   tasks: Task[];
 };
 
@@ -758,6 +759,7 @@ export default function BuddyTemplatePage() {
           name: newCategory.name,
           order: checklist.categories.length,
           checklistId: checklist.id,
+          isBuddyCategory: true,
         };
 
         const response = await fetch("/api/categories", {
@@ -1271,12 +1273,13 @@ export default function BuddyTemplatePage() {
               modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
             >
               <div className="space-y-4 mt-6">
-                {checklist?.categories.length ? (
+                { (checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask))).length ? (
                   <SortableContext
-                    items={checklist.categories.map((cat) => cat.id)}
+                    items={(checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask))).map((cat) => cat.id)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {checklist.categories
+                     {(checklist?.categories || [])
+                      .filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask)))
                       .sort((a, b) => a.order - b.order)
                       .map((category) => (
                         <SortableBuddyCategory

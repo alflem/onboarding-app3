@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name.trim(),
         order: body.order || 0,
+        isBuddyCategory: !!body.isBuddyCategory,
         checklist: {
           connect: {
             id: body.checklistId

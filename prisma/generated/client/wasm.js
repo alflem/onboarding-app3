@@ -183,6 +183,7 @@ exports.Prisma.CategoryScalarFieldEnum = {
   name: 'name',
   checklistId: 'checklistId',
   order: 'order',
+  isBuddyCategory: 'isBuddyCategory',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

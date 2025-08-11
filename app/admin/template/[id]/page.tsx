@@ -89,6 +89,7 @@ type Category = {
   id: string;
   name: string;
   order: number;
+  isBuddyCategory?: boolean;
   tasks: Task[];
 };
 
@@ -554,11 +555,13 @@ export default function TemplateEditPage() {
     isBuddyTask: false,
   });
 
-  // Filtrera kategorier för att endast visa vanliga kategorier (som innehåller vanliga uppgifter)
+  // Filtrera kategorier för att visa endast vanliga kategorier (och tomma som inte är buddy-kategorier)
   const regularCategories = useMemo(
-    () => checklist?.categories.filter(category =>
-      category.tasks.some(task => !task.isBuddyTask)
-    ) || [],
+    () =>
+      checklist?.categories.filter((category) =>
+        (category.isBuddyCategory === false || category.isBuddyCategory === undefined) &&
+        (category.tasks.length === 0 || category.tasks.some((task) => !task.isBuddyTask))
+      ) || [],
     [checklist]
   );
 
@@ -857,6 +860,7 @@ export default function TemplateEditPage() {
           name: newCategory.name,
           order: checklist.categories.length,
           checklistId: checklist.id,
+          isBuddyCategory: false,
         };
 
         const response = await fetch("/api/categories", {

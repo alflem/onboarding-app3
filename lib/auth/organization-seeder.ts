@@ -365,6 +365,7 @@ export async function createOrganizationWithChecklist(
         name,
         order,
         checklistId: checklist.id,
+        isBuddyCategory: false,
       },
     });
 
@@ -455,6 +456,7 @@ export async function createOrganizationWithFullChecklist(
         name,
         order: order + DEFAULT_CHECKLIST_CATEGORIES.length, // Lägg till efter de vanliga kategorierna
         checklistId: checklist.id,
+        isBuddyCategory: true,
       },
     });
 
@@ -522,6 +524,7 @@ export async function addBuddyChecklistToOrganization(
         name,
         order: order + existingCategoriesCount, // Lägg till efter befintliga kategorier
         checklistId: checklist.id,
+        isBuddyCategory: true,
       },
     });
 

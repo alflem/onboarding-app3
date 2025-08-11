@@ -8770,6 +8770,7 @@ export namespace Prisma {
     name: string | null
     checklistId: string | null
     order: number | null
+    isBuddyCategory: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8779,6 +8780,7 @@ export namespace Prisma {
     name: string | null
     checklistId: string | null
     order: number | null
+    isBuddyCategory: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -8788,6 +8790,7 @@ export namespace Prisma {
     name: number
     checklistId: number
     order: number
+    isBuddyCategory: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -8807,6 +8810,7 @@ export namespace Prisma {
     name?: true
     checklistId?: true
     order?: true
+    isBuddyCategory?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8816,6 +8820,7 @@ export namespace Prisma {
     name?: true
     checklistId?: true
     order?: true
+    isBuddyCategory?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -8825,6 +8830,7 @@ export namespace Prisma {
     name?: true
     checklistId?: true
     order?: true
+    isBuddyCategory?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -8921,6 +8927,7 @@ export namespace Prisma {
     name: string
     checklistId: string
     order: number
+    isBuddyCategory: boolean
     createdAt: Date
     updatedAt: Date
     _count: CategoryCountAggregateOutputType | null
@@ -8949,6 +8956,7 @@ export namespace Prisma {
     name?: boolean
     checklistId?: boolean
     order?: boolean
+    isBuddyCategory?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     checklist?: boolean | ChecklistDefaultArgs<ExtArgs>
@@ -8961,6 +8969,7 @@ export namespace Prisma {
     name?: boolean
     checklistId?: boolean
     order?: boolean
+    isBuddyCategory?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     checklist?: boolean | ChecklistDefaultArgs<ExtArgs>
@@ -8971,6 +8980,7 @@ export namespace Prisma {
     name?: boolean
     checklistId?: boolean
     order?: boolean
+    isBuddyCategory?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     checklist?: boolean | ChecklistDefaultArgs<ExtArgs>
@@ -8981,11 +8991,12 @@ export namespace Prisma {
     name?: boolean
     checklistId?: boolean
     order?: boolean
+    isBuddyCategory?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "checklistId" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+  export type CategoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "checklistId" | "order" | "isBuddyCategory" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
   export type CategoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     checklist?: boolean | ChecklistDefaultArgs<ExtArgs>
     tasks?: boolean | Category$tasksArgs<ExtArgs>
@@ -9009,6 +9020,7 @@ export namespace Prisma {
       name: string
       checklistId: string
       order: number
+      isBuddyCategory: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["category"]>
@@ -9440,6 +9452,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Category", 'String'>
     readonly checklistId: FieldRef<"Category", 'String'>
     readonly order: FieldRef<"Category", 'Int'>
+    readonly isBuddyCategory: FieldRef<"Category", 'Boolean'>
     readonly createdAt: FieldRef<"Category", 'DateTime'>
     readonly updatedAt: FieldRef<"Category", 'DateTime'>
   }
@@ -14394,6 +14407,7 @@ export namespace Prisma {
     name: 'name',
     checklistId: 'checklistId',
     order: 'order',
+    isBuddyCategory: 'isBuddyCategory',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -15015,6 +15029,7 @@ export namespace Prisma {
     name?: StringFilter<"Category"> | string
     checklistId?: StringFilter<"Category"> | string
     order?: IntFilter<"Category"> | number
+    isBuddyCategory?: BoolFilter<"Category"> | boolean
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     checklist?: XOR<ChecklistScalarRelationFilter, ChecklistWhereInput>
@@ -15026,6 +15041,7 @@ export namespace Prisma {
     name?: SortOrder
     checklistId?: SortOrder
     order?: SortOrder
+    isBuddyCategory?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     checklist?: ChecklistOrderByWithRelationInput
@@ -15040,6 +15056,7 @@ export namespace Prisma {
     name?: StringFilter<"Category"> | string
     checklistId?: StringFilter<"Category"> | string
     order?: IntFilter<"Category"> | number
+    isBuddyCategory?: BoolFilter<"Category"> | boolean
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
     checklist?: XOR<ChecklistScalarRelationFilter, ChecklistWhereInput>
@@ -15051,6 +15068,7 @@ export namespace Prisma {
     name?: SortOrder
     checklistId?: SortOrder
     order?: SortOrder
+    isBuddyCategory?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CategoryCountOrderByAggregateInput
@@ -15068,6 +15086,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Category"> | string
     checklistId?: StringWithAggregatesFilter<"Category"> | string
     order?: IntWithAggregatesFilter<"Category"> | number
+    isBuddyCategory?: BoolWithAggregatesFilter<"Category"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Category"> | Date | string
   }
@@ -15805,6 +15824,7 @@ export namespace Prisma {
     id?: string
     name: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     checklist: ChecklistCreateNestedOneWithoutCategoriesInput
@@ -15816,6 +15836,7 @@ export namespace Prisma {
     name: string
     checklistId: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutCategoryInput
@@ -15825,6 +15846,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUpdateOneRequiredWithoutCategoriesNestedInput
@@ -15836,6 +15858,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     checklistId?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutCategoryNestedInput
@@ -15846,6 +15869,7 @@ export namespace Prisma {
     name: string
     checklistId: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -15854,6 +15878,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15863,6 +15888,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     checklistId?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -16704,6 +16730,7 @@ export namespace Prisma {
     name?: SortOrder
     checklistId?: SortOrder
     order?: SortOrder
+    isBuddyCategory?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16717,6 +16744,7 @@ export namespace Prisma {
     name?: SortOrder
     checklistId?: SortOrder
     order?: SortOrder
+    isBuddyCategory?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16726,6 +16754,7 @@ export namespace Prisma {
     name?: SortOrder
     checklistId?: SortOrder
     order?: SortOrder
+    isBuddyCategory?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18737,6 +18766,7 @@ export namespace Prisma {
     id?: string
     name: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutCategoryInput
@@ -18746,6 +18776,7 @@ export namespace Prisma {
     id?: string
     name: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutCategoryInput
@@ -18810,6 +18841,7 @@ export namespace Prisma {
     name?: StringFilter<"Category"> | string
     checklistId?: StringFilter<"Category"> | string
     order?: IntFilter<"Category"> | number
+    isBuddyCategory?: BoolFilter<"Category"> | boolean
     createdAt?: DateTimeFilter<"Category"> | Date | string
     updatedAt?: DateTimeFilter<"Category"> | Date | string
   }
@@ -18958,6 +18990,7 @@ export namespace Prisma {
     id?: string
     name: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     checklist: ChecklistCreateNestedOneWithoutCategoriesInput
@@ -18968,6 +19001,7 @@ export namespace Prisma {
     name: string
     checklistId: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19018,6 +19052,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     checklist?: ChecklistUpdateOneRequiredWithoutCategoriesNestedInput
@@ -19028,6 +19063,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     checklistId?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -19796,6 +19832,7 @@ export namespace Prisma {
     id?: string
     name: string
     order: number
+    isBuddyCategory?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -19804,6 +19841,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutCategoryNestedInput
@@ -19813,6 +19851,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutCategoryNestedInput
@@ -19822,6 +19861,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     order?: IntFieldUpdateOperationsInput | number
+    isBuddyCategory?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
