@@ -1273,13 +1273,13 @@ export default function BuddyTemplatePage() {
               modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
             >
               <div className="space-y-4 mt-6">
-                { (checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask))).length ? (
+                { (checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.some(t => t.isBuddyTask))).length ? (
                   <SortableContext
-                    items={(checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask))).map((cat) => cat.id)}
+                    items={(checklist?.categories || []).filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.some(t => t.isBuddyTask))).map((cat) => cat.id)}
                     strategy={verticalListSortingStrategy}
                   >
-                     {(checklist?.categories || [])
-                      .filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.length > 0 && cat.tasks.every(t => t.isBuddyTask)))
+                    {(checklist?.categories || [])
+                      .filter(cat => cat.isBuddyCategory === true || (cat.isBuddyCategory === undefined && cat.tasks.some(t => t.isBuddyTask)))
                       .sort((a, b) => a.order - b.order)
                       .map((category) => (
                         <SortableBuddyCategory

@@ -555,12 +555,12 @@ export default function TemplateEditPage() {
     isBuddyTask: false,
   });
 
-  // Filtrera kategorier för att visa endast vanliga kategorier (och tomma som inte är buddy-kategorier)
+  // Filtrera kategorier: visa endast vanliga kategorier (inte buddy) och som är tomma eller enbart innehåller icke-buddy-uppgifter
   const regularCategories = useMemo(
     () =>
       checklist?.categories.filter((category) =>
         (category.isBuddyCategory === false || category.isBuddyCategory === undefined) &&
-        (category.tasks.length === 0 || category.tasks.some((task) => !task.isBuddyTask))
+        (category.tasks.length === 0 || category.tasks.every((task) => !task.isBuddyTask))
       ) || [],
     [checklist]
   );
