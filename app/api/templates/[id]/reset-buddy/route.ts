@@ -114,7 +114,7 @@ export async function POST(
               isBuddyCategory: true,
             },
           });
-        } catch (err) {
+        } catch (_err) {
           // Fallback om kolumnen inte finns i DB än
           category = await prisma.category.create({
             data: {
