@@ -105,14 +105,25 @@ export async function POST(
 
       if (!category) {
         // Skapa ny kategori om den inte finns
-        category = await prisma.category.create({
-          data: {
-            name,
-            order: maxOrder + order,
-            checklistId: id,
-            isBuddyCategory: true,
-          },
-        });
+        try {
+          category = await prisma.category.create({
+            data: {
+              name,
+              order: maxOrder + order,
+              checklistId: id,
+              isBuddyCategory: true,
+            },
+          });
+        } catch (err) {
+          // Fallback om kolumnen inte finns i DB än
+          category = await prisma.category.create({
+            data: {
+              name,
+              order: maxOrder + order,
+              checklistId: id,
+            },
+          });
+        }
       }
 
       // Skapa buddy-uppgifter för denna kategori
