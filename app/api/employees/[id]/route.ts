@@ -102,6 +102,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return {
         id: cat.id,
         name: cat.name,
+        isBuddyCategory: !!(cat as any).isBuddyCategory,
         tasks: cat.tasks.map((t): EmployeeTask => ({
           id: t.id,
           title: t.title,
@@ -132,6 +133,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     );
 
     // Strukturera svaret
+    // Är denna användare buddy för någon?
+    const [usersWithThisBuddyCount, activePreparationsCount] = await Promise.all([
+      prisma.user.count({ where: { buddyId: employee.id } }),
+      prisma.buddyPreparation.count({ where: { buddyId: employee.id, isActive: true } })
+    ]);
+    const isBuddyForSomeone = usersWithThisBuddyCount > 0 || activePreparationsCount > 0;
+
     const response = {
       id: employee.id,
       name: employee.name,
@@ -140,8 +148,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       createdAt: employee.createdAt,
       progress: progressPercentage,
       hasBuddy: employee.buddyId !== null,
+      isBuddyForSomeone,
       buddy: employee.buddy,
-      categories: allCategories.map(c => ({ id: c.id, name: c.name, completedTasks: c.completedTasks, totalTasks: c.totalTasks })),
+      categories: allCategories.map(c => ({ id: c.id, name: c.name, completedTasks: c.completedTasks, totalTasks: c.totalTasks, isBuddyCategory: c.isBuddyCategory })),
       totalTasks,
       completedTasks,
       buddyTasks,

@@ -161,11 +161,12 @@ export default function AdminPage() {
     name: string;
     createdAt: string;
     progress: number;
-    categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
+    categories: { id: string; name: string; completedTasks: number; totalTasks: number; isBuddyCategory?: boolean }[];
     totalTasks?: number;
     completedTasks?: number;
     buddyTasks?: { id: string; title: string; completed: boolean; categoryId: string; categoryName: string }[];
     regularTasks?: { id: string; title: string; completed: boolean; categoryId: string; categoryName: string }[];
+    isBuddyForSomeone?: boolean;
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
 
@@ -1110,7 +1111,7 @@ export default function AdminPage() {
 
       {/* Dialog för medarbetardetaljer */}
       <Dialog open={employeeDetailDialogOpen} onOpenChange={setEmployeeDetailDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -1168,24 +1169,54 @@ export default function AdminPage() {
                     </div>
 
                     {employeeDetails.categories && (
-                      <div className="space-y-2 mt-4">
-                        <h4 className="text-sm font-medium">Kategorier</h4>
-                        {employeeDetails.categories.map((category: { id: string; name: string; completedTasks: number; totalTasks: number }) => (
-                          <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                            <span className="text-sm">{category.name}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">
-                                {category.completedTasks}/{category.totalTasks} uppgifter
-                              </span>
-                              <div className="w-16 bg-secondary/20 rounded-full h-2">
-                                <div
-                                  className="bg-primary h-2 rounded-full"
-                                  style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
-                                ></div>
+                      <div className="space-y-4 mt-4">
+                        {/* Vanliga kategorier */}
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium">Checklistans kategorier</h4>
+                          {employeeDetails.categories
+                            .filter((c) => !c.isBuddyCategory)
+                            .map((category) => (
+                              <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                                <span className="text-sm">{category.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">
+                                    {category.completedTasks}/{category.totalTasks} uppgifter
+                                  </span>
+                                  <div className="w-16 bg-secondary/20 rounded-full h-2">
+                                    <div
+                                      className="bg-primary h-2 rounded-full"
+                                      style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            ))}
+                        </div>
+
+                        {/* Buddy-kategorier visas bara om personen är buddy för någon */}
+                        {employeeDetails.isBuddyForSomeone && (
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium">Buddy-kategorier</h4>
+                            {employeeDetails.categories
+                              .filter((c) => c.isBuddyCategory)
+                              .map((category) => (
+                                <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                                  <span className="text-sm">{category.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-muted-foreground">
+                                      {category.completedTasks}/{category.totalTasks} uppgifter
+                                    </span>
+                                    <div className="w-16 bg-secondary/20 rounded-full h-2">
+                                      <div
+                                        className="bg-primary h-2 rounded-full"
+                                        style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
+                                      ></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
                           </div>
-                        ))}
+                        )}
                       </div>
                     )}
                   </div>
