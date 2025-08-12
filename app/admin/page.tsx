@@ -1192,68 +1192,7 @@ export default function AdminPage() {
                 </CardContent>
               </Card>
 
-              {/* Uppgiftsöversikt separerad: Buddyuppgifter och vanliga uppgifter */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ClipboardCheck className="h-5 w-5" />
-                      Buddyuppgifter
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {employeeDetails?.buddyTasks && employeeDetails.buddyTasks.length > 0 ? (
-                      <div className="space-y-2">
-                        {employeeDetails.buddyTasks.map((task) => (
-                          <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                            <div className="flex items-center gap-2">
-                              {task.completed ? (
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <Loader2 className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <span className="text-sm font-medium">{task.title}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Inga buddyuppgifter.</p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ClipboardList className="h-5 w-5" />
-                      Vanliga uppgifter
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {employeeDetails?.regularTasks && employeeDetails.regularTasks.length > 0 ? (
-                      <div className="space-y-2">
-                        {employeeDetails.regularTasks.map((task) => (
-                          <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                            <div className="flex items-center gap-2">
-                              {task.completed ? (
-                                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <Loader2 className="h-4 w-4 text-muted-foreground" />
-                              )}
-                              <span className="text-sm font-medium">{task.title}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Inga vanliga uppgifter.</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              {/* Endast kategori-progress visas för att hålla modalen kompakt */}
 
               {/* Buddy-hantering */}
               {buddyEnabled && (
