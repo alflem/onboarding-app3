@@ -46,22 +46,35 @@ const Header: React.FC = () => {
   const { currentViewMode, isViewSwitchingEnabled, setViewMode } = useViewContext();
 
   useEffect(() => {
-    // Kontrollera om användaren är buddy för någon
-    if (session?.user?.id) {
+    if (!session?.user?.id) return;
+
+    const fetchBuddyStatus = () => {
       console.log("Header: Checking buddy status for user:", session.user.id);
       fetch('/api/user/is-buddy')
         .then(response => response.json())
         .then(data => {
           console.log("Header: Buddy status response:", data);
-          setIsBuddy(data.isBuddy);
-          setBuddyEnabled(data.buddyEnabled);
+          setIsBuddy(!!data.isBuddy);
+          setBuddyEnabled(!!data.buddyEnabled);
         })
         .catch(error => {
           console.error("Kunde inte kontrollera buddystatus:", error);
           setIsBuddy(false);
           setBuddyEnabled(false);
         });
-    }
+    };
+
+    // Initial fetch
+    fetchBuddyStatus();
+
+    // Lyssna på globalt event för att uppdatera status direkt efter förändringar
+    const onBuddyStatusChanged = () => fetchBuddyStatus();
+    window.addEventListener('buddy-status-changed', onBuddyStatusChanged);
+
+    // Rensa lyssnare
+    return () => {
+      window.removeEventListener('buddy-status-changed', onBuddyStatusChanged);
+    };
   }, [session?.user?.id]);
 
   const toggleMenu = (): void => {

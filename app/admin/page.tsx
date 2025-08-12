@@ -499,6 +499,10 @@ export default function AdminPage() {
           toast.success("Buddyförberedelse sparad", {
       description: "Förberedelsen har sparats framgångsrikt."
     });
+    // Signalera till Header (och andra) att buddy-status kan ha förändrats
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('buddy-status-changed'));
+    }
   };
 
   const handleDeleteBuddyPreparation = async (preparationId: string) => {
