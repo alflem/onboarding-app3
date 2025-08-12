@@ -116,9 +116,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
       };
     });
 
-    const totalTasks = allCategories.reduce((sum, c) => sum + c.totalTasks, 0);
-    const completedTasks = allCategories.reduce((sum, c) => sum + c.completedTasks, 0);
-    const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    // Basala totalsummer (alla kategorier)
+    const totalTasksAll = allCategories.reduce((sum, c) => sum + c.totalTasks, 0);
+    const completedTasksAll = allCategories.reduce((sum, c) => sum + c.completedTasks, 0);
 
     // Flata listor för visning: buddyuppgifter respektive vanliga uppgifter
     const buddyTasks = allCategories.flatMap(cat =>
@@ -140,6 +140,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
     ]);
     const isBuddyForSomeone = usersWithThisBuddyCount > 0 || activePreparationsCount > 0;
 
+    // Vem ska kategorierna gälla för? Om användaren inte är buddy räknar vi bara vanliga kategorier
+    const relevantCategories = isBuddyForSomeone ? allCategories : allCategories.filter(c => !c.isBuddyCategory);
+    const totalTasks = relevantCategories.reduce((sum, c) => sum + c.totalTasks, 0);
+    const completedTasks = relevantCategories.reduce((sum, c) => sum + c.completedTasks, 0);
+    const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
     const response = {
       id: employee.id,
       name: employee.name,
@@ -153,6 +159,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
       categories: allCategories.map(c => ({ id: c.id, name: c.name, completedTasks: c.completedTasks, totalTasks: c.totalTasks, isBuddyCategory: c.isBuddyCategory })),
       totalTasks,
       completedTasks,
+      totalTasksAll,
+      completedTasksAll,
       buddyTasks,
       regularTasks
     };
