@@ -119,15 +119,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const completedTasks = allCategories.reduce((sum, c) => sum + c.completedTasks, 0);
     const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-    // Lista detaljer om slutförda uppgifter
-    const completedTasksDetailed = allCategories.flatMap(cat =>
-      cat.tasks.filter(t => t.completed).map(t => ({
-        id: t.id,
-        title: t.title,
-        isBuddyTask: t.isBuddyTask,
-        categoryId: cat.id,
-        categoryName: cat.name
-      }))
+    // Flata listor för visning: buddyuppgifter respektive vanliga uppgifter
+    const buddyTasks = allCategories.flatMap(cat =>
+      cat.tasks
+        .filter(t => t.isBuddyTask)
+        .map(t => ({ id: t.id, title: t.title, completed: t.completed, categoryId: cat.id, categoryName: cat.name }))
+    );
+    const regularTasks = allCategories.flatMap(cat =>
+      cat.tasks
+        .filter(t => !t.isBuddyTask)
+        .map(t => ({ id: t.id, title: t.title, completed: t.completed, categoryId: cat.id, categoryName: cat.name }))
     );
 
     // Strukturera svaret
@@ -143,7 +144,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
       categories: allCategories.map(c => ({ id: c.id, name: c.name, completedTasks: c.completedTasks, totalTasks: c.totalTasks })),
       totalTasks,
       completedTasks,
-      completedTasksDetailed
+      buddyTasks,
+      regularTasks
     };
 
     return NextResponse.json(response);

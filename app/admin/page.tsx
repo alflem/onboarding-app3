@@ -164,7 +164,8 @@ export default function AdminPage() {
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
     totalTasks?: number;
     completedTasks?: number;
-    completedTasksDetailed?: { id: string; title: string; isBuddyTask: boolean; categoryId: string; categoryName: string }[];
+    buddyTasks?: { id: string; title: string; completed: boolean; categoryId: string; categoryName: string }[];
+    regularTasks?: { id: string; title: string; completed: boolean; categoryId: string; categoryName: string }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
 
@@ -1191,39 +1192,68 @@ export default function AdminPage() {
                 </CardContent>
               </Card>
 
-              {/* Slutförda uppgifter med buddy-markering */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ClipboardCheck className="h-5 w-5" />
-                    Utförda uppgifter
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {employeeDetails?.completedTasksDetailed && employeeDetails.completedTasksDetailed.length > 0 ? (
-                    <div className="space-y-2">
-                      {employeeDetails.completedTasksDetailed.map((task) => (
-                        <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                            <span className="text-sm font-medium">{task.title}</span>
+              {/* Uppgiftsöversikt separerad: Buddyuppgifter och vanliga uppgifter */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ClipboardCheck className="h-5 w-5" />
+                      Buddyuppgifter
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {employeeDetails?.buddyTasks && employeeDetails.buddyTasks.length > 0 ? (
+                      <div className="space-y-2">
+                        {employeeDetails.buddyTasks.map((task) => (
+                          <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                            <div className="flex items-center gap-2">
+                              {task.completed ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <Loader2 className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="text-sm font-medium">{task.title}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
-                            {task.isBuddyTask ? (
-                              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700">Buddy</span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">Medarbetare</span>
-                            )}
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Inga buddyuppgifter.</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5" />
+                      Vanliga uppgifter
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {employeeDetails?.regularTasks && employeeDetails.regularTasks.length > 0 ? (
+                      <div className="space-y-2">
+                        {employeeDetails.regularTasks.map((task) => (
+                          <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                            <div className="flex items-center gap-2">
+                              {task.completed ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <Loader2 className="h-4 w-4 text-muted-foreground" />
+                              )}
+                              <span className="text-sm font-medium">{task.title}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">Inga uppgifter slutförda ännu.</p>
-                  )}
-                </CardContent>
-              </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Inga vanliga uppgifter.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Buddy-hantering */}
               {buddyEnabled && (
