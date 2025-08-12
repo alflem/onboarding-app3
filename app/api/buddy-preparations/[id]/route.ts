@@ -83,13 +83,27 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!userId) {
       return NextResponse.json({ error: "userId is required" }, { status: 400 });
     }
-    // Fetch the preparation to get buddyId
+    // Fetch the preparation to get buddyId and organizationId
     const preparation = await prisma.buddyPreparation.findUnique({
       where: { id },
-      select: { buddyId: true }
+      select: { buddyId: true, organizationId: true }
     });
     if (!preparation) {
       return NextResponse.json({ error: "Buddy preparation not found" }, { status: 404 });
+    }
+
+    // Admins may only modify preparations within their own organization
+    if (session.user.role === "ADMIN" && preparation.organizationId !== session.user.organizationId) {
+      return NextResponse.json({ error: "Can only modify preparations from your own organization" }, { status: 403 });
+    }
+
+    // Ensure the user being linked belongs to the same organization
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { organizationId: true }
+    });
+    if (!targetUser || targetUser.organizationId !== preparation.organizationId) {
+      return NextResponse.json({ error: "User must belong to the same organization as the preparation" }, { status: 400 });
     }
     // Update the buddy preparation
     const updatedPreparation = await prisma.buddyPreparation.update({

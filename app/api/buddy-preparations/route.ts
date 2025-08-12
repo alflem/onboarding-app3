@@ -17,13 +17,19 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const organizationId = searchParams.get("organizationId");
+    const organizationIdFromQuery = searchParams.get("organizationId");
     const debug = searchParams.get("debug") === "true";
 
-    // Super admin can see all, admin can only see their organization
-    const whereClause = session.user.role === "SUPER_ADMIN"
-      ? (organizationId ? { organizationId } : {})
-      : { organizationId: session.user.organizationId };
+    // Determine effective organization to scope results to.
+    // Default to the user's organization. Super admins may override with query param.
+    const effectiveOrganizationId = organizationIdFromQuery || session.user.organizationId || undefined;
+
+    if (!effectiveOrganizationId) {
+      // If no organization context is available, don't leak data
+      return NextResponse.json({ error: "organizationId is required" }, { status: 400 });
+    }
+
+    const whereClause = { organizationId: effectiveOrganizationId };
 
     if (debug) {
       console.log("Buddy preparations debug - whereClause:", whereClause);
@@ -110,7 +116,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, buddyId, organizationId, notes, testEmail } = body;
+    const { firstName, lastName, email, buddyId, organizationId: organizationIdFromBody, notes, testEmail, fixEmails } = body;
+
+    // Resolve the organization to operate on:
+    // - Admins are always scoped to their own org
+    // - Super admins can specify via body or fall back to their session org (if any)
+    const resolvedOrganizationId =
+      session.user.role === "SUPER_ADMIN"
+        ? (organizationIdFromBody || session.user.organizationId)
+        : session.user.organizationId;
+
+    if (!resolvedOrganizationId) {
+      return NextResponse.json(
+        { error: "organizationId is required (provide it or ensure your user belongs to an organization)" },
+        { status: 400 }
+      );
+    }
 
     // If this is a test request to check email matching
     if (testEmail) {
@@ -118,7 +139,7 @@ export async function POST(request: NextRequest) {
 
       const testPreparations = await prisma.buddyPreparation.findMany({
         where: {
-          organizationId: organizationId || session.user.organizationId,
+          organizationId: resolvedOrganizationId,
           isActive: true,
         },
       });
@@ -153,12 +174,12 @@ export async function POST(request: NextRequest) {
     }
 
     // If this is a request to fix email formatting
-    if (body.fixEmails) {
+    if (fixEmails) {
       console.log('Fixing email formatting in buddy preparations...');
 
       const allPreparations = await prisma.buddyPreparation.findMany({
         where: {
-          organizationId: organizationId || session.user.organizationId,
+          organizationId: resolvedOrganizationId,
         },
       });
 
@@ -181,15 +202,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate required fields
-    if (!firstName || !lastName || !buddyId || !organizationId) {
+    if (!firstName || !lastName || !buddyId) {
       return NextResponse.json(
-        { error: "firstName, lastName, buddyId, and organizationId are required" },
+        { error: "firstName, lastName and buddyId are required" },
         { status: 400 }
       );
     }
 
-    // Validate that admin can only create for their organization
-    if (session.user.role === "ADMIN" && organizationId !== session.user.organizationId) {
+    // Validate that admin can only create for their organization (we already resolved it, but keep a guard)
+    if (session.user.role === "ADMIN" && resolvedOrganizationId !== session.user.organizationId) {
       return NextResponse.json({ error: "Can only create preparations for your own organization" }, { status: 403 });
     }
 
@@ -197,7 +218,7 @@ export async function POST(request: NextRequest) {
     const buddy = await prisma.user.findFirst({
       where: {
         id: buddyId,
-        organizationId: organizationId,
+          organizationId: resolvedOrganizationId,
       },
     });
 
@@ -210,7 +231,7 @@ export async function POST(request: NextRequest) {
 
     // Check if organization has buddy system enabled
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: resolvedOrganizationId },
     });
 
     if (!organization?.buddyEnabled) {
@@ -227,7 +248,7 @@ export async function POST(request: NextRequest) {
         where: {
           email_organizationId: {
             email: emailNormalized,
-            organizationId,
+            organizationId: resolvedOrganizationId,
           },
         },
       });
@@ -247,7 +268,7 @@ export async function POST(request: NextRequest) {
         lastName: lastName.trim(),
         email: email ? email.toLowerCase().trim() : null,
         buddyId,
-        organizationId,
+        organizationId: resolvedOrganizationId,
         notes: notes?.trim() || null,
       },
       include: {
