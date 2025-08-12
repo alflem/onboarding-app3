@@ -1111,7 +1111,7 @@ export default function AdminPage() {
 
       {/* Dialog för medarbetardetaljer */}
       <Dialog open={employeeDetailDialogOpen} onOpenChange={setEmployeeDetailDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -1176,13 +1176,13 @@ export default function AdminPage() {
                           {employeeDetails.categories
                             .filter((c) => !c.isBuddyCategory)
                             .map((category) => (
-                              <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                                <span className="text-sm">{category.name}</span>
-                                <div className="flex items-center gap-2">
+                              <div key={category.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                                <span className="text-sm flex-1 break-words">{category.name}</span>
+                                <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
                                   <span className="text-xs text-muted-foreground">
                                     {category.completedTasks}/{category.totalTasks} uppgifter
                                   </span>
-                                  <div className="w-16 bg-secondary/20 rounded-full h-2">
+                                  <div className="w-20 bg-secondary/20 rounded-full h-2">
                                     <div
                                       className="bg-primary h-2 rounded-full"
                                       style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
@@ -1200,13 +1200,13 @@ export default function AdminPage() {
                             {employeeDetails.categories
                               .filter((c) => c.isBuddyCategory)
                               .map((category) => (
-                                <div key={category.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                                  <span className="text-sm">{category.name}</span>
-                                  <div className="flex items-center gap-2">
+                                <div key={category.id} className="flex items-center gap-2 p-2 bg-muted/30 rounded">
+                                  <span className="text-sm flex-1 break-words">{category.name}</span>
+                                  <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
                                     <span className="text-xs text-muted-foreground">
                                       {category.completedTasks}/{category.totalTasks} uppgifter
                                     </span>
-                                    <div className="w-16 bg-secondary/20 rounded-full h-2">
+                                    <div className="w-20 bg-secondary/20 rounded-full h-2">
                                       <div
                                         className="bg-primary h-2 rounded-full"
                                         style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
