@@ -44,7 +44,7 @@ export function CustomPrismaAdapter(prisma: PrismaClient): Adapter {
         }
 
         // Check for pre-assigned role
-        let assignedRole = "ADMIN"; // Default role
+        let assignedRole = "EMPLOYEE"; // Default role changed from ADMIN to EMPLOYEE
         if (user.email) {
           const preAssignedRole = await prisma.preAssignedRole.findUnique({
             where: { email: user.email.toLowerCase() }
