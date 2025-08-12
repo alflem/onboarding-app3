@@ -162,6 +162,9 @@ export default function AdminPage() {
     createdAt: string;
     progress: number;
     categories: { id: string; name: string; completedTasks: number; totalTasks: number }[];
+    totalTasks?: number;
+    completedTasks?: number;
+    completedTasksDetailed?: { id: string; title: string; isBuddyTask: boolean; categoryId: string; categoryName: string }[];
     buddy?: { name: string; email: string; id: string };
   } | null>(null);
 
@@ -1117,7 +1120,7 @@ export default function AdminPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {loading ? (
+              {loading ? (
             <div className="flex justify-center items-center py-8">
               <Loader2 className="h-6 w-6 animate-spin" />
               <span className="ml-2">Laddar...</span>
@@ -1151,8 +1154,8 @@ export default function AdminPage() {
                       <div className="text-sm font-medium">{t('completed_tasks')}</div>
                       <div className="text-sm text-muted-foreground">
                         {t('tasks_completed_count', {
-                          completed: employeeDetails.categories.reduce((acc, category) => acc + category.completedTasks, 0),
-                          total: employeeDetails.categories.reduce((acc, category) => acc + category.totalTasks, 0)
+                          completed: employeeDetails.completedTasks ?? employeeDetails.categories.reduce((acc, category) => acc + category.completedTasks, 0),
+                          total: employeeDetails.totalTasks ?? employeeDetails.categories.reduce((acc, category) => acc + category.totalTasks, 0)
                         })}
                       </div>
                     </div>
@@ -1185,6 +1188,40 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Slutförda uppgifter med buddy-markering */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5" />
+                    Utförda uppgifter
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {employeeDetails?.completedTasksDetailed && employeeDetails.completedTasksDetailed.length > 0 ? (
+                    <div className="space-y-2">
+                      {employeeDetails.completedTasksDetailed.map((task) => (
+                        <div key={task.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium">{task.title}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="px-2 py-0.5 rounded bg-secondary/20">{task.categoryName}</span>
+                            {task.isBuddyTask ? (
+                              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700">Buddy</span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded bg-gray-100 text-gray-700">Medarbetare</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Inga uppgifter slutförda ännu.</p>
+                  )}
                 </CardContent>
               </Card>
 

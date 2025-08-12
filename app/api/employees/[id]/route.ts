@@ -55,15 +55,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
             email: true
           }
         },
-        progress: {
-          include: {
-            task: {
-              include: {
-                category: true
-              }
-            }
-          }
-        }
+        progress: true
       }
     });
 
@@ -83,46 +75,60 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Beräkna progress
-    const completedTasks = employee.progress.filter((p: typeof employee.progress[0]) => p.completed).length;
-    const totalTasks = employee.progress.length;
-    const progressPercentage = totalTasks > 0
-      ? Math.round((completedTasks / totalTasks) * 100)
-      : 0;
-
-    // Organisera progress efter kategori
-    const progressByCategory = employee.progress.reduce((acc: Record<string, { id: string; name: string; tasks: EmployeeTask[]; completedTasks: number; totalTasks: number }>, progress: typeof employee.progress[0]) => {
-      const categoryId = progress.task.category.id;
-
-      if (!acc[categoryId]) {
-        acc[categoryId] = {
-          id: categoryId,
-          name: progress.task.category.name,
-          tasks: [],
-          completedTasks: 0,
-          totalTasks: 0
-        };
+    // Hämta checklistans uppgifter för medarbetarens organisation
+    const checklist = await prisma.checklist.findUnique({
+      where: { organizationId: employee.organizationId! },
+      include: {
+        categories: {
+          include: {
+            tasks: {
+              select: { id: true, title: true, description: true, isBuddyTask: true }
+            }
+          }
+        }
       }
+    });
 
-      acc[categoryId].tasks.push({
-        id: progress.task.id,
-        title: progress.task.title,
-        description: progress.task.description,
-        isBuddyTask: progress.task.isBuddyTask,
-        completed: progress.completed,
-        progressId: progress.id
-      });
+    // Bygg upp uppgiftskarta och kategorier
+    const userProgress = await prisma.taskProgress.findMany({
+      where: { userId: employee.id },
+      select: { id: true, taskId: true, completed: true }
+    });
+    const completedTaskIdSet = new Set(userProgress.filter(p => p.completed).map(p => p.taskId));
 
-      acc[categoryId].totalTasks++;
-      if (progress.completed) {
-        acc[categoryId].completedTasks++;
-      }
+    const allCategories = (checklist?.categories || []).map(cat => {
+      const totalTasksForCategory = cat.tasks.length;
+      const completedInCategory = cat.tasks.reduce((sum, task) => sum + (completedTaskIdSet.has(task.id) ? 1 : 0), 0);
+      return {
+        id: cat.id,
+        name: cat.name,
+        tasks: cat.tasks.map((t): EmployeeTask => ({
+          id: t.id,
+          title: t.title,
+          description: t.description,
+          isBuddyTask: t.isBuddyTask,
+          completed: completedTaskIdSet.has(t.id),
+          progressId: userProgress.find(p => p.taskId === t.id)?.id || ""
+        })),
+        completedTasks: completedInCategory,
+        totalTasks: totalTasksForCategory
+      };
+    });
 
-      return acc;
-    }, {} as Record<string, { id: string; name: string; tasks: EmployeeTask[]; completedTasks: number; totalTasks: number }>);
+    const totalTasks = allCategories.reduce((sum, c) => sum + c.totalTasks, 0);
+    const completedTasks = allCategories.reduce((sum, c) => sum + c.completedTasks, 0);
+    const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-    // Konvertera till array
-    const categories = Object.values(progressByCategory);
+    // Lista detaljer om slutförda uppgifter
+    const completedTasksDetailed = allCategories.flatMap(cat =>
+      cat.tasks.filter(t => t.completed).map(t => ({
+        id: t.id,
+        title: t.title,
+        isBuddyTask: t.isBuddyTask,
+        categoryId: cat.id,
+        categoryName: cat.name
+      }))
+    );
 
     // Strukturera svaret
     const response = {
@@ -134,7 +140,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
       progress: progressPercentage,
       hasBuddy: employee.buddyId !== null,
       buddy: employee.buddy,
-      categories: categories
+      categories: allCategories.map(c => ({ id: c.id, name: c.name, completedTasks: c.completedTasks, totalTasks: c.totalTasks })),
+      totalTasks,
+      completedTasks,
+      completedTasksDetailed
     };
 
     return NextResponse.json(response);
