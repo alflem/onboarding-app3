@@ -31,6 +31,8 @@ model User {
   organization          Organization?       @relation(fields: [organizationId], references: [id])
   buddyPreparationsAsBuddy BuddyPreparation[] @relation("BuddyPreparationBuddy")
   buddyPreparationAsUser   BuddyPreparation?  @relation("BuddyPreparationUser")
+  // Opposite side for BuddyPreparationBuddy.buddy relation
+  buddyPreparationBuddyLinks BuddyPreparationBuddy[] @relation("BuddyPreparationBuddyUser")
 }
 
 model Account {
@@ -178,7 +180,7 @@ model BuddyPreparationBuddy {
 
   // Relations
   preparation BuddyPreparation @relation(fields: [buddyPreparationId], references: [id], onDelete: Cascade)
-  buddy       User             @relation(fields: [buddyId], references: [id], onDelete: Cascade)
+  buddy       User             @relation("BuddyPreparationBuddyUser", fields: [buddyId], references: [id], onDelete: Cascade)
 
   @@unique([buddyPreparationId, buddyId])
 }
