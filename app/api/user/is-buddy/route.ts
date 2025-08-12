@@ -41,38 +41,37 @@ export async function GET() {
       });
     }
 
-    // Check if user is a buddy for someone (existing users)
+    // Legacy single-buddy relation
     const employeesWithThisBuddy = await prisma.user.findMany({
-      where: {
-        buddyId: session.user.id
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true
-      }
+      where: { buddyId: session.user.id },
+      select: { id: true, name: true, email: true }
     });
+
+    // New multi-buddy assignments
+    const assignmentLinks = await prisma.buddyAssignment.findMany({
+      where: { buddyId: session.user.id },
+      include: { user: { select: { id: true, name: true, email: true } } }
+    });
+    const assignedUsers = assignmentLinks.map(a => a.user);
 
     // Check if user has active buddy preparations
     const activeBuddyPreparations = await prisma.buddyPreparation.findMany({
       where: {
-        buddyId: session.user.id,
-        isActive: true
+        isActive: true,
+        OR: [
+          { buddyId: session.user.id },
+          { buddies: { some: { buddyId: session.user.id } } }
+        ]
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true
-      }
+      select: { id: true, firstName: true, lastName: true, email: true }
     });
 
     // User is a buddy if they have either existing employees or active preparations
-    const isBuddy = employeesWithThisBuddy.length > 0 || activeBuddyPreparations.length > 0;
+    const isBuddy = employeesWithThisBuddy.length > 0 || assignedUsers.length > 0 || activeBuddyPreparations.length > 0;
 
     return NextResponse.json({
       isBuddy,
-      buddyFor: employeesWithThisBuddy,
+      buddyFor: [...employeesWithThisBuddy, ...assignedUsers],
       buddyPreparations: activeBuddyPreparations,
       buddyEnabled: true
     });

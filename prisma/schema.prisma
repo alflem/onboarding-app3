@@ -20,12 +20,14 @@ model User {
   updatedAt             DateTime            @updatedAt
   organizationId        String?
   role                  Role                @default(EMPLOYEE)
-  buddyId               String?
+  buddyId               String? // legacy single-buddy (kept for backward compatibility)
   accounts              Account[]
   sessions              Session[]
   progress              TaskProgress[]
   buddy                 User?               @relation("BuddyRelation", fields: [buddyId], references: [id])
   buddyFor              User[]              @relation("BuddyRelation")
+  buddyAssignments      BuddyAssignment[]   @relation("UserBuddyAssignments")
+  asBuddyAssignments    BuddyAssignment[]   @relation("BuddyAssignmentsAsBuddy")
   organization          Organization?       @relation(fields: [organizationId], references: [id])
   buddyPreparationsAsBuddy BuddyPreparation[] @relation("BuddyPreparationBuddy")
   buddyPreparationAsUser   BuddyPreparation?  @relation("BuddyPreparationUser")
@@ -138,7 +140,7 @@ model BuddyPreparation {
   firstName      String
   lastName       String
   email          String?       // Optional email för automatisk koppling
-  buddyId        String        // Den som ska vara buddy
+  buddyId        String        // Legacy primary buddy (kept for compatibility)
   organizationId String
   isActive       Boolean       @default(true) // true = väntar på användare, false = kopplad
   userId         String?       @unique // null tills användaren skapar konto
@@ -148,10 +150,37 @@ model BuddyPreparation {
 
   // Relations
   buddy          User          @relation("BuddyPreparationBuddy", fields: [buddyId], references: [id], onDelete: Cascade)
+  buddies        BuddyPreparationBuddy[]
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User?         @relation("BuddyPreparationUser", fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([email, organizationId]) // Prevent duplicate preparations for same email in same org
+}
+
+model BuddyAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  buddyId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User @relation("UserBuddyAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  buddy User @relation("BuddyAssignmentsAsBuddy", fields: [buddyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, buddyId])
+}
+
+model BuddyPreparationBuddy {
+  id                  String  @id @default(cuid())
+  buddyPreparationId  String
+  buddyId             String
+  createdAt           DateTime @default(now())
+
+  // Relations
+  preparation BuddyPreparation @relation(fields: [buddyPreparationId], references: [id], onDelete: Cascade)
+  buddy       User             @relation(fields: [buddyId], references: [id], onDelete: Cascade)
+
+  @@unique([buddyPreparationId, buddyId])
 }
 
 enum Role {

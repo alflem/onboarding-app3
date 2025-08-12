@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, buddyId, organizationId: organizationIdFromBody, notes, testEmail, fixEmails } = body;
+    const { firstName, lastName, email, buddyId, additionalBuddyId, organizationId: organizationIdFromBody, notes, testEmail, fixEmails } = body;
 
     // Resolve the organization to operate on:
     // - Admins are always scoped to their own org
@@ -289,6 +289,16 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // If an additional buddy is provided, attach via BuddyPreparationBuddy
+    if (additionalBuddyId) {
+      await prisma.buddyPreparationBuddy.create({
+        data: {
+          buddyPreparationId: preparation.id,
+          buddyId: additionalBuddyId,
+        }
+      });
+    }
 
     return NextResponse.json({
       success: true,

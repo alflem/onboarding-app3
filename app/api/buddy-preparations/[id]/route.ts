@@ -138,11 +138,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         },
       },
     });
-    // Set the user's buddyId to the preparation's buddyId
-    await prisma.user.update({
-      where: { id: userId },
-      data: { buddyId: preparation.buddyId },
-    });
+    // Set the user's buddy relations: legacy single buddyId and multi assignment
+    await prisma.user.update({ where: { id: userId }, data: { buddyId: preparation.buddyId } });
+    // Also mirror to BuddyAssignment so multiple buddies can access
+    await prisma.buddyAssignment.upsert({
+      where: { userId_buddyId: { userId, buddyId: preparation.buddyId } as any },
+      update: {},
+      create: { userId, buddyId: preparation.buddyId }
+    } as any);
     return NextResponse.json({ success: true, data: updatedPreparation });
   } catch (error) {
     console.error("Error manually linking buddy preparation:", error);

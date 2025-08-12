@@ -7,7 +7,7 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-// PATCH /api/employees/[id]/buddy - Uppdatera buddytilldelning för en medarbetare
+  // PATCH /api/employees/[id]/buddy - Uppdatera buddytilldelning för en medarbetare (single or multi)
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     // Hämta användarsession
@@ -35,12 +35,18 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     // Hämta och validera begäransdata
     const body = await request.json();
-    const { buddyId } = body;
+    const { buddyId, additionalBuddyId, mode } = body as { buddyId?: string | null; additionalBuddyId?: string | null; mode?: 'single' | 'multi' };
 
     // buddyId kan vara null för att ta bort buddy
-    if (buddyId !== null && (typeof buddyId !== 'string' || buddyId.trim() === '')) {
+    if (buddyId !== undefined && buddyId !== null && (typeof buddyId !== 'string' || buddyId.trim() === '')) {
       return NextResponse.json(
         { error: 'Ogiltigt buddyID' },
+        { status: 400 }
+      );
+    }
+    if (additionalBuddyId !== undefined && additionalBuddyId !== null && (typeof additionalBuddyId !== 'string' || additionalBuddyId.trim() === '')) {
+      return NextResponse.json(
+        { error: 'Ogiltigt additionalBuddyId' },
         { status: 400 }
       );
     }
@@ -67,7 +73,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     }
 
     // Om buddyId inte är null, verifiera att buddyanvändaren finns
-    if (buddyId !== null) {
+    if (buddyId !== null && buddyId !== undefined) {
       const buddy = await prisma.user.findUnique({
         where: {
           id: buddyId
@@ -96,30 +102,60 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         );
       }
     }
-
-    // Uppdatera användaren med den nya buddyrelationen (eller ta bort den)
-    const updatedEmployee = await prisma.user.update({
-      where: {
-        id: id
-      },
-      data: {
-        buddyId: buddyId
-      },
-      include: {
-        buddy: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        }
+    if (additionalBuddyId !== null && additionalBuddyId !== undefined) {
+      const buddy = await prisma.user.findUnique({ where: { id: additionalBuddyId } });
+      if (!buddy) {
+        return NextResponse.json({ error: 'Buddy-användaren (extra) hittades inte' }, { status: 404 });
       }
-    });
+      if (buddy.organizationId !== session.user.organizationId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      if (id === additionalBuddyId) {
+        return NextResponse.json({ error: 'En medarbetare kan inte vara sin egen buddy' }, { status: 400 });
+      }
+    }
+
+    let updatedEmployee;
+    if (mode === 'multi') {
+      // Maintain legacy single buddyId if provided; else leave as is
+      if (buddyId !== undefined) {
+        updatedEmployee = await prisma.user.update({ where: { id }, data: { buddyId }, include: { buddy: { select: { id: true, name: true, email: true } } } });
+      } else {
+        updatedEmployee = await prisma.user.findUnique({ where: { id }, include: { buddy: true } });
+      }
+      // Upsert BuddyAssignment(s)
+      const toCreate: string[] = [];
+      if (buddyId) toCreate.push(buddyId);
+      if (additionalBuddyId) toCreate.push(additionalBuddyId);
+      for (const bId of toCreate) {
+        await prisma.buddyAssignment.upsert({
+          where: { userId_buddyId: { userId: id, buddyId: bId } as any },
+          update: {},
+          create: { userId: id, buddyId: bId }
+        } as any);
+      }
+      // If buddyId === null and no additional specified, clear all assignments
+      if (buddyId === null && !additionalBuddyId) {
+        await prisma.buddyAssignment.deleteMany({ where: { userId: id } });
+      }
+    } else {
+      // Default: single mode
+      updatedEmployee = await prisma.user.update({
+        where: { id },
+        data: { buddyId: buddyId ?? null },
+        include: { buddy: { select: { id: true, name: true, email: true } } }
+      });
+      // Keep assignments in sync: ensure the single buddy is assigned; remove others
+      await prisma.buddyAssignment.deleteMany({ where: { userId: id } });
+      if (buddyId) {
+        await prisma.buddyAssignment.create({ data: { userId: id, buddyId } });
+      }
+    }
 
     return NextResponse.json({
-      id: updatedEmployee.id,
-      buddyId: updatedEmployee.buddyId,
-      buddy: updatedEmployee.buddy
+      id: updatedEmployee?.id ?? id,
+      buddyId: (updatedEmployee as any)?.buddyId ?? null,
+      buddy: (updatedEmployee as any)?.buddy ?? null
     });
 
   } catch (error) {

@@ -13,62 +13,48 @@ export async function GET() {
 
     const userId = session.user.id;
 
-    // Get users this person is buddy for
-    const buddyForUsers = await prisma.user.findMany({
-      where: {
-        buddyId: userId,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        role: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    // Get users this person is buddy for (legacy single buddy)
+    const buddyForUsersLegacy = await prisma.user.findMany({
+      where: { buddyId: userId },
+      select: { id: true, name: true, email: true, createdAt: true, role: true },
+      orderBy: { createdAt: "desc" },
     });
+
+    // And via multi-buddy assignments
+    const assignmentUsers = await prisma.buddyAssignment.findMany({
+      where: { buddyId: userId },
+      include: { user: { select: { id: true, name: true, email: true, createdAt: true, role: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    const buddyForUsers = [
+      ...buddyForUsersLegacy,
+      ...assignmentUsers.map(a => a.user)
+    ];
 
     // Get active buddy preparations this person is buddy for
     const activeBuddyPreparations = await prisma.buddyPreparation.findMany({
       where: {
-        buddyId: userId,
         isActive: true,
+        OR: [
+          { buddyId: userId },
+          { buddies: { some: { buddyId: userId } } }
+        ]
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        notes: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      select: { id: true, firstName: true, lastName: true, email: true, notes: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
     });
 
     // Get completed buddy preparations this person was buddy for
     const completedBuddyPreparations = await prisma.buddyPreparation.findMany({
       where: {
-        buddyId: userId,
         isActive: false,
+        OR: [
+          { buddyId: userId },
+          { buddies: { some: { buddyId: userId } } }
+        ]
       },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            createdAt: true,
-            role: true,
-          },
-        },
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      include: { user: { select: { id: true, name: true, email: true, createdAt: true, role: true } } },
+      orderBy: { updatedAt: "desc" },
     });
 
     // Calculate stats
