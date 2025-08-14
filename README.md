@@ -99,34 +99,138 @@ En omfattande onboardingapplikation byggd med Next.js och Prisma för att fören
 4. Administratören kan skapa och tilldela checklistor till medarbetaren
 5. Medarbetaren slutför uppgifter i sin checklista, med stöd från sin buddy
 
-## Deployment
+## Deployment till Azure App Service (Linux)
 
-### Azure Web App Deployment
+Den här appen är byggd med Next.js standalone och startas via en egen startfil. Startup command ska vara:
 
-Applikationen använder GitHub Actions för automatisk deployment till Azure Web App.
+```
+node server.js
+```
 
-#### Standard Deployment
-- **Workflow**: `.github/workflows/next-deploy.yml`
-- **Trigger**: Automatisk vid push till `master` branch
-- **Process**: Bygger applikationen och deployar till Azure
+### Förutsättningar
+- Azure-prenumeration och en Azure App Service (Linux)
+- PostgreSQL-databas (Azure Database for PostgreSQL eller motsvarande)
+- Konfigurerade miljövariabler
 
-#### Full Clean Deployment
-- **Workflow**: `.github/workflows/full_clean.yml`
-- **Trigger**: Manuell via GitHub Actions
-- **Process**:
-  1. Säkerhetsbekräftelse (kräver att man skriver "RESET")
-  2. Nollställer databasen helt (tar bort all data)
-  3. Kör seedscript (om tillgängligt)
-  4. Bygger och deployar applikationen
+### 1) Bygg appen
+```bash
+npm ci
+npm run build
+```
+Detta skapar `.next/standalone` och `.next/static`. Filen `server.js` startar den kompilerade servern.
 
-**⚠️ Varning**: Full Clean-deployment tar bort ALL data i databasen. Använd endast för utveckling eller när du medvetet vill börja om från början.
+### 2) Artefakter att deploya
+Se till att följande mappar/filer följer med i deployment:
+- `.next/standalone`
+- `.next/static`
+- `public/`
+- `server.js`
+- `package.json`, `package-lock.json`
 
-#### Använda Full Clean Deployment
-1. Gå till GitHub → Actions → "Full Clean - Reset DB and Deploy"
-2. Klicka "Run workflow"
-3. Skriv "RESET" i bekräftelsefältet
-4. Klicka "Run workflow"
+### 3) Skapa App Service
+- Runtime stack: Node (t.ex. Node 18 LTS)
+- OS: Linux
 
+### 4) App Settings (miljövariabler)
+I App Service → Configuration → Application settings:
+- `NODE_ENV=production`
+- `PORT=8080` (Azure tillhandahåller `PORT`, men 8080 är vanligt)
+- `DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DB?schema=public`
+- `NEXTAUTH_URL=https://<ditt-app-namn>.azurewebsites.net`
+- `NEXTAUTH_SECRET=<starkt-hemligt-värde>`
+- `AZURE_AD_CLIENT_ID` / `AZURE_AD_CLIENT_SECRET` / `AZURE_AD_TENANT_ID`
+
+### 5) Startup command
+App Service → Configuration → General settings → Startup Command:
+```
+node server.js
+```
+
+### 6) Deploy
+Zip Deploy (exempel):
+```bash
+az webapp deployment source config-zip \
+  --resource-group <RG> \
+  --name <APP_NAME> \
+  --src <build.zip>
+```
+Se till att zip:en har filerna enligt punkt 2 i rot.
+
+### 7) Efterkontroll
+- Loggar: App Service → Log stream
+- Testa URL: verifiera att appen startar (annars kontrollera startup command och att `.next/standalone` finns)
+- Databasåtkomst: kontrollera `DATABASE_URL` och brandväggsregler
+
+## GitHub Actions-guide (CI/CD till Azure App Service)
+
+Nedan är ett exempel-workflow som bygger Next.js i standalone-läge och deployar till Azure App Service. Startup command i App Service ska vara `node server.js` (se avsnitt ovan).
+
+Skapa fil: `.github/workflows/azure-deploy.yml`
+
+```yaml
+name: Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Prepare artifact
+        run: |
+          mkdir -p deploy
+          cp -r .next/standalone deploy/.next/standalone
+          cp -r .next/static deploy/.next/static
+          cp -r public deploy/public
+          cp server.js deploy/server.js
+          cp package.json deploy/package.json
+          cp package-lock.json deploy/package-lock.json
+          cd deploy && zip -r ../build.zip . && cd ..
+
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: build.zip
+```
+
+Konfiguration:
+- Skapa hemligheterna i GitHub repo settings → Secrets and variables → Actions:
+  - `AZURE_WEBAPP_NAME`: Namnet på din App Service
+  - `AZURE_WEBAPP_PUBLISH_PROFILE`: Innehållet från Publish profile (App Service → Get publish profile)
+
+Databasmigreringar:
+- Rekommenderas att köras separat (t.ex. manuell migrering via CI steg före deployment) eller som en release-rutin.
+- Exempelsteg (om databasen är åtkomlig från CI):
+  ```yaml
+  - name: Run Prisma migrate
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    run: npx prisma migrate deploy
+  ```
+
+Obs:
+- Startup command i App Service måste vara `node server.js`.
+- Säkerställ att App Settings (env vars) i Azure är korrekt satta (NEXTAUTH_SECRET, DATABASE_URL, etc.).
 
 
 ## Utveckling

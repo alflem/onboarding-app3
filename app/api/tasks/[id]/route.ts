@@ -134,18 +134,53 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Hämta och validera begäransdata
     const body = await request.json();
 
+    // Om categoryId ska ändras, kontrollera att målkategorin tillhör samma organisation
+    if (body.categoryId) {
+      const targetCategory = await prisma.category.findUnique({
+        where: { id: body.categoryId },
+        include: {
+          checklist: {
+            select: { organizationId: true }
+          }
+        }
+      });
+
+      if (!targetCategory) {
+        return NextResponse.json(
+          { error: 'Målkategorin hittades inte' },
+          { status: 404 }
+        );
+      }
+
+      if (targetCategory.checklist.organizationId !== session.user.organizationId) {
+        return NextResponse.json(
+          { error: 'Forbidden' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Bygg uppdateringsdata
+    const updateData: {
+      title?: string;
+      description?: string | null;
+      link?: string | null;
+      isBuddyTask?: boolean;
+      order?: number;
+      categoryId?: string;
+    } = {};
+
+    if (body.title) updateData.title = body.title.trim();
+    if (body.description !== undefined) updateData.description = body.description;
+    if (body.link !== undefined) updateData.link = body.link;
+    if (body.isBuddyTask !== undefined) updateData.isBuddyTask = body.isBuddyTask;
+    if (body.order !== undefined) updateData.order = body.order;
+    if (body.categoryId) updateData.categoryId = body.categoryId;
+
     // Uppdatera uppgift i databasen
     const updatedTask = await prisma.task.update({
-      where: {
-        id: id
-      },
-      data: {
-        title: body.title ? body.title.trim() : undefined,
-        description: body.description !== undefined ? body.description : undefined,
-        link: body.link !== undefined ? body.link : undefined,
-        isBuddyTask: body.isBuddyTask !== undefined ? body.isBuddyTask : undefined,
-        order: body.order !== undefined ? body.order : undefined
-      }
+      where: { id },
+      data: updateData
     });
 
     return NextResponse.json(updatedTask);

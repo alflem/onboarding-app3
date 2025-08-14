@@ -624,54 +624,114 @@ export default function BuddyTemplatePage() {
           // Save the new category order
           await handleSaveCategoryOrder(reorderedCategories);
         } else {
-          // Find which category the task belongs to
+          // Cross-category and intra-category reorder for buddy tasks only
           let sourceCategory: Category | undefined;
-          let task: Task | undefined;
+          let movingTask: Task | undefined;
 
           for (const category of checklist.categories) {
             const foundTask = category.tasks.find((t) => t.id === active.id);
             if (foundTask) {
               sourceCategory = category;
-              task = foundTask;
+              movingTask = foundTask;
               break;
             }
           }
 
-          if (sourceCategory && task) {
-            // Find which category the task is being dragged to
-            const isSameCategory = sourceCategory.tasks.some(
-              (t) => t.id === over.id
+          if (!sourceCategory || !movingTask) return;
+
+          // Endast buddy-uppgifter hanteras här
+          if (!movingTask.isBuddyTask) return;
+
+          const targetCategory = checklist.categories.find(
+            (cat) => cat.id === over.id || cat.tasks.some((t) => t.id === over.id)
+          );
+
+          if (!targetCategory) return;
+
+          // Filtrera till buddy-uppgifter i respektive kategori för ordning
+          const sourceBuddyTasks = sourceCategory.tasks.filter((t) => t.isBuddyTask);
+          const targetBuddyTasks = targetCategory.tasks.filter((t) => t.isBuddyTask);
+
+          // Samma kategori: reorder inom buddy-uppgifter
+          if (sourceCategory.id === targetCategory.id) {
+            const oldIndex = sourceBuddyTasks.findIndex((t) => t.id === active.id);
+            const overIndex = sourceBuddyTasks.findIndex((t) => t.id === over.id);
+            if (oldIndex === -1 || overIndex === -1) return;
+
+            const reordered = arrayMove(sourceBuddyTasks, oldIndex, overIndex).map(
+              (t, index) => ({ ...t, order: index })
             );
 
-            if (isSameCategory) {
-              // Reorder within the same category
-              const oldIndex = sourceCategory.tasks.findIndex(
-                (t) => t.id === active.id
-              );
-              const newIndex = sourceCategory.tasks.findIndex(
-                (t) => t.id === over.id
-              );
+            // Slå ihop tillbaka med ev. icke-buddy tasks opåverkade
+            const mergedTasks = [
+              ...reordered,
+              ...sourceCategory.tasks.filter((t) => !t.isBuddyTask),
+            ].sort((a, b) => a.order - b.order);
 
-              const reorderedTasks = arrayMove(
-                sourceCategory.tasks,
-                oldIndex,
-                newIndex
-              ).map((t, index) => ({ ...t, order: index }));
+            setChecklist({
+              ...checklist,
+              categories: checklist.categories.map((cat) =>
+                cat.id === sourceCategory!.id ? { ...cat, tasks: mergedTasks } : cat
+              ),
+            });
 
-              // Update the checklist state
-              setChecklist({
-                ...checklist,
-                categories: checklist.categories.map((cat) =>
-                  cat.id === sourceCategory?.id
-                    ? { ...cat, tasks: reorderedTasks }
-                    : cat
-                ),
-              });
-
-              // Save the new task order
-              await handleSaveTaskOrder(reorderedTasks);
-            }
+            await handleSaveTaskOrder(reordered);
+            return;
           }
+
+          // Flytt mellan kategorier
+          const sourceRemainingBuddy = sourceBuddyTasks
+            .filter((t) => t.id !== movingTask.id)
+            .map((t, index) => ({ ...t, order: index }));
+
+          const overIndexInTargetBuddy = targetBuddyTasks.findIndex((t) => t.id === over.id);
+          const insertIndex = overIndexInTargetBuddy === -1 ? targetBuddyTasks.length : overIndexInTargetBuddy;
+
+          const targetNewBuddy = [
+            ...targetBuddyTasks.slice(0, insertIndex),
+            { ...movingTask, categoryId: targetCategory.id },
+            ...targetBuddyTasks.slice(insertIndex),
+          ].map((t, index) => ({ ...t, order: index }));
+
+          // Slå ihop med ev. icke-buddy tasks opåverkade
+          const sourceMergedTasks = [
+            ...sourceRemainingBuddy,
+            ...sourceCategory.tasks.filter((t) => !t.isBuddyTask),
+          ].sort((a, b) => a.order - b.order);
+
+          const targetMergedTasks = [
+            ...targetNewBuddy,
+            ...targetCategory.tasks.filter((t) => !t.isBuddyTask),
+          ].sort((a, b) => a.order - b.order);
+
+          setChecklist({
+            ...checklist,
+            categories: checklist.categories.map((cat) => {
+              if (cat.id === sourceCategory!.id) return { ...cat, tasks: sourceMergedTasks };
+              if (cat.id === targetCategory.id) return { ...cat, tasks: targetMergedTasks };
+              return cat;
+            }),
+          });
+
+          const movedTaskNewOrder = targetNewBuddy.find((t) => t.id === movingTask.id)?.order;
+          // Uppdatera backend (kategori + order)
+          fetch(`/api/tasks/${movingTask.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryId: targetCategory.id, order: movedTaskNewOrder, isBuddyTask: true })
+          }).catch(() => {
+            // fallback återladdning
+            const reload = async () => {
+              try {
+                const response = await fetch(`/api/templates/${id}`);
+                if (response.ok) setChecklist(await response.json());
+              } catch {}
+            };
+            reload();
+          });
+
+          await handleSaveTaskOrder(sourceRemainingBuddy);
+          await handleSaveTaskOrder(targetNewBuddy);
         }
       }
     }

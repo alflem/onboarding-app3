@@ -739,50 +739,98 @@ export default function TemplateEditPage() {
         handleSaveCategoryOrder(updatedCategories);
       }
     }
-    // Om vi drar en uppgift inom samma kategori
+    // Om vi drar en uppgift: stöd både intra- och inter-kategori
     else {
       const sourceCategory = checklist.categories.find((cat) =>
         cat.tasks.some((task) => task.id === active.id)
       );
 
+      // För att hitta targetCategory, leta både efter task-id och kategori-id
       const targetCategory = checklist.categories.find((cat) =>
-        cat.tasks.some((task) => task.id === over.id)
+        cat.id === over.id || cat.tasks.some((task) => task.id === over.id)
       );
 
-      if (sourceCategory && targetCategory) {
-        // Om vi drar inom samma kategori
-        if (sourceCategory.id === targetCategory.id) {
-          const oldIndex = sourceCategory.tasks.findIndex(
-            (task) => task.id === active.id
-          );
-          const newIndex = sourceCategory.tasks.findIndex(
-            (task) => task.id === over.id
-          );
+      if (!sourceCategory || !targetCategory) return;
 
-          const reorderedTasks = arrayMove(
-            sourceCategory.tasks,
-            oldIndex,
-            newIndex
-          ).map((task, index) => ({
-            ...task,
-            order: index,
-          }));
+      // Inom samma kategori: bara reorder
+      if (sourceCategory.id === targetCategory.id) {
+        const oldIndex = sourceCategory.tasks.findIndex(
+          (task) => task.id === active.id
+        );
+        const newIndex = sourceCategory.tasks.findIndex(
+          (task) => task.id === over.id
+        );
 
-          const updatedCategories = checklist.categories.map((cat) =>
-            cat.id === sourceCategory.id
-              ? { ...cat, tasks: reorderedTasks }
-              : cat
-          );
+        const reorderedTasks = arrayMove(
+          sourceCategory.tasks,
+          oldIndex,
+          newIndex
+        ).map((task, index) => ({
+          ...task,
+          order: index,
+        }));
 
-          setChecklist({
-            ...checklist,
-            categories: updatedCategories,
-          });
+        const updatedCategories = checklist.categories.map((cat) =>
+          cat.id === sourceCategory.id
+            ? { ...cat, tasks: reorderedTasks }
+            : cat
+        );
 
-          // Spara ändringarna till databasen
-          handleSaveTaskOrder(reorderedTasks);
-        }
+        setChecklist({
+          ...checklist,
+          categories: updatedCategories,
+        });
+
+        // Spara ändringarna till databasen
+        handleSaveTaskOrder(reorderedTasks);
+        return;
       }
+
+      // Flytt mellan kategorier
+      const movingTask = sourceCategory.tasks.find((t) => t.id === active.id);
+      if (!movingTask) return;
+
+      const sourceTasks = sourceCategory.tasks
+        .filter((t) => t.id !== movingTask.id)
+        .map((t, index) => ({ ...t, order: index }));
+
+      // Om man släpper över en task i target, beräkna infogningsindex relativt target
+      const overIndexInTarget = targetCategory.tasks.findIndex(
+        (t) => t.id === over.id
+      );
+      const insertIndex = overIndexInTarget === -1
+        ? targetCategory.tasks.length
+        : overIndexInTarget;
+
+      const targetTasks = [
+        ...targetCategory.tasks.slice(0, insertIndex),
+        { ...movingTask, categoryId: targetCategory.id },
+        ...targetCategory.tasks.slice(insertIndex),
+      ]
+        .map((t, index) => ({ ...t, order: index }));
+
+      const updatedCategories = checklist.categories.map((cat) => {
+        if (cat.id === sourceCategory.id) return { ...cat, tasks: sourceTasks };
+        if (cat.id === targetCategory.id) return { ...cat, tasks: targetTasks };
+        return cat;
+      });
+
+      setChecklist({ ...checklist, categories: updatedCategories });
+
+      // Uppdatera backend: sätt ny categoryId och ev. order
+      const movedTaskNewOrder = targetTasks.find((t) => t.id === movingTask.id)?.order;
+      fetch(`/api/tasks/${movingTask.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId: targetCategory.id, order: movedTaskNewOrder })
+      }).catch(() => {
+        // Vid fel, ladda om mallen för att återställa korrekt state
+        fetchChecklist();
+      });
+
+      // Spara ny ordning i båda kategorierna
+      handleSaveTaskOrder(sourceTasks);
+      handleSaveTaskOrder(targetTasks);
     }
   };
 
