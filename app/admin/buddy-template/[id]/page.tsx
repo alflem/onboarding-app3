@@ -776,6 +776,9 @@ export default function BuddyTemplatePage() {
 
   // Save task order
   const handleSaveTaskOrder = async (tasks: Task[]) => {
+    if (!tasks || tasks.length === 0) {
+      return;
+    }
     setSaving(true);
 
     try {

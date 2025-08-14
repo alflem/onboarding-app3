@@ -868,6 +868,9 @@ export default function TemplateEditPage() {
 
   // Funktion för att spara uppgiftsordning till databasen
   const handleSaveTaskOrder = async (tasks: Task[]) => {
+    if (!tasks || tasks.length === 0) {
+      return;
+    }
     setSaving(true);
     try {
       const updates = tasks.map((task) => ({
@@ -875,7 +878,7 @@ export default function TemplateEditPage() {
         order: task.order,
       }));
 
-      const response = await fetch("../../api/tasks/reorder", {
+      const response = await fetch("/api/tasks/reorder", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
