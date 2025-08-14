@@ -424,6 +424,8 @@ function SortableTask({
 
   return (
     <div
+      id={`task-${task.id}`}
+      data-task-id={task.id}
       ref={setNodeRef}
       style={style}
       className={`border rounded-md p-3 ${
@@ -1168,6 +1170,8 @@ export default function TemplateEditPage() {
           })),
         });
 
+        // Spara id för att kunna scrolla till rätt uppgift efter att dialogen stängts
+        const editedId = editingTaskId;
         setEditingTaskId(null);
 
         // Stäng dialogen programmatiskt
@@ -1175,6 +1179,14 @@ export default function TemplateEditPage() {
           '[data-state="open"] button[aria-label="Close"]'
         ) as HTMLButtonElement;
         closeButton?.click();
+
+        // Scrolla till uppgiften som uppdaterades
+        requestAnimationFrame(() => {
+          const el = document.getElementById(`task-${editedId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        });
 
         toast.success("Uppgift uppdaterad", {
           description: "Uppgiften har uppdaterats i mallen.",

@@ -143,6 +143,8 @@ function SortableTask({
 
   return (
     <div
+      id={`task-${task.id}`}
+      data-task-id={task.id}
       ref={setNodeRef}
       style={style}
       className={`border rounded-md p-3 ${
@@ -1058,11 +1060,19 @@ export default function BuddyTemplatePage() {
             ),
           })),
         });
-
+        const editedId = editingTaskId;
         setEditingTaskId(null);
 
         toast.success("Buddyuppgift uppdaterad", {
           description: "Buddyuppgiften har uppdaterats i mallen.",
+        });
+
+        // Scrolla till uppgiften som uppdaterades
+        requestAnimationFrame(() => {
+          const el = document.getElementById(`task-${editedId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
         });
       } catch (error) {
         console.error("Fel vid uppdatering av uppgift:", error);
