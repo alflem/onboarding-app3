@@ -45,6 +45,7 @@ import {
   ClipboardCheck,
   Loader2,
   RotateCcw
+  , ChevronDown, ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -120,6 +121,8 @@ function SortableCategory({
   setNewTask,
   handleAddTask,
   saving,
+  isCollapsed,
+  onToggleCollapse,
 }: {
   category: Category;
   editingCategoryId: string | null;
@@ -154,6 +157,8 @@ function SortableCategory({
   }) => void;
   handleAddTask: () => Promise<void>;
   saving: boolean;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }) {
   // Hämta sortable-props för kategorin
   const {
@@ -192,6 +197,18 @@ function SortableCategory({
           <div {...attributes} {...listeners} className="cursor-grab">
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? "Expandera kategori" : "Fäll ihop kategori"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
           {editingCategoryId === category.id ? (
             <div className="flex items-center space-x-2">
               <Input
@@ -269,113 +286,121 @@ function SortableCategory({
 
       {/* Uppgifter inom kategorin */}
       <div className="space-y-2 ml-6 mt-2">
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          {category.tasks
-            .filter((task) => !task.isBuddyTask)
-            .sort((a, b) => a.order - b.order)
-            .map((task) => (
-              <SortableTask
-                key={task.id}
-                task={task}
-                categoryId={category.id}
-                _editingTaskId={editingTaskIdProp}
-                setEditingTaskId={setEditingTaskId}
-                setEditingTask={setEditingTask}
-                handleDeleteTask={handleDeleteTask}
-              />
-            ))}
-        </SortableContext>
+        {!isCollapsed ? (
+          <>
+            <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+              {category.tasks
+                .filter((task) => !task.isBuddyTask)
+                .sort((a, b) => a.order - b.order)
+                .map((task) => (
+                  <SortableTask
+                    key={task.id}
+                    task={task}
+                    categoryId={category.id}
+                    _editingTaskId={editingTaskIdProp}
+                    setEditingTaskId={setEditingTaskId}
+                    setEditingTask={setEditingTask}
+                    handleDeleteTask={handleDeleteTask}
+                  />
+                ))}
+            </SortableContext>
 
-        {/* Lägg till uppgift i denna kategori */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full mt-2 border-dashed"
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Lägg till uppgift
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Lägg till uppgift</DialogTitle>
-              <DialogDescription>
-                Skapa en ny uppgift i kategorin {category.name}.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="task-title">Titel</Label>
-                <Input
-                  id="task-title"
-                  value={newTask.title}
-                  onChange={(e) =>
-                    setNewTask({
-                      ...newTask,
-                      title: e.target.value,
-                      categoryId: category.id,
-                    })
-                  }
-                  placeholder="Ange uppgiftens titel"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="task-description">Beskrivning</Label>
-                <Textarea
-                  id="task-description"
-                  value={newTask.description}
-                  onChange={(e) =>
-                    setNewTask({
-                      ...newTask,
-                      description: e.target.value,
-                      categoryId: category.id,
-                      isBuddyTask: false,
-                    })
-                  }
-                  placeholder="Ange en beskrivning (valfritt)"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="task-link">Länk (valfritt)</Label>
-                <Input
-                  id="task-link"
-                  value={newTask.link}
-                  onChange={(e) =>
-                    setNewTask({
-                      ...newTask,
-                      link: e.target.value,
-                      categoryId: category.id,
-                    })
-                  }
-                  placeholder="https://exempel.se"
-                  type="url"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Avbryt</Button>
-              </DialogClose>
-              <DialogClose asChild>
+            {/* Lägg till uppgift i denna kategori */}
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button
-                  onClick={async () => {
-                    await handleAddTask();
-                  }}
-                  disabled={!newTask.title.trim() || saving}
+                  variant="outline"
+                  className="w-full mt-2 border-dashed"
+                  size="sm"
                 >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Plus className="h-4 w-4 mr-2" />
-                  )}
-                  Lägg till
+                  <Plus className="h-4 w-4 mr-2" />
+                  Lägg till uppgift
                 </Button>
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Lägg till uppgift</DialogTitle>
+                  <DialogDescription>
+                    Skapa en ny uppgift i kategorin {category.name}.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-title">Titel</Label>
+                    <Input
+                      id="task-title"
+                      value={newTask.title}
+                      onChange={(e) =>
+                        setNewTask({
+                          ...newTask,
+                          title: e.target.value,
+                          categoryId: category.id,
+                        })
+                      }
+                      placeholder="Ange uppgiftens titel"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-description">Beskrivning</Label>
+                    <Textarea
+                      id="task-description"
+                      value={newTask.description}
+                      onChange={(e) =>
+                        setNewTask({
+                          ...newTask,
+                          description: e.target.value,
+                          categoryId: category.id,
+                          isBuddyTask: false,
+                        })
+                      }
+                      placeholder="Ange en beskrivning (valfritt)"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="task-link">Länk (valfritt)</Label>
+                    <Input
+                      id="task-link"
+                      value={newTask.link}
+                      onChange={(e) =>
+                        setNewTask({
+                          ...newTask,
+                          link: e.target.value,
+                          categoryId: category.id,
+                        })
+                      }
+                      placeholder="https://exempel.se"
+                      type="url"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Avbryt</Button>
+                  </DialogClose>
+                  <DialogClose asChild>
+                    <Button
+                      onClick={async () => {
+                        await handleAddTask();
+                      }}
+                      disabled={!newTask.title.trim() || saving}
+                    >
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4 mr-2" />
+                      )}
+                      Lägg till
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
+        ) : (
+          <div className="text-sm text-muted-foreground py-1">
+            {category.tasks.filter((t) => !t.isBuddyTask).length} uppgifter hopfällda
+          </div>
+        )}
       </div>
     </div>
   );
@@ -556,6 +581,12 @@ export default function TemplateEditPage() {
     link: "",
     isBuddyTask: false,
   });
+
+  // Collapse-state för kategorier
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+  const toggleCollapse = (categoryId: string) => {
+    setCollapsedCategories((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
+  };
 
   // Filtrera kategorier: visa endast vanliga kategorier (inte buddy) och som är tomma eller enbart innehåller icke-buddy-uppgifter
   const regularCategories = useMemo(
@@ -1395,6 +1426,8 @@ export default function TemplateEditPage() {
                     setNewTask={setNewTask}
                     handleAddTask={handleAddTask}
                     saving={saving}
+                    isCollapsed={!!collapsedCategories[category.id]}
+                    onToggleCollapse={() => toggleCollapse(category.id)}
                   />
                 ))}
               </div>

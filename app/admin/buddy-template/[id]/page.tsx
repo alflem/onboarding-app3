@@ -44,6 +44,8 @@ import {
   Save,
   RotateCcw,
   Loader2,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -231,6 +233,8 @@ function SortableBuddyCategory({
   setNewTask,
   handleAddTask,
   saving,
+  isCollapsed,
+  onToggleCollapse,
 }: {
   category: Category;
   editingCategoryId: string | null;
@@ -265,6 +269,8 @@ function SortableBuddyCategory({
   }) => void;
   handleAddTask: () => Promise<void>;
   saving: boolean;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }) {
   const {
     attributes,
@@ -306,6 +312,18 @@ function SortableBuddyCategory({
           <div {...attributes} {...listeners} className="cursor-grab">
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? "Expandera kategori" : "Fäll ihop kategori"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
           {editingCategoryId === category.id ? (
             <div className="flex items-center space-x-2">
               <Input
@@ -383,28 +401,34 @@ function SortableBuddyCategory({
       </div>
 
       <div className="space-y-3 ml-6 mt-2">
-        {buddyTasks.length > 0 ? (
-          <SortableContext
-            items={taskIds}
-            strategy={verticalListSortingStrategy}
-          >
-            {buddyTasks
-              .sort((a, b) => a.order - b.order)
-              .map((task) => (
-                <SortableTask
-                  key={task.id}
-                  task={task}
-                  categoryId={category.id}
-                  setEditingTaskId={setEditingTaskId}
-                  setEditingTask={setEditingTask}
-                  handleDeleteTask={handleDeleteTask}
-                />
-              ))}
-          </SortableContext>
+        {!isCollapsed ? (
+          buddyTasks.length > 0 ? (
+            <SortableContext
+              items={taskIds}
+              strategy={verticalListSortingStrategy}
+            >
+              {buddyTasks
+                .sort((a, b) => a.order - b.order)
+                .map((task) => (
+                  <SortableTask
+                    key={task.id}
+                    task={task}
+                    categoryId={category.id}
+                    setEditingTaskId={setEditingTaskId}
+                    setEditingTask={setEditingTask}
+                    handleDeleteTask={handleDeleteTask}
+                  />
+                ))}
+            </SortableContext>
+          ) : (
+            <p className="text-center py-4 text-muted-foreground">
+              Inga buddyuppgifter i denna kategori ännu. Lägg till en!
+            </p>
+          )
         ) : (
-          <p className="text-center py-4 text-muted-foreground">
-            Inga buddyuppgifter i denna kategori ännu. Lägg till en!
-          </p>
+          <div className="text-sm text-muted-foreground py-1">
+            {buddyTasks.length} buddyuppgifter hopfällda
+          </div>
         )}
 
         {/* Lägg till uppgift i denna kategori */}
@@ -544,6 +568,12 @@ export default function BuddyTemplatePage() {
     isBuddyTask: true, // Always true for buddy tasks
     categoryId: "",
   });
+
+  // Collapse-state för kategorier
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+  const toggleCollapse = (categoryId: string) => {
+    setCollapsedCategories((prev) => ({ ...prev, [categoryId]: !prev[categoryId] }));
+  };
 
   // Initiera drag sensors
   const sensors = useSensors(
@@ -1372,6 +1402,8 @@ export default function BuddyTemplatePage() {
                           setNewTask={setNewTask}
                           handleAddTask={handleAddTask}
                           saving={saving}
+                          isCollapsed={!!collapsedCategories[category.id]}
+                          onToggleCollapse={() => toggleCollapse(category.id)}
                         />
                       ))}
                   </SortableContext>
