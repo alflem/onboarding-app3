@@ -54,9 +54,12 @@ import {
 
   UserPlus,
   Trash2,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
+import { cn } from "@/lib/utils";
 import BuddyPreparationForm from "./components/BuddyPreparationForm";
 import {
   Select,
@@ -65,6 +68,19 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 // Typdefintioner
 type Checklist = {
@@ -141,7 +157,8 @@ export default function AdminPage() {
 
   // State för formulär
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-  const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
+  const [selectedBuddyIds, setSelectedBuddyIds] = useState<string[]>([]);
+  const [selectedBuddyIdForDetail, setSelectedBuddyIdForDetail] = useState<string | null>(null);
 
   // State för åtgärder
   const [submitting, setSubmitting] = useState(false);
@@ -370,43 +387,47 @@ export default function AdminPage() {
     }
   };
 
-  // Funktion för att tilldela en buddy
+  // Funktion för att tilldela buddies
   const handleAssignBuddy = async () => {
-    if (!selectedEmployeeId || !selectedBuddyId) return;
+    if (!selectedEmployeeId || selectedBuddyIds.length === 0) return;
 
     setSubmitting(true);
 
     try {
+      // Skapa alla buddy-tilldelningar i en request
       const response = await fetch(`/api/employees/${selectedEmployeeId}/buddy`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          buddyId: selectedBuddyId
+          mode: 'multi',
+          buddyId: selectedBuddyIds[0] || null,
+          additionalBuddyId: selectedBuddyIds.length > 1 ? selectedBuddyIds[1] : null
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Kunde inte tilldela buddy');
+        throw new Error('Kunde inte tilldela buddies');
       }
 
       await response.json();
 
       fetchUsers(); // Uppdatera listan med medarbetare
       setSelectedEmployeeId(null);
-      setSelectedBuddyId(null);
+      setSelectedBuddyIds([]);
       setBuddyDialogOpen(false);
 
-      toast.success("Buddy tilldelad", {
-        description: "Medarbetaren har tilldelats en buddy."
+      const buddyText = selectedBuddyIds.length === 1 ? 'en buddy' : `${selectedBuddyIds.length} buddies`;
+      toast.success("Buddies tilldelade", {
+        description: `Medarbetaren har tilldelats ${buddyText}.`
       });
 
       // Skicka event för att uppdatera header-navigationen
       window.dispatchEvent(new CustomEvent('buddy-status-changed'));
     } catch {
-      toast.error("Kunde inte tilldela buddy", {
-        description: "Ett fel uppstod vid tilldelning av buddy."
+      toast.error("Kunde inte tilldela buddies", {
+        description: "Ett fel uppstod vid tilldelning av buddies."
       });
     } finally {
       setSubmitting(false);
@@ -998,25 +1019,62 @@ export default function AdminPage() {
         <Dialog open={buddyDialogOpen} onOpenChange={setBuddyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tilldela buddy</DialogTitle>
+            <DialogTitle>Tilldela buddies</DialogTitle>
             <DialogDescription>
-              Välj en medarbetare som ska vara buddy för den valda medarbetaren.
+              Välj en eller flera medarbetare som ska vara buddies för den valda medarbetaren.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="buddy-select">Välj buddy</Label>
-              <select
-                id="buddy-select"
-                className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={selectedBuddyId || ""}
-                onChange={(e) => setSelectedBuddyId(e.target.value)}
-              >
-                <option value="" disabled>Välj en buddy...</option>
-                {buddies.map(buddy => (
-                  <option key={buddy.id} value={buddy.id}>{buddy.name}</option>
-                ))}
-              </select>
+              <Label htmlFor="buddy-select">Välj buddies</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {selectedBuddyIds.length === 0
+                      ? "Välj buddies..."
+                      : selectedBuddyIds.length === 1
+                      ? buddies.find(buddy => buddy.id === selectedBuddyIds[0])?.name
+                      : `${selectedBuddyIds.length} buddies valda`}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Sök buddies..." />
+                    <CommandList>
+                      <CommandEmpty>Inga buddies hittades.</CommandEmpty>
+                      <CommandGroup>
+                        {buddies.map((buddy) => (
+                          <CommandItem
+                            key={buddy.id}
+                            onSelect={() => {
+                              setSelectedBuddyIds(current => {
+                                if (current.includes(buddy.id)) {
+                                  return current.filter(id => id !== buddy.id);
+                                } else {
+                                  return [...current, buddy.id];
+                                }
+                              });
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedBuddyIds.includes(buddy.id) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {buddy.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           <DialogFooter>
@@ -1025,7 +1083,7 @@ export default function AdminPage() {
             </DialogClose>
             <Button
               onClick={handleAssignBuddy}
-              disabled={submitting || !selectedBuddyId}
+              disabled={submitting || selectedBuddyIds.length === 0}
             >
               {submitting ? (
                 <>
@@ -1203,8 +1261,8 @@ export default function AdminPage() {
                               <select
                                 id="detail-buddy-select"
                                 className="flex-1 flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                value={selectedBuddyId || ""}
-                                onChange={(e) => setSelectedBuddyId(e.target.value)}
+                                value={selectedBuddyIdForDetail || ""}
+                                onChange={(e) => setSelectedBuddyIdForDetail(e.target.value)}
                               >
                                 <option value="" disabled>Välj en buddy...</option>
                                 {buddies.map(buddy => (
@@ -1213,12 +1271,12 @@ export default function AdminPage() {
                               </select>
                               <Button
                                 onClick={() => {
-                                  if (selectedBuddyId) {
-                                    handleUpdateBuddyFromDetail(selectedBuddyId);
-                                    setSelectedBuddyId(null);
+                                  if (selectedBuddyIdForDetail) {
+                                    handleUpdateBuddyFromDetail(selectedBuddyIdForDetail);
+                                    setSelectedBuddyIdForDetail(null);
                                   }
                                 }}
-                                disabled={submitting || !selectedBuddyId}
+                                disabled={submitting || !selectedBuddyIdForDetail}
                               >
                                 {submitting ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1238,8 +1296,8 @@ export default function AdminPage() {
                             <select
                               id="change-buddy-select"
                               className="flex-1 flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              value={selectedBuddyId || ""}
-                              onChange={(e) => setSelectedBuddyId(e.target.value)}
+                              value={selectedBuddyIdForDetail || ""}
+                              onChange={(e) => setSelectedBuddyIdForDetail(e.target.value)}
                             >
                               <option value="" disabled>Välj ny buddy...</option>
                               {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id).map(buddy => (
@@ -1248,12 +1306,12 @@ export default function AdminPage() {
                             </select>
                             <Button
                               onClick={() => {
-                                if (selectedBuddyId) {
-                                  handleUpdateBuddyFromDetail(selectedBuddyId);
-                                  setSelectedBuddyId(null);
+                                if (selectedBuddyIdForDetail) {
+                                  handleUpdateBuddyFromDetail(selectedBuddyIdForDetail);
+                                  setSelectedBuddyIdForDetail(null);
                                 }
                               }}
-                              disabled={submitting || !selectedBuddyId}
+                              disabled={submitting || !selectedBuddyIdForDetail}
                             >
                               {submitting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
