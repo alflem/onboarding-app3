@@ -209,9 +209,6 @@ export default function ChecklistPage() {
       } else {
         throw new Error('Kunde inte uppdatera uppgiftsstatusen');
       }
-
-      // Uppdatering lyckades
-      toast.success(completed ? 'Uppgift markerad som slutförd' : 'Uppgift markerad som ej slutförd');
     } catch (error) {
       console.error('Error updating task status:', error);
       toast.error('Ett fel uppstod när uppgiftsstatusen skulle uppdateras');

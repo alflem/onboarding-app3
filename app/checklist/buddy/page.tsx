@@ -282,11 +282,6 @@ function BuddyChecklistContent() {
 
       if (response.ok) {
         const data = await response.json();
-        const employeeName = data.employee?.name || 'anställd';
-        toast.success(completed
-          ? `Uppgift markerad som slutförd för ${employeeName}`
-          : `Uppgift markerad som ej slutförd för ${employeeName}`
-        );
         return data;
       } else {
         throw new Error('Kunde inte uppdatera uppgiftsstatusen');
