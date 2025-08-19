@@ -54,12 +54,9 @@ import {
 
   UserPlus,
   Trash2,
-  Check,
-  ChevronsUpDown,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
-import { cn } from "@/lib/utils";
 import BuddyPreparationForm from "./components/BuddyPreparationForm";
 import {
   Select,
@@ -68,19 +65,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Typdefintioner
 type Checklist = {
@@ -1029,54 +1014,31 @@ export default function AdminPage() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="buddy-select">Välj buddies</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between"
-                  >
-                    {selectedBuddyIds.length === 0
-                      ? "Välj buddies..."
-                      : selectedBuddyIds.length === 1
-                      ? buddies.find(buddy => buddy.id === selectedBuddyIds[0])?.name
-                      : `${selectedBuddyIds.length} buddies valda`}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Sök buddies..." />
-                    <CommandList>
-                      <CommandEmpty>Inga buddies hittades.</CommandEmpty>
-                      <CommandGroup>
-                        {buddies.map((buddy) => (
-                          <CommandItem
-                            key={buddy.id}
-                            onSelect={() => {
-                              setSelectedBuddyIds(current => {
-                                if (current.includes(buddy.id)) {
-                                  return current.filter(id => id !== buddy.id);
-                                } else {
-                                  return [...current, buddy.id];
-                                }
-                              });
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedBuddyIds.includes(buddy.id) ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {buddy.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <div className="border rounded-md p-2 max-h-40 overflow-y-auto">
+                {buddies.map((buddy) => (
+                  <div key={buddy.id} className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id={`buddy-${buddy.id}`}
+                      checked={selectedBuddyIds.includes(buddy.id)}
+                      onCheckedChange={(checked) => {
+                        setSelectedBuddyIds(current => {
+                          if (checked) {
+                            return [...current, buddy.id];
+                          } else {
+                            return current.filter(id => id !== buddy.id);
+                          }
+                        });
+                      }}
+                    />
+                    <label
+                      htmlFor={`buddy-${buddy.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {buddy.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -1260,54 +1222,31 @@ export default function AdminPage() {
                           <div className="space-y-2">
                             <Label htmlFor="detail-buddy-select">Välj buddies</Label>
                             <div className="flex gap-2">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    className="flex-1 justify-between"
-                                  >
-                                    {selectedBuddyIdsForDetail.length === 0
-                                      ? "Välj buddies..."
-                                      : selectedBuddyIdsForDetail.length === 1
-                                      ? buddies.find(buddy => buddy.id === selectedBuddyIdsForDetail[0])?.name
-                                      : `${selectedBuddyIdsForDetail.length} buddies valda`}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-full p-0">
-                                  <Command>
-                                    <CommandInput placeholder="Sök buddies..." />
-                                    <CommandList>
-                                      <CommandEmpty>Inga buddies hittades.</CommandEmpty>
-                                      <CommandGroup>
-                                        {buddies.map((buddy) => (
-                                          <CommandItem
-                                            key={buddy.id}
-                                            onSelect={() => {
-                                              setSelectedBuddyIdsForDetail(current => {
-                                                if (current.includes(buddy.id)) {
-                                                  return current.filter(id => id !== buddy.id);
-                                                } else {
-                                                  return [...current, buddy.id];
-                                                }
-                                              });
-                                            }}
-                                          >
-                                            <Check
-                                              className={cn(
-                                                "mr-2 h-4 w-4",
-                                                selectedBuddyIdsForDetail.includes(buddy.id) ? "opacity-100" : "opacity-0"
-                                              )}
-                                            />
-                                            {buddy.name}
-                                          </CommandItem>
-                                        ))}
-                                      </CommandGroup>
-                                    </CommandList>
-                                  </Command>
-                                </PopoverContent>
-                              </Popover>
+                              <div className="border rounded-md p-2 max-h-40 overflow-y-auto flex-1">
+                                {buddies.map((buddy) => (
+                                  <div key={buddy.id} className="flex items-center space-x-2 py-1">
+                                    <Checkbox
+                                      id={`detail-buddy-${buddy.id}`}
+                                      checked={selectedBuddyIdsForDetail.includes(buddy.id)}
+                                      onCheckedChange={(checked) => {
+                                        setSelectedBuddyIdsForDetail(current => {
+                                          if (checked) {
+                                            return [...current, buddy.id];
+                                          } else {
+                                            return current.filter(id => id !== buddy.id);
+                                          }
+                                        });
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`detail-buddy-${buddy.id}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                    >
+                                      {buddy.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
                               <Button
                                 onClick={() => {
                                   if (selectedBuddyIdsForDetail.length > 0) {
@@ -1332,54 +1271,31 @@ export default function AdminPage() {
                         <div className="space-y-2">
                           <Label htmlFor="change-buddy-select">Lägg till fler buddies</Label>
                           <div className="flex gap-2">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className="flex-1 justify-between"
-                                >
-                                  {selectedBuddyIdsForDetail.length === 0
-                                    ? "Välj fler buddies..."
-                                    : selectedBuddyIdsForDetail.length === 1
-                                    ? buddies.find(buddy => buddy.id === selectedBuddyIdsForDetail[0])?.name
-                                    : `${selectedBuddyIdsForDetail.length} buddies valda`}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-full p-0">
-                                <Command>
-                                  <CommandInput placeholder="Sök buddies..." />
-                                  <CommandList>
-                                    <CommandEmpty>Inga buddies hittades.</CommandEmpty>
-                                    <CommandGroup>
-                                      {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id).map((buddy) => (
-                                        <CommandItem
-                                          key={buddy.id}
-                                          onSelect={() => {
-                                            setSelectedBuddyIdsForDetail(current => {
-                                              if (current.includes(buddy.id)) {
-                                                return current.filter(id => id !== buddy.id);
-                                              } else {
-                                                return [...current, buddy.id];
-                                              }
-                                            });
-                                          }}
-                                        >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              selectedBuddyIdsForDetail.includes(buddy.id) ? "opacity-100" : "opacity-0"
-                                            )}
-                                          />
-                                          {buddy.name}
-                                        </CommandItem>
-                                      ))}
-                                    </CommandGroup>
-                                  </CommandList>
-                                </Command>
-                              </PopoverContent>
-                            </Popover>
+                            <div className="border rounded-md p-2 max-h-40 overflow-y-auto flex-1">
+                              {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id).map((buddy) => (
+                                <div key={buddy.id} className="flex items-center space-x-2 py-1">
+                                  <Checkbox
+                                    id={`add-buddy-${buddy.id}`}
+                                    checked={selectedBuddyIdsForDetail.includes(buddy.id)}
+                                    onCheckedChange={(checked) => {
+                                      setSelectedBuddyIdsForDetail(current => {
+                                        if (checked) {
+                                          return [...current, buddy.id];
+                                        } else {
+                                          return current.filter(id => id !== buddy.id);
+                                        }
+                                      });
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor={`add-buddy-${buddy.id}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                  >
+                                    {buddy.name}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
                             <Button
                               onClick={() => {
                                 if (selectedBuddyIdsForDetail.length > 0) {
