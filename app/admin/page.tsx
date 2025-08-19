@@ -65,7 +65,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+
 
 // Typdefintioner
 type Checklist = {
@@ -1014,30 +1014,56 @@ export default function AdminPage() {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="buddy-select">Välj buddies</Label>
-              <div className="border rounded-md p-2 max-h-40 overflow-y-auto">
-                {buddies.map((buddy) => (
-                  <div key={buddy.id} className="flex items-center space-x-2 py-1">
-                    <Checkbox
-                      id={`buddy-${buddy.id}`}
-                      checked={selectedBuddyIds.includes(buddy.id)}
-                      onCheckedChange={(checked) => {
-                        setSelectedBuddyIds(current => {
-                          if (checked) {
-                            return [...current, buddy.id];
-                          } else {
-                            return current.filter(id => id !== buddy.id);
-                          }
-                        });
-                      }}
-                    />
-                    <label
-                      htmlFor={`buddy-${buddy.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {buddy.name}
-                    </label>
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  {selectedBuddyIds.length === 0
+                    ? "Inga buddies valda"
+                    : selectedBuddyIds.length === 1
+                    ? `Vald: ${buddies.find(b => b.id === selectedBuddyIds[0])?.name}`
+                    : `${selectedBuddyIds.length} buddies valda`}
+                </div>
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    if (value && !selectedBuddyIds.includes(value)) {
+                      setSelectedBuddyIds(current => [...current, value]);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Välj buddy att lägga till..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buddies
+                      .filter(buddy => !selectedBuddyIds.includes(buddy.id))
+                      .map(buddy => (
+                        <SelectItem key={buddy.id} value={buddy.id}>
+                          {buddy.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+
+                {selectedBuddyIds.length > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Valda buddies:</p>
+                    {selectedBuddyIds.map(buddyId => {
+                      const buddy = buddies.find(b => b.id === buddyId);
+                      return (
+                        <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
+                          <span className="text-sm">{buddy?.name}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedBuddyIds(current => current.filter(id => id !== buddyId))}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -1222,30 +1248,56 @@ export default function AdminPage() {
                           <div className="space-y-2">
                             <Label htmlFor="detail-buddy-select">Välj buddies</Label>
                             <div className="flex gap-2">
-                              <div className="border rounded-md p-2 max-h-40 overflow-y-auto flex-1">
-                                {buddies.map((buddy) => (
-                                  <div key={buddy.id} className="flex items-center space-x-2 py-1">
-                                    <Checkbox
-                                      id={`detail-buddy-${buddy.id}`}
-                                      checked={selectedBuddyIdsForDetail.includes(buddy.id)}
-                                      onCheckedChange={(checked) => {
-                                        setSelectedBuddyIdsForDetail(current => {
-                                          if (checked) {
-                                            return [...current, buddy.id];
-                                          } else {
-                                            return current.filter(id => id !== buddy.id);
-                                          }
-                                        });
-                                      }}
-                                    />
-                                    <label
-                                      htmlFor={`detail-buddy-${buddy.id}`}
-                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                    >
-                                      {buddy.name}
-                                    </label>
+                              <div className="space-y-2 flex-1">
+                                <div className="text-sm text-muted-foreground">
+                                  {selectedBuddyIdsForDetail.length === 0
+                                    ? "Inga buddies valda"
+                                    : selectedBuddyIdsForDetail.length === 1
+                                    ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
+                                    : `${selectedBuddyIdsForDetail.length} buddies valda`}
+                                </div>
+                                <Select
+                                  value=""
+                                  onValueChange={(value) => {
+                                    if (value && !selectedBuddyIdsForDetail.includes(value)) {
+                                      setSelectedBuddyIdsForDetail(current => [...current, value]);
+                                    }
+                                  }}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Välj buddy att lägga till..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {buddies
+                                      .filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id))
+                                      .map(buddy => (
+                                        <SelectItem key={buddy.id} value={buddy.id}>
+                                          {buddy.name}
+                                        </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                </Select>
+
+                                {selectedBuddyIdsForDetail.length > 0 && (
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-medium">Valda buddies:</p>
+                                    {selectedBuddyIdsForDetail.map(buddyId => {
+                                      const buddy = buddies.find(b => b.id === buddyId);
+                                      return (
+                                        <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
+                                          <span className="text-sm">{buddy?.name}</span>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setSelectedBuddyIdsForDetail(current => current.filter(id => id !== buddyId))}
+                                          >
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                ))}
+                                )}
                               </div>
                               <Button
                                 onClick={() => {
@@ -1271,30 +1323,56 @@ export default function AdminPage() {
                         <div className="space-y-2">
                           <Label htmlFor="change-buddy-select">Lägg till fler buddies</Label>
                           <div className="flex gap-2">
-                            <div className="border rounded-md p-2 max-h-40 overflow-y-auto flex-1">
-                              {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id).map((buddy) => (
-                                <div key={buddy.id} className="flex items-center space-x-2 py-1">
-                                  <Checkbox
-                                    id={`add-buddy-${buddy.id}`}
-                                    checked={selectedBuddyIdsForDetail.includes(buddy.id)}
-                                    onCheckedChange={(checked) => {
-                                      setSelectedBuddyIdsForDetail(current => {
-                                        if (checked) {
-                                          return [...current, buddy.id];
-                                        } else {
-                                          return current.filter(id => id !== buddy.id);
-                                        }
-                                      });
-                                    }}
-                                  />
-                                  <label
-                                    htmlFor={`add-buddy-${buddy.id}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                  >
-                                    {buddy.name}
-                                  </label>
+                            <div className="space-y-2 flex-1">
+                              <div className="text-sm text-muted-foreground">
+                                {selectedBuddyIdsForDetail.length === 0
+                                  ? "Inga buddies valda"
+                                  : selectedBuddyIdsForDetail.length === 1
+                                  ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
+                                  : `${selectedBuddyIdsForDetail.length} buddies valda`}
+                              </div>
+                              <Select
+                                value=""
+                                onValueChange={(value) => {
+                                  if (value && !selectedBuddyIdsForDetail.includes(value)) {
+                                    setSelectedBuddyIdsForDetail(current => [...current, value]);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Välj buddy att lägga till..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {buddies
+                                    .filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id))
+                                    .map(buddy => (
+                                      <SelectItem key={buddy.id} value={buddy.id}>
+                                        {buddy.name}
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+
+                              {selectedBuddyIdsForDetail.length > 0 && (
+                                <div className="space-y-1">
+                                  <p className="text-sm font-medium">Valda buddies:</p>
+                                  {selectedBuddyIdsForDetail.map(buddyId => {
+                                    const buddy = buddies.find(b => b.id === buddyId);
+                                    return (
+                                      <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
+                                        <span className="text-sm">{buddy?.name}</span>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setSelectedBuddyIdsForDetail(current => current.filter(id => id !== buddyId))}
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              ))}
+                              )}
                             </div>
                             <Button
                               onClick={() => {
