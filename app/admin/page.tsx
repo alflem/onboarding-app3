@@ -1022,27 +1022,6 @@ export default function AdminPage() {
                     ? `Vald: ${buddies.find(b => b.id === selectedBuddyIds[0])?.name}`
                     : `${selectedBuddyIds.length} buddies valda`}
                 </div>
-                <Select
-                  value=""
-                  onValueChange={(value) => {
-                    if (value && !selectedBuddyIds.includes(value)) {
-                      setSelectedBuddyIds(current => [...current, value]);
-                    }
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Välj buddy att lägga till..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {buddies
-                      .filter(buddy => !selectedBuddyIds.includes(buddy.id))
-                      .map(buddy => (
-                        <SelectItem key={buddy.id} value={buddy.id}>
-                          {buddy.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
 
                 {selectedBuddyIds.length > 0 && (
                   <div className="space-y-1">
@@ -1062,6 +1041,28 @@ export default function AdminPage() {
                         </div>
                       );
                     })}
+                  </div>
+                )}
+
+                {buddies.filter(buddy => !selectedBuddyIds.includes(buddy.id)).length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Lägg till fler buddies:</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {buddies
+                        .filter(buddy => !selectedBuddyIds.includes(buddy.id))
+                        .map(buddy => (
+                          <Button
+                            key={buddy.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedBuddyIds(current => [...current, buddy.id])}
+                            className="justify-start"
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            {buddy.name}
+                          </Button>
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -1256,27 +1257,6 @@ export default function AdminPage() {
                                     ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
                                     : `${selectedBuddyIdsForDetail.length} buddies valda`}
                                 </div>
-                                <Select
-                                  value=""
-                                  onValueChange={(value) => {
-                                    if (value && !selectedBuddyIdsForDetail.includes(value)) {
-                                      setSelectedBuddyIdsForDetail(current => [...current, value]);
-                                    }
-                                  }}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Välj buddy att lägga till..." />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {buddies
-                                      .filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id))
-                                      .map(buddy => (
-                                        <SelectItem key={buddy.id} value={buddy.id}>
-                                          {buddy.name}
-                                        </SelectItem>
-                                      ))}
-                                  </SelectContent>
-                                </Select>
 
                                 {selectedBuddyIdsForDetail.length > 0 && (
                                   <div className="space-y-1">
@@ -1296,6 +1276,28 @@ export default function AdminPage() {
                                         </div>
                                       );
                                     })}
+                                  </div>
+                                )}
+
+                                {buddies.filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id)).length > 0 && (
+                                  <div className="space-y-2">
+                                    <p className="text-sm font-medium">Lägg till fler buddies:</p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                      {buddies
+                                        .filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id))
+                                        .map(buddy => (
+                                          <Button
+                                            key={buddy.id}
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setSelectedBuddyIdsForDetail(current => [...current, buddy.id])}
+                                            className="justify-start"
+                                          >
+                                            <UserPlus className="h-4 w-4 mr-2" />
+                                            {buddy.name}
+                                          </Button>
+                                        ))}
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -1331,27 +1333,6 @@ export default function AdminPage() {
                                   ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
                                   : `${selectedBuddyIdsForDetail.length} buddies valda`}
                               </div>
-                              <Select
-                                value=""
-                                onValueChange={(value) => {
-                                  if (value && !selectedBuddyIdsForDetail.includes(value)) {
-                                    setSelectedBuddyIdsForDetail(current => [...current, value]);
-                                  }
-                                }}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Välj buddy att lägga till..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {buddies
-                                    .filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id))
-                                    .map(buddy => (
-                                      <SelectItem key={buddy.id} value={buddy.id}>
-                                        {buddy.name}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
 
                               {selectedBuddyIdsForDetail.length > 0 && (
                                 <div className="space-y-1">
@@ -1371,6 +1352,28 @@ export default function AdminPage() {
                                       </div>
                                     );
                                   })}
+                                </div>
+                              )}
+
+                              {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id)).length > 0 && (
+                                <div className="space-y-2">
+                                  <p className="text-sm font-medium">Lägg till fler buddies:</p>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {buddies
+                                      .filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id))
+                                      .map(buddy => (
+                                        <Button
+                                          key={buddy.id}
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => setSelectedBuddyIdsForDetail(current => [...current, buddy.id])}
+                                          className="justify-start"
+                                        >
+                                          <UserPlus className="h-4 w-4 mr-2" />
+                                          {buddy.name}
+                                        </Button>
+                                      ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
