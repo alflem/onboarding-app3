@@ -44,8 +44,7 @@ import {
   Save,
   ClipboardCheck,
   Loader2,
-  RotateCcw
-  , ChevronDown, ChevronRight
+  ChevronDown, ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -632,38 +631,7 @@ export default function TemplateEditPage() {
     }
   }, [id]);
 
-  // Funktion för att återställa checklistan till standardmall
-  const resetChecklist = useCallback(async () => {
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/templates/${id}/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
 
-      if (!response.ok) {
-        throw new Error('Kunde inte återställa checklista');
-      }
-
-      const result = await response.json();
-
-      // Uppdatera checklistan med den nya data
-      setChecklist(result.data);
-
-      toast.success("Checklista återställd", {
-        description: "Checklistan har återställts till standardmallen från organization_seeder."
-      });
-    } catch (error) {
-      console.error("Fel vid återställning av checklista:", error);
-      toast.error("Kunde inte återställa checklista", {
-        description: "Ett fel uppstod vid återställning av checklista."
-      });
-    } finally {
-      setSaving(false);
-    }
-  }, [id]);
 
   // Hämta organisationsinställningar
   const fetchOrganizationSettings = useCallback(async () => {

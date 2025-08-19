@@ -51,7 +51,7 @@ import {
   UserX,
   UserCheck,
   BarChart,
-  RotateCcw,
+
   UserPlus,
   Trash2,
 } from "lucide-react";
@@ -220,43 +220,7 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Funktion för att återställa checklistan till standardmall
-  const resetChecklist = useCallback(async () => {
-    if (!checklist) return;
 
-    try {
-      setSubmitting(true);
-      const response = await fetch(`/api/templates/${checklist.id}/reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Kunde inte återställa checklista');
-      }
-
-      const result = await response.json();
-
-      // Uppdatera checklistan med den nya data
-      setChecklist({
-        ...checklist,
-        categoriesCount: result.data.categories.length,
-        tasksCount: result.data.categories.reduce((sum: number, cat: Category) => sum + cat.tasks.length, 0)
-      });
-
-      toast.success("Checklista återställd", {
-        description: "Checklistan har återställts till standardmallen från organization_seeder."
-      });
-    } catch {
-      toast.error("Kunde inte återställa checklista", {
-        description: "Ett fel uppstod vid återställning av checklista."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [checklist]);
 
   // Funktion för att hämta eller skapa en checklista
   const fetchChecklist = useCallback(async () => {

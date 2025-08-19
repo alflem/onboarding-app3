@@ -42,7 +42,7 @@ import {
   GripVertical,
   ArrowLeft,
   Save,
-  RotateCcw,
+
   Loader2,
   ChevronDown,
   ChevronRight,
@@ -1155,40 +1155,7 @@ export default function BuddyTemplatePage() {
     }
   };
 
-  // Reset buddy checklist to standard template
-  const resetBuddyChecklist = async () => {
-    if (!checklist) return;
 
-    try {
-      setSaving(true);
-      const response = await fetch(`/api/templates/${id}/reset-buddy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Kunde inte återställa buddy-checklista');
-      }
-
-      const result = await response.json();
-
-      // Uppdatera checklistan med den nya data
-      setChecklist(result.data);
-
-      toast.success("Buddy-checklista återställd", {
-        description: "Buddy-checklistan har återställts till standardmallen med svenska processer."
-      });
-    } catch (error) {
-      console.error("Fel vid återställning av buddy-checklista:", error);
-      toast.error("Kunde inte återställa buddy-checklista", {
-        description: "Ett fel uppstod vid återställning av buddy-checklista."
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Loading state
   if (loading) {
