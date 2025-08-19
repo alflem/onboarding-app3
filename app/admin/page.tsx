@@ -387,8 +387,7 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           mode: 'multi',
-          buddyId: selectedBuddyIds[0] || null,
-          additionalBuddyId: selectedBuddyIds.length > 1 ? selectedBuddyIds[1] : null
+          buddyIds: selectedBuddyIds
         }),
       });
 
@@ -433,8 +432,7 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           mode: 'multi',
-          buddyId: buddyId,
-          additionalBuddyId: null
+          buddyIds: buddyId ? [buddyId] : []
         }),
       });
 

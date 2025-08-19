@@ -35,7 +35,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     // Hämta och validera begäransdata
     const body = await request.json();
-    const { buddyId, additionalBuddyId, mode } = body as { buddyId?: string | null; additionalBuddyId?: string | null; mode?: 'single' | 'multi' };
+    const { buddyId, additionalBuddyId, mode, buddyIds } = body as {
+      buddyId?: string | null;
+      additionalBuddyId?: string | null;
+      mode?: 'single' | 'multi';
+      buddyIds?: string[];
+    };
 
     // buddyId kan vara null för att ta bort buddy
     if (buddyId !== undefined && buddyId !== null && (typeof buddyId !== 'string' || buddyId.trim() === '')) {
@@ -117,26 +122,47 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     let updatedEmployee;
     if (mode === 'multi') {
-      // Maintain legacy single buddyId if provided; else leave as is
-      if (buddyId !== undefined) {
-        updatedEmployee = await prisma.user.update({ where: { id }, data: { buddyId }, include: { buddy: { select: { id: true, name: true, email: true } } } });
-      } else {
-        updatedEmployee = await prisma.user.findUnique({ where: { id }, include: { buddy: true } });
-      }
-      // Upsert BuddyAssignment(s)
-      const toCreate: string[] = [];
-      if (buddyId) toCreate.push(buddyId);
-      if (additionalBuddyId) toCreate.push(additionalBuddyId);
-      for (const bId of toCreate) {
-        await prisma.buddyAssignment.upsert({
-          where: { userId_buddyId: { userId: id, buddyId: bId } as any },
-          update: {},
-          create: { userId: id, buddyId: bId }
-        } as any);
-      }
-      // If buddyId === null and no additional specified, clear all assignments
-      if (buddyId === null && !additionalBuddyId) {
+      // Handle multiple buddies via buddyIds array
+      if (buddyIds && Array.isArray(buddyIds)) {
+        // Clear existing assignments
         await prisma.buddyAssignment.deleteMany({ where: { userId: id } });
+
+        // Create new assignments for all selected buddies
+        for (const bId of buddyIds) {
+          await prisma.buddyAssignment.create({
+            data: { userId: id, buddyId: bId }
+          });
+        }
+
+        // Set the first buddy as the primary buddy for legacy compatibility
+        const primaryBuddyId = buddyIds.length > 0 ? buddyIds[0] : null;
+        updatedEmployee = await prisma.user.update({
+          where: { id },
+          data: { buddyId: primaryBuddyId },
+          include: { buddy: { select: { id: true, name: true, email: true } } }
+        });
+      } else {
+        // Legacy support for buddyId + additionalBuddyId
+        if (buddyId !== undefined) {
+          updatedEmployee = await prisma.user.update({ where: { id }, data: { buddyId }, include: { buddy: { select: { id: true, name: true, email: true } } } });
+        } else {
+          updatedEmployee = await prisma.user.findUnique({ where: { id }, include: { buddy: true } });
+        }
+        // Upsert BuddyAssignment(s)
+        const toCreate: string[] = [];
+        if (buddyId) toCreate.push(buddyId);
+        if (additionalBuddyId) toCreate.push(additionalBuddyId);
+        for (const bId of toCreate) {
+          await prisma.buddyAssignment.upsert({
+            where: { userId_buddyId: { userId: id, buddyId: bId } as any },
+            update: {},
+            create: { userId: id, buddyId: bId }
+          } as any);
+        }
+        // If buddyId === null and no additional specified, clear all assignments
+        if (buddyId === null && !additionalBuddyId) {
+          await prisma.buddyAssignment.deleteMany({ where: { userId: id } });
+        }
       }
     } else {
       // Default: single mode
