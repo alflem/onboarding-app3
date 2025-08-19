@@ -1,6 +1,7 @@
 "use client"
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -18,6 +19,13 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Info, Users, HelpCircle, ExternalLink, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/language-context";
@@ -42,6 +50,11 @@ interface Category {
 
 interface ChecklistData {
   categories: Category[];
+  employee?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 interface BuddyUser {
@@ -83,8 +96,11 @@ interface BuddyRelationships {
   };
 }
 
-export default function BuddyChecklistPage() {
+function BuddyChecklistContent() {
   const { data: session, status } = useSession({ required: true });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [checklist, setChecklist] = useState<ChecklistData>({ categories: [] });
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,6 +108,7 @@ export default function BuddyChecklistPage() {
   const [buddyEnabled, setBuddyEnabled] = useState<boolean | null>(null);
   const [openAccordionItems, setOpenAccordionItems] = useState<string[]>([]);
   const [buddyRelationships, setBuddyRelationships] = useState<BuddyRelationships | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
 
   // Språkstöd
   const { language } = useLanguage();
@@ -136,27 +153,32 @@ export default function BuddyChecklistPage() {
     }
   }, [session?.user?.id]);
 
-  const fetchChecklist = useCallback(async () => {
+  const fetchChecklist = useCallback(async (employeeId?: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/checklist`);
+
+      if (!employeeId) {
+        // Om ingen anställd är vald, visa tom checklista
+        setChecklist({ categories: [] });
+        setProgress(0);
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/checklist/employee/${employeeId}`);
 
       if (!response.ok) {
-        throw new Error('Kunde inte hämta checklistan');
+        if (response.status === 403) {
+          toast.error('Du har inte behörighet att se denna checklista');
+        } else {
+          throw new Error('Kunde inte hämta checklistan');
+        }
+        return;
       }
 
       const data = await response.json();
-
-      // Filter to only include categories with buddy tasks
-      const buddyData = {
-        categories: data.categories.map((category: Category) => ({
-          ...category,
-          tasks: category.tasks.filter((task: Task) => task.isBuddyTask)
-        })).filter((category: Category) => category.tasks.length > 0)
-      };
-
-      setChecklist(buddyData);
-      calculateProgress(buddyData.categories);
+      setChecklist(data);
+      calculateProgress(data.categories);
     } catch (error) {
       console.error('Error fetching checklist:', error);
       toast.error('Ett fel uppstod när checklistan skulle hämtas');
@@ -178,12 +200,36 @@ export default function BuddyChecklistPage() {
     }
   }, []);
 
+  // Hantera URL-parametrar och initial laddning
   useEffect(() => {
     if (status === "authenticated" && session?.user?.id) {
-      fetchChecklist();
       fetchBuddyRelationships();
     }
-  }, [status, session, fetchChecklist, fetchBuddyRelationships]);
+  }, [status, session, fetchBuddyRelationships]);
+
+  // Hantera URL-parameter för anställd
+  useEffect(() => {
+    const employeeParam = searchParams.get('employee');
+    if (employeeParam) {
+      setSelectedEmployeeId(employeeParam);
+    }
+  }, [searchParams]);
+
+  // Hämta checklista när anställd väljs
+  useEffect(() => {
+    if (selectedEmployeeId && buddyRelationships) {
+      // Kontrollera att den valda anställda finns i buddy-relationerna
+      const isValidEmployee = buddyRelationships.activeUsers.some(user => user.id === selectedEmployeeId);
+      if (isValidEmployee) {
+        fetchChecklist(selectedEmployeeId);
+      } else {
+        setSelectedEmployeeId(null);
+        toast.error('Du har inte behörighet att se denna anställds checklista');
+      }
+    } else if (selectedEmployeeId === null) {
+      fetchChecklist();
+    }
+  }, [selectedEmployeeId, buddyRelationships, fetchChecklist]);
 
   const calculateProgress = (categories: Category[]) => {
     let completed = 0;
@@ -202,6 +248,11 @@ export default function BuddyChecklistPage() {
   };
 
   const handleTaskChange = async (taskId: string, completed: boolean) => {
+    if (!selectedEmployeeId) {
+      toast.error('Ingen anställd vald');
+      return;
+    }
+
     try {
       // Uppdatera UI optimistiskt
       const updatedChecklist = {
@@ -217,8 +268,8 @@ export default function BuddyChecklistPage() {
       setChecklist(updatedChecklist);
       calculateProgress(updatedChecklist.categories);
 
-      // Skicka uppdatering till servern
-      const response = await fetch(`/api/tasks/${taskId}/progress`, {
+      // Skicka uppdatering till servern för den specifika anställda
+      const response = await fetch(`/api/buddy/tasks/${taskId}/progress/${selectedEmployeeId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,20 +279,39 @@ export default function BuddyChecklistPage() {
 
       if (response.ok) {
         const data = await response.json();
+        const employeeName = data.employee?.name || 'anställd';
+        toast.success(completed
+          ? `Uppgift markerad som slutförd för ${employeeName}`
+          : `Uppgift markerad som ej slutförd för ${employeeName}`
+        );
         return data;
       } else {
         throw new Error('Kunde inte uppdatera uppgiftsstatusen');
       }
-
-      // Uppdatering lyckades
-      toast.success(completed ? 'Uppgift markerad som slutförd' : 'Uppgift markerad som ej slutförd');
     } catch (error) {
       console.error('Error updating task status:', error);
       toast.error('Ett fel uppstod när uppgiftsstatusen skulle uppdateras');
 
       // Återställ UI till tidigare tillstånd genom att hämta data igen
-      fetchChecklist();
+      fetchChecklist(selectedEmployeeId);
     }
+  };
+
+  // Hantera val av anställd
+  const handleEmployeeSelect = (employeeId: string) => {
+    setSelectedEmployeeId(employeeId);
+    // Uppdatera URL utan att ladda om sidan
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('employee', employeeId);
+    router.push(newUrl.toString(), { scroll: false });
+  };
+
+  // Rensa val av anställd
+  const handleClearEmployeeSelection = () => {
+    setSelectedEmployeeId(null);
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.delete('employee');
+    router.push(newUrl.toString(), { scroll: false });
   };
 
   function isCompletedBuddyPreparation(
@@ -330,29 +400,84 @@ export default function BuddyChecklistPage() {
         </Card>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
-        <Card className="w-full md:w-64 lg:w-80">
-          <CardHeader className="pb-2">
-            <CardTitle>{t('buddy_progress')}</CardTitle>
+      {/* Employee Selector */}
+      {buddyRelationships && buddyRelationships.activeUsers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Välj anställd
+            </CardTitle>
             <CardDescription>
-              {t('completed_buddy_tasks_desc', { progress: progress.toString() })}
+              Välj vilken anställd du vill se buddy-checklistan för
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Progress value={progress} className="h-4" />
-
-            <div className="mt-6 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>{t('completed_buddy_tasks')}</span>
-                <Badge variant="outline" className="bg-secondary/10">
-                  {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} {t('of')} {checklist.categories.flatMap(c => c.tasks).length}
-                </Badge>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Select value={selectedEmployeeId || ""} onValueChange={handleEmployeeSelect}>
+                <SelectTrigger className="w-full sm:w-[300px]">
+                  <SelectValue placeholder="Välj en anställd..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {buddyRelationships.activeUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{user.name}</span>
+                        <span className="text-sm text-muted-foreground">{user.email}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedEmployeeId && (
+                <Button variant="outline" onClick={handleClearEmployeeSelection}>
+                  Rensa val
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
+      )}
 
-        <div className="w-full space-y-4">
+      {/* Message when no employee is selected */}
+      {buddyRelationships && buddyRelationships.activeUsers.length > 0 && !selectedEmployeeId && (
+        <Card>
+          <CardContent className="text-center py-8">
+            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium">Välj en anställd för att se deras buddy-checklista</p>
+            <p className="text-sm text-muted-foreground">Du är buddy för {buddyRelationships.activeUsers.length} person(er)</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Progress and Checklist - only show when employee is selected */}
+      {selectedEmployeeId && checklist.employee && (
+        <div className="flex flex-col md:flex-row gap-4 items-start justify-between">
+          <Card className="w-full md:w-64 lg:w-80">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5" />
+                Progress för {checklist.employee.name}
+              </CardTitle>
+              <CardDescription>
+                Slutförda buddy-uppgifter: {progress}%
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Progress value={progress} className="h-4" />
+
+              <div className="mt-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Slutförda uppgifter</span>
+                  <Badge variant="outline" className="bg-secondary/10">
+                    {checklist.categories.flatMap(c => c.tasks).filter(t => t.completed).length} av {checklist.categories.flatMap(c => c.tasks).length}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="w-full space-y-4">
           {checklist.categories.length > 0 ? (
             <Accordion type="multiple" value={openAccordionItems} className="w-full" onValueChange={handleAccordionChange}>
               {checklist.categories.map((category) => (
@@ -428,8 +553,9 @@ export default function BuddyChecklistPage() {
               <p className="text-muted-foreground">{t('no_buddy_tasks_found')}</p>
             </div>
           )}
+          </div>
         </div>
-      </div>
+      )}
 
       <Card>
         <CardHeader>
@@ -470,5 +596,13 @@ export default function BuddyChecklistPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function BuddyChecklistPage() {
+  return (
+    <Suspense fallback={<div className="container p-8 flex justify-center">Laddar...</div>}>
+      <BuddyChecklistContent />
+    </Suspense>
   );
 }
