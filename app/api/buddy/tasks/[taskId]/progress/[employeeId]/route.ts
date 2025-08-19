@@ -105,23 +105,46 @@ export async function POST(request: NextRequest, context: RouteContext) {
       };
     }
 
-    // Uppdatera eller skapa framsteg för den specifika anställda
-    const taskProgress = await prisma.taskProgress.upsert({
-      where: {
-        userId_taskId: {
+    // Uppdatera eller skapa framsteg för den specifika personen
+    let taskProgress;
+
+    if (employee) {
+      // För anställda användare - använd vanliga TaskProgress
+      taskProgress = await prisma.taskProgress.upsert({
+        where: {
+          userId_taskId: {
+            userId: employeeId,
+            taskId,
+          },
+        },
+        update: {
+          completed,
+        },
+        create: {
           userId: employeeId,
           taskId,
+          completed,
         },
-      },
-      update: {
-        completed,
-      },
-      create: {
-        userId: employeeId,
-        taskId,
-        completed,
-      },
-    });
+      });
+    } else if (preparation) {
+      // För buddyförberedelser - använd BuddyPreparationTaskProgress
+      taskProgress = await prisma.buddyPreparationTaskProgress.upsert({
+        where: {
+          preparationId_taskId: {
+            preparationId: employeeId,
+            taskId,
+          },
+        },
+        update: {
+          completed,
+        },
+        create: {
+          preparationId: employeeId,
+          taskId,
+          completed,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

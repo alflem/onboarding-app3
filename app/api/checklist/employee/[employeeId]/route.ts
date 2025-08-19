@@ -109,14 +109,29 @@ export async function GET(request: NextRequest, context: RouteContext) {
     }
 
     // Hämta framsteg för den specifika personen
-    const taskProgress = await prisma.taskProgress.findMany({
-      where: { userId: employeeId },
-      select: { taskId: true, completed: true }
-    });
+    let completedTaskIds = new Set<string>();
 
-    const completedTaskIds = new Set(
-      taskProgress.filter(p => p.completed).map(p => p.taskId)
-    );
+    if (employee) {
+      // För anställda användare - använd vanliga TaskProgress
+      const taskProgress = await prisma.taskProgress.findMany({
+        where: { userId: employeeId },
+        select: { taskId: true, completed: true }
+      });
+
+      completedTaskIds = new Set(
+        taskProgress.filter(p => p.completed).map(p => p.taskId)
+      );
+    } else if (preparation) {
+      // För buddyförberedelser - använd BuddyPreparationTaskProgress
+      const preparationTaskProgress = await prisma.buddyPreparationTaskProgress.findMany({
+        where: { preparationId: employeeId },
+        select: { taskId: true, completed: true }
+      });
+
+      completedTaskIds = new Set(
+        preparationTaskProgress.filter(p => p.completed).map(p => p.taskId)
+      );
+    }
 
     // Filtrera kategorier som har buddy-uppgifter och lägg till completion status
     const categoriesWithTasks = checklist.categories

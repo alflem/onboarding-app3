@@ -59,6 +59,11 @@ export type Task = $Result.DefaultSelection<Prisma.$TaskPayload>
  */
 export type TaskProgress = $Result.DefaultSelection<Prisma.$TaskProgressPayload>
 /**
+ * Model BuddyPreparationTaskProgress
+ * 
+ */
+export type BuddyPreparationTaskProgress = $Result.DefaultSelection<Prisma.$BuddyPreparationTaskProgressPayload>
+/**
  * Model PreAssignedRole
  * 
  */
@@ -311,6 +316,16 @@ export class PrismaClient<
     * ```
     */
   get taskProgress(): Prisma.TaskProgressDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.buddyPreparationTaskProgress`: Exposes CRUD operations for the **BuddyPreparationTaskProgress** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BuddyPreparationTaskProgresses
+    * const buddyPreparationTaskProgresses = await prisma.buddyPreparationTaskProgress.findMany()
+    * ```
+    */
+  get buddyPreparationTaskProgress(): Prisma.BuddyPreparationTaskProgressDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.preAssignedRole`: Exposes CRUD operations for the **PreAssignedRole** model.
@@ -800,6 +815,7 @@ export namespace Prisma {
     Category: 'Category',
     Task: 'Task',
     TaskProgress: 'TaskProgress',
+    BuddyPreparationTaskProgress: 'BuddyPreparationTaskProgress',
     PreAssignedRole: 'PreAssignedRole',
     BuddyPreparation: 'BuddyPreparation',
     BuddyAssignment: 'BuddyAssignment',
@@ -822,7 +838,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "account" | "session" | "verificationToken" | "organization" | "checklist" | "category" | "task" | "taskProgress" | "preAssignedRole" | "buddyPreparation" | "buddyAssignment" | "buddyPreparationBuddy"
+      modelProps: "user" | "account" | "session" | "verificationToken" | "organization" | "checklist" | "category" | "task" | "taskProgress" | "buddyPreparationTaskProgress" | "preAssignedRole" | "buddyPreparation" | "buddyAssignment" | "buddyPreparationBuddy"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1492,6 +1508,80 @@ export namespace Prisma {
           }
         }
       }
+      BuddyPreparationTaskProgress: {
+        payload: Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>
+        fields: Prisma.BuddyPreparationTaskProgressFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BuddyPreparationTaskProgressFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BuddyPreparationTaskProgressFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          findFirst: {
+            args: Prisma.BuddyPreparationTaskProgressFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BuddyPreparationTaskProgressFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          findMany: {
+            args: Prisma.BuddyPreparationTaskProgressFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>[]
+          }
+          create: {
+            args: Prisma.BuddyPreparationTaskProgressCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          createMany: {
+            args: Prisma.BuddyPreparationTaskProgressCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BuddyPreparationTaskProgressCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>[]
+          }
+          delete: {
+            args: Prisma.BuddyPreparationTaskProgressDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          update: {
+            args: Prisma.BuddyPreparationTaskProgressUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          deleteMany: {
+            args: Prisma.BuddyPreparationTaskProgressDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BuddyPreparationTaskProgressUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BuddyPreparationTaskProgressUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>[]
+          }
+          upsert: {
+            args: Prisma.BuddyPreparationTaskProgressUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BuddyPreparationTaskProgressPayload>
+          }
+          aggregate: {
+            args: Prisma.BuddyPreparationTaskProgressAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBuddyPreparationTaskProgress>
+          }
+          groupBy: {
+            args: Prisma.BuddyPreparationTaskProgressGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BuddyPreparationTaskProgressGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BuddyPreparationTaskProgressCountArgs<ExtArgs>
+            result: $Utils.Optional<BuddyPreparationTaskProgressCountAggregateOutputType> | number
+          }
+        }
+      }
       PreAssignedRole: {
         payload: Prisma.$PreAssignedRolePayload<ExtArgs>
         fields: Prisma.PreAssignedRoleFieldRefs
@@ -1881,6 +1971,7 @@ export namespace Prisma {
     category?: CategoryOmit
     task?: TaskOmit
     taskProgress?: TaskProgressOmit
+    buddyPreparationTaskProgress?: BuddyPreparationTaskProgressOmit
     preAssignedRole?: PreAssignedRoleOmit
     buddyPreparation?: BuddyPreparationOmit
     buddyAssignment?: BuddyAssignmentOmit
@@ -2176,10 +2267,12 @@ export namespace Prisma {
 
   export type TaskCountOutputType = {
     progress: number
+    preparationProgress: number
   }
 
   export type TaskCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     progress?: boolean | TaskCountOutputTypeCountProgressArgs
+    preparationProgress?: boolean | TaskCountOutputTypeCountPreparationProgressArgs
   }
 
   // Custom InputTypes
@@ -2200,6 +2293,13 @@ export namespace Prisma {
     where?: TaskProgressWhereInput
   }
 
+  /**
+   * TaskCountOutputType without action
+   */
+  export type TaskCountOutputTypeCountPreparationProgressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationTaskProgressWhereInput
+  }
+
 
   /**
    * Count Type BuddyPreparationCountOutputType
@@ -2207,10 +2307,12 @@ export namespace Prisma {
 
   export type BuddyPreparationCountOutputType = {
     buddies: number
+    taskProgress: number
   }
 
   export type BuddyPreparationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     buddies?: boolean | BuddyPreparationCountOutputTypeCountBuddiesArgs
+    taskProgress?: boolean | BuddyPreparationCountOutputTypeCountTaskProgressArgs
   }
 
   // Custom InputTypes
@@ -2229,6 +2331,13 @@ export namespace Prisma {
    */
   export type BuddyPreparationCountOutputTypeCountBuddiesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BuddyPreparationBuddyWhereInput
+  }
+
+  /**
+   * BuddyPreparationCountOutputType without action
+   */
+  export type BuddyPreparationCountOutputTypeCountTaskProgressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationTaskProgressWhereInput
   }
 
 
@@ -10449,6 +10558,7 @@ export namespace Prisma {
     updatedAt?: boolean
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     progress?: boolean | Task$progressArgs<ExtArgs>
+    preparationProgress?: boolean | Task$preparationProgressArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
 
@@ -10494,6 +10604,7 @@ export namespace Prisma {
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | CategoryDefaultArgs<ExtArgs>
     progress?: boolean | Task$progressArgs<ExtArgs>
+    preparationProgress?: boolean | Task$preparationProgressArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10508,6 +10619,7 @@ export namespace Prisma {
     objects: {
       category: Prisma.$CategoryPayload<ExtArgs>
       progress: Prisma.$TaskProgressPayload<ExtArgs>[]
+      preparationProgress: Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10915,6 +11027,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     category<T extends CategoryDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CategoryDefaultArgs<ExtArgs>>): Prisma__CategoryClient<$Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     progress<T extends Task$progressArgs<ExtArgs> = {}>(args?: Subset<T, Task$progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    preparationProgress<T extends Task$preparationProgressArgs<ExtArgs> = {}>(args?: Subset<T, Task$preparationProgressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11370,6 +11483,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TaskProgressScalarFieldEnum | TaskProgressScalarFieldEnum[]
+  }
+
+  /**
+   * Task.preparationProgress
+   */
+  export type Task$preparationProgressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    where?: BuddyPreparationTaskProgressWhereInput
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BuddyPreparationTaskProgressScalarFieldEnum | BuddyPreparationTaskProgressScalarFieldEnum[]
   }
 
   /**
@@ -12467,6 +12604,1085 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: TaskProgressInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BuddyPreparationTaskProgress
+   */
+
+  export type AggregateBuddyPreparationTaskProgress = {
+    _count: BuddyPreparationTaskProgressCountAggregateOutputType | null
+    _min: BuddyPreparationTaskProgressMinAggregateOutputType | null
+    _max: BuddyPreparationTaskProgressMaxAggregateOutputType | null
+  }
+
+  export type BuddyPreparationTaskProgressMinAggregateOutputType = {
+    id: string | null
+    preparationId: string | null
+    taskId: string | null
+    completed: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BuddyPreparationTaskProgressMaxAggregateOutputType = {
+    id: string | null
+    preparationId: string | null
+    taskId: string | null
+    completed: boolean | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BuddyPreparationTaskProgressCountAggregateOutputType = {
+    id: number
+    preparationId: number
+    taskId: number
+    completed: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BuddyPreparationTaskProgressMinAggregateInputType = {
+    id?: true
+    preparationId?: true
+    taskId?: true
+    completed?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BuddyPreparationTaskProgressMaxAggregateInputType = {
+    id?: true
+    preparationId?: true
+    taskId?: true
+    completed?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BuddyPreparationTaskProgressCountAggregateInputType = {
+    id?: true
+    preparationId?: true
+    taskId?: true
+    completed?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BuddyPreparationTaskProgressAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BuddyPreparationTaskProgress to aggregate.
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparationTaskProgresses to fetch.
+     */
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparationTaskProgresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparationTaskProgresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BuddyPreparationTaskProgresses
+    **/
+    _count?: true | BuddyPreparationTaskProgressCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BuddyPreparationTaskProgressMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BuddyPreparationTaskProgressMaxAggregateInputType
+  }
+
+  export type GetBuddyPreparationTaskProgressAggregateType<T extends BuddyPreparationTaskProgressAggregateArgs> = {
+        [P in keyof T & keyof AggregateBuddyPreparationTaskProgress]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBuddyPreparationTaskProgress[P]>
+      : GetScalarType<T[P], AggregateBuddyPreparationTaskProgress[P]>
+  }
+
+
+
+
+  export type BuddyPreparationTaskProgressGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BuddyPreparationTaskProgressWhereInput
+    orderBy?: BuddyPreparationTaskProgressOrderByWithAggregationInput | BuddyPreparationTaskProgressOrderByWithAggregationInput[]
+    by: BuddyPreparationTaskProgressScalarFieldEnum[] | BuddyPreparationTaskProgressScalarFieldEnum
+    having?: BuddyPreparationTaskProgressScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BuddyPreparationTaskProgressCountAggregateInputType | true
+    _min?: BuddyPreparationTaskProgressMinAggregateInputType
+    _max?: BuddyPreparationTaskProgressMaxAggregateInputType
+  }
+
+  export type BuddyPreparationTaskProgressGroupByOutputType = {
+    id: string
+    preparationId: string
+    taskId: string
+    completed: boolean
+    createdAt: Date
+    updatedAt: Date
+    _count: BuddyPreparationTaskProgressCountAggregateOutputType | null
+    _min: BuddyPreparationTaskProgressMinAggregateOutputType | null
+    _max: BuddyPreparationTaskProgressMaxAggregateOutputType | null
+  }
+
+  type GetBuddyPreparationTaskProgressGroupByPayload<T extends BuddyPreparationTaskProgressGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BuddyPreparationTaskProgressGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BuddyPreparationTaskProgressGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BuddyPreparationTaskProgressGroupByOutputType[P]>
+            : GetScalarType<T[P], BuddyPreparationTaskProgressGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BuddyPreparationTaskProgressSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    preparationId?: boolean
+    taskId?: boolean
+    completed?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparationTaskProgress"]>
+
+  export type BuddyPreparationTaskProgressSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    preparationId?: boolean
+    taskId?: boolean
+    completed?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparationTaskProgress"]>
+
+  export type BuddyPreparationTaskProgressSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    preparationId?: boolean
+    taskId?: boolean
+    completed?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["buddyPreparationTaskProgress"]>
+
+  export type BuddyPreparationTaskProgressSelectScalar = {
+    id?: boolean
+    preparationId?: boolean
+    taskId?: boolean
+    completed?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BuddyPreparationTaskProgressOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "preparationId" | "taskId" | "completed" | "createdAt" | "updatedAt", ExtArgs["result"]["buddyPreparationTaskProgress"]>
+  export type BuddyPreparationTaskProgressInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }
+  export type BuddyPreparationTaskProgressIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }
+  export type BuddyPreparationTaskProgressIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    task?: boolean | TaskDefaultArgs<ExtArgs>
+    preparation?: boolean | BuddyPreparationDefaultArgs<ExtArgs>
+  }
+
+  export type $BuddyPreparationTaskProgressPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BuddyPreparationTaskProgress"
+    objects: {
+      task: Prisma.$TaskPayload<ExtArgs>
+      preparation: Prisma.$BuddyPreparationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      preparationId: string
+      taskId: string
+      completed: boolean
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["buddyPreparationTaskProgress"]>
+    composites: {}
+  }
+
+  type BuddyPreparationTaskProgressGetPayload<S extends boolean | null | undefined | BuddyPreparationTaskProgressDefaultArgs> = $Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload, S>
+
+  type BuddyPreparationTaskProgressCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BuddyPreparationTaskProgressFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BuddyPreparationTaskProgressCountAggregateInputType | true
+    }
+
+  export interface BuddyPreparationTaskProgressDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BuddyPreparationTaskProgress'], meta: { name: 'BuddyPreparationTaskProgress' } }
+    /**
+     * Find zero or one BuddyPreparationTaskProgress that matches the filter.
+     * @param {BuddyPreparationTaskProgressFindUniqueArgs} args - Arguments to find a BuddyPreparationTaskProgress
+     * @example
+     * // Get one BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BuddyPreparationTaskProgressFindUniqueArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressFindUniqueArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BuddyPreparationTaskProgress that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BuddyPreparationTaskProgressFindUniqueOrThrowArgs} args - Arguments to find a BuddyPreparationTaskProgress
+     * @example
+     * // Get one BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BuddyPreparationTaskProgressFindUniqueOrThrowArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BuddyPreparationTaskProgress that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressFindFirstArgs} args - Arguments to find a BuddyPreparationTaskProgress
+     * @example
+     * // Get one BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BuddyPreparationTaskProgressFindFirstArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressFindFirstArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BuddyPreparationTaskProgress that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressFindFirstOrThrowArgs} args - Arguments to find a BuddyPreparationTaskProgress
+     * @example
+     * // Get one BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BuddyPreparationTaskProgressFindFirstOrThrowArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressFindFirstOrThrowArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BuddyPreparationTaskProgresses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgresses = await prisma.buddyPreparationTaskProgress.findMany()
+     * 
+     * // Get first 10 BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgresses = await prisma.buddyPreparationTaskProgress.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const buddyPreparationTaskProgressWithIdOnly = await prisma.buddyPreparationTaskProgress.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BuddyPreparationTaskProgressFindManyArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BuddyPreparationTaskProgress.
+     * @param {BuddyPreparationTaskProgressCreateArgs} args - Arguments to create a BuddyPreparationTaskProgress.
+     * @example
+     * // Create one BuddyPreparationTaskProgress
+     * const BuddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.create({
+     *   data: {
+     *     // ... data to create a BuddyPreparationTaskProgress
+     *   }
+     * })
+     * 
+     */
+    create<T extends BuddyPreparationTaskProgressCreateArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressCreateArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BuddyPreparationTaskProgresses.
+     * @param {BuddyPreparationTaskProgressCreateManyArgs} args - Arguments to create many BuddyPreparationTaskProgresses.
+     * @example
+     * // Create many BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BuddyPreparationTaskProgressCreateManyArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BuddyPreparationTaskProgresses and returns the data saved in the database.
+     * @param {BuddyPreparationTaskProgressCreateManyAndReturnArgs} args - Arguments to create many BuddyPreparationTaskProgresses.
+     * @example
+     * // Create many BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BuddyPreparationTaskProgresses and only return the `id`
+     * const buddyPreparationTaskProgressWithIdOnly = await prisma.buddyPreparationTaskProgress.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BuddyPreparationTaskProgressCreateManyAndReturnArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BuddyPreparationTaskProgress.
+     * @param {BuddyPreparationTaskProgressDeleteArgs} args - Arguments to delete one BuddyPreparationTaskProgress.
+     * @example
+     * // Delete one BuddyPreparationTaskProgress
+     * const BuddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.delete({
+     *   where: {
+     *     // ... filter to delete one BuddyPreparationTaskProgress
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BuddyPreparationTaskProgressDeleteArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressDeleteArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BuddyPreparationTaskProgress.
+     * @param {BuddyPreparationTaskProgressUpdateArgs} args - Arguments to update one BuddyPreparationTaskProgress.
+     * @example
+     * // Update one BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BuddyPreparationTaskProgressUpdateArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressUpdateArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BuddyPreparationTaskProgresses.
+     * @param {BuddyPreparationTaskProgressDeleteManyArgs} args - Arguments to filter BuddyPreparationTaskProgresses to delete.
+     * @example
+     * // Delete a few BuddyPreparationTaskProgresses
+     * const { count } = await prisma.buddyPreparationTaskProgress.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BuddyPreparationTaskProgressDeleteManyArgs>(args?: SelectSubset<T, BuddyPreparationTaskProgressDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BuddyPreparationTaskProgresses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BuddyPreparationTaskProgressUpdateManyArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BuddyPreparationTaskProgresses and returns the data updated in the database.
+     * @param {BuddyPreparationTaskProgressUpdateManyAndReturnArgs} args - Arguments to update many BuddyPreparationTaskProgresses.
+     * @example
+     * // Update many BuddyPreparationTaskProgresses
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BuddyPreparationTaskProgresses and only return the `id`
+     * const buddyPreparationTaskProgressWithIdOnly = await prisma.buddyPreparationTaskProgress.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BuddyPreparationTaskProgressUpdateManyAndReturnArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BuddyPreparationTaskProgress.
+     * @param {BuddyPreparationTaskProgressUpsertArgs} args - Arguments to update or create a BuddyPreparationTaskProgress.
+     * @example
+     * // Update or create a BuddyPreparationTaskProgress
+     * const buddyPreparationTaskProgress = await prisma.buddyPreparationTaskProgress.upsert({
+     *   create: {
+     *     // ... data to create a BuddyPreparationTaskProgress
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BuddyPreparationTaskProgress we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BuddyPreparationTaskProgressUpsertArgs>(args: SelectSubset<T, BuddyPreparationTaskProgressUpsertArgs<ExtArgs>>): Prisma__BuddyPreparationTaskProgressClient<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BuddyPreparationTaskProgresses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressCountArgs} args - Arguments to filter BuddyPreparationTaskProgresses to count.
+     * @example
+     * // Count the number of BuddyPreparationTaskProgresses
+     * const count = await prisma.buddyPreparationTaskProgress.count({
+     *   where: {
+     *     // ... the filter for the BuddyPreparationTaskProgresses we want to count
+     *   }
+     * })
+    **/
+    count<T extends BuddyPreparationTaskProgressCountArgs>(
+      args?: Subset<T, BuddyPreparationTaskProgressCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BuddyPreparationTaskProgressCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BuddyPreparationTaskProgress.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BuddyPreparationTaskProgressAggregateArgs>(args: Subset<T, BuddyPreparationTaskProgressAggregateArgs>): Prisma.PrismaPromise<GetBuddyPreparationTaskProgressAggregateType<T>>
+
+    /**
+     * Group by BuddyPreparationTaskProgress.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BuddyPreparationTaskProgressGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BuddyPreparationTaskProgressGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BuddyPreparationTaskProgressGroupByArgs['orderBy'] }
+        : { orderBy?: BuddyPreparationTaskProgressGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BuddyPreparationTaskProgressGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBuddyPreparationTaskProgressGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BuddyPreparationTaskProgress model
+   */
+  readonly fields: BuddyPreparationTaskProgressFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BuddyPreparationTaskProgress.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BuddyPreparationTaskProgressClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    task<T extends TaskDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TaskDefaultArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    preparation<T extends BuddyPreparationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BuddyPreparationDefaultArgs<ExtArgs>>): Prisma__BuddyPreparationClient<$Result.GetResult<Prisma.$BuddyPreparationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BuddyPreparationTaskProgress model
+   */
+  interface BuddyPreparationTaskProgressFieldRefs {
+    readonly id: FieldRef<"BuddyPreparationTaskProgress", 'String'>
+    readonly preparationId: FieldRef<"BuddyPreparationTaskProgress", 'String'>
+    readonly taskId: FieldRef<"BuddyPreparationTaskProgress", 'String'>
+    readonly completed: FieldRef<"BuddyPreparationTaskProgress", 'Boolean'>
+    readonly createdAt: FieldRef<"BuddyPreparationTaskProgress", 'DateTime'>
+    readonly updatedAt: FieldRef<"BuddyPreparationTaskProgress", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BuddyPreparationTaskProgress findUnique
+   */
+  export type BuddyPreparationTaskProgressFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparationTaskProgress to fetch.
+     */
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparationTaskProgress findUniqueOrThrow
+   */
+  export type BuddyPreparationTaskProgressFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparationTaskProgress to fetch.
+     */
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparationTaskProgress findFirst
+   */
+  export type BuddyPreparationTaskProgressFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparationTaskProgress to fetch.
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparationTaskProgresses to fetch.
+     */
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BuddyPreparationTaskProgresses.
+     */
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparationTaskProgresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparationTaskProgresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BuddyPreparationTaskProgresses.
+     */
+    distinct?: BuddyPreparationTaskProgressScalarFieldEnum | BuddyPreparationTaskProgressScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparationTaskProgress findFirstOrThrow
+   */
+  export type BuddyPreparationTaskProgressFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparationTaskProgress to fetch.
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparationTaskProgresses to fetch.
+     */
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BuddyPreparationTaskProgresses.
+     */
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparationTaskProgresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparationTaskProgresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BuddyPreparationTaskProgresses.
+     */
+    distinct?: BuddyPreparationTaskProgressScalarFieldEnum | BuddyPreparationTaskProgressScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparationTaskProgress findMany
+   */
+  export type BuddyPreparationTaskProgressFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter, which BuddyPreparationTaskProgresses to fetch.
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BuddyPreparationTaskProgresses to fetch.
+     */
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BuddyPreparationTaskProgresses.
+     */
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BuddyPreparationTaskProgresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BuddyPreparationTaskProgresses.
+     */
+    skip?: number
+    distinct?: BuddyPreparationTaskProgressScalarFieldEnum | BuddyPreparationTaskProgressScalarFieldEnum[]
+  }
+
+  /**
+   * BuddyPreparationTaskProgress create
+   */
+  export type BuddyPreparationTaskProgressCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BuddyPreparationTaskProgress.
+     */
+    data: XOR<BuddyPreparationTaskProgressCreateInput, BuddyPreparationTaskProgressUncheckedCreateInput>
+  }
+
+  /**
+   * BuddyPreparationTaskProgress createMany
+   */
+  export type BuddyPreparationTaskProgressCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BuddyPreparationTaskProgresses.
+     */
+    data: BuddyPreparationTaskProgressCreateManyInput | BuddyPreparationTaskProgressCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BuddyPreparationTaskProgress createManyAndReturn
+   */
+  export type BuddyPreparationTaskProgressCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * The data used to create many BuddyPreparationTaskProgresses.
+     */
+    data: BuddyPreparationTaskProgressCreateManyInput | BuddyPreparationTaskProgressCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BuddyPreparationTaskProgress update
+   */
+  export type BuddyPreparationTaskProgressUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BuddyPreparationTaskProgress.
+     */
+    data: XOR<BuddyPreparationTaskProgressUpdateInput, BuddyPreparationTaskProgressUncheckedUpdateInput>
+    /**
+     * Choose, which BuddyPreparationTaskProgress to update.
+     */
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparationTaskProgress updateMany
+   */
+  export type BuddyPreparationTaskProgressUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BuddyPreparationTaskProgresses.
+     */
+    data: XOR<BuddyPreparationTaskProgressUpdateManyMutationInput, BuddyPreparationTaskProgressUncheckedUpdateManyInput>
+    /**
+     * Filter which BuddyPreparationTaskProgresses to update
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * Limit how many BuddyPreparationTaskProgresses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BuddyPreparationTaskProgress updateManyAndReturn
+   */
+  export type BuddyPreparationTaskProgressUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * The data used to update BuddyPreparationTaskProgresses.
+     */
+    data: XOR<BuddyPreparationTaskProgressUpdateManyMutationInput, BuddyPreparationTaskProgressUncheckedUpdateManyInput>
+    /**
+     * Filter which BuddyPreparationTaskProgresses to update
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * Limit how many BuddyPreparationTaskProgresses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BuddyPreparationTaskProgress upsert
+   */
+  export type BuddyPreparationTaskProgressUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BuddyPreparationTaskProgress to update in case it exists.
+     */
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    /**
+     * In case the BuddyPreparationTaskProgress found by the `where` argument doesn't exist, create a new BuddyPreparationTaskProgress with this data.
+     */
+    create: XOR<BuddyPreparationTaskProgressCreateInput, BuddyPreparationTaskProgressUncheckedCreateInput>
+    /**
+     * In case the BuddyPreparationTaskProgress was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BuddyPreparationTaskProgressUpdateInput, BuddyPreparationTaskProgressUncheckedUpdateInput>
+  }
+
+  /**
+   * BuddyPreparationTaskProgress delete
+   */
+  export type BuddyPreparationTaskProgressDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    /**
+     * Filter which BuddyPreparationTaskProgress to delete.
+     */
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+  }
+
+  /**
+   * BuddyPreparationTaskProgress deleteMany
+   */
+  export type BuddyPreparationTaskProgressDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BuddyPreparationTaskProgresses to delete
+     */
+    where?: BuddyPreparationTaskProgressWhereInput
+    /**
+     * Limit how many BuddyPreparationTaskProgresses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BuddyPreparationTaskProgress without action
+   */
+  export type BuddyPreparationTaskProgressDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
   }
 
 
@@ -13681,6 +14897,7 @@ export namespace Prisma {
     buddies?: boolean | BuddyPreparation$buddiesArgs<ExtArgs>
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+    taskProgress?: boolean | BuddyPreparation$taskProgressArgs<ExtArgs>
     _count?: boolean | BuddyPreparationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["buddyPreparation"]>
 
@@ -13738,6 +14955,7 @@ export namespace Prisma {
     buddies?: boolean | BuddyPreparation$buddiesArgs<ExtArgs>
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     user?: boolean | BuddyPreparation$userArgs<ExtArgs>
+    taskProgress?: boolean | BuddyPreparation$taskProgressArgs<ExtArgs>
     _count?: boolean | BuddyPreparationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BuddyPreparationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -13758,6 +14976,7 @@ export namespace Prisma {
       buddies: Prisma.$BuddyPreparationBuddyPayload<ExtArgs>[]
       organization: Prisma.$OrganizationPayload<ExtArgs>
       user: Prisma.$UserPayload<ExtArgs> | null
+      taskProgress: Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -14169,6 +15388,7 @@ export namespace Prisma {
     buddies<T extends BuddyPreparation$buddiesArgs<ExtArgs> = {}>(args?: Subset<T, BuddyPreparation$buddiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationBuddyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     user<T extends BuddyPreparation$userArgs<ExtArgs> = {}>(args?: Subset<T, BuddyPreparation$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    taskProgress<T extends BuddyPreparation$taskProgressArgs<ExtArgs> = {}>(args?: Subset<T, BuddyPreparation$taskProgressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BuddyPreparationTaskProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -14645,6 +15865,30 @@ export namespace Prisma {
      */
     include?: UserInclude<ExtArgs> | null
     where?: UserWhereInput
+  }
+
+  /**
+   * BuddyPreparation.taskProgress
+   */
+  export type BuddyPreparation$taskProgressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BuddyPreparationTaskProgress
+     */
+    select?: BuddyPreparationTaskProgressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BuddyPreparationTaskProgress
+     */
+    omit?: BuddyPreparationTaskProgressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BuddyPreparationTaskProgressInclude<ExtArgs> | null
+    where?: BuddyPreparationTaskProgressWhereInput
+    orderBy?: BuddyPreparationTaskProgressOrderByWithRelationInput | BuddyPreparationTaskProgressOrderByWithRelationInput[]
+    cursor?: BuddyPreparationTaskProgressWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BuddyPreparationTaskProgressScalarFieldEnum | BuddyPreparationTaskProgressScalarFieldEnum[]
   }
 
   /**
@@ -16902,6 +18146,18 @@ export namespace Prisma {
   export type TaskProgressScalarFieldEnum = (typeof TaskProgressScalarFieldEnum)[keyof typeof TaskProgressScalarFieldEnum]
 
 
+  export const BuddyPreparationTaskProgressScalarFieldEnum: {
+    id: 'id',
+    preparationId: 'preparationId',
+    taskId: 'taskId',
+    completed: 'completed',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BuddyPreparationTaskProgressScalarFieldEnum = (typeof BuddyPreparationTaskProgressScalarFieldEnum)[keyof typeof BuddyPreparationTaskProgressScalarFieldEnum]
+
+
   export const PreAssignedRoleScalarFieldEnum: {
     id: 'id',
     email: 'email',
@@ -17595,6 +18851,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     progress?: TaskProgressListRelationFilter
+    preparationProgress?: BuddyPreparationTaskProgressListRelationFilter
   }
 
   export type TaskOrderByWithRelationInput = {
@@ -17609,6 +18866,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     category?: CategoryOrderByWithRelationInput
     progress?: TaskProgressOrderByRelationAggregateInput
+    preparationProgress?: BuddyPreparationTaskProgressOrderByRelationAggregateInput
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
@@ -17626,6 +18884,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Task"> | Date | string
     category?: XOR<CategoryScalarRelationFilter, CategoryWhereInput>
     progress?: TaskProgressListRelationFilter
+    preparationProgress?: BuddyPreparationTaskProgressListRelationFilter
   }, "id">
 
   export type TaskOrderByWithAggregationInput = {
@@ -17724,6 +18983,70 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"TaskProgress"> | Date | string
   }
 
+  export type BuddyPreparationTaskProgressWhereInput = {
+    AND?: BuddyPreparationTaskProgressWhereInput | BuddyPreparationTaskProgressWhereInput[]
+    OR?: BuddyPreparationTaskProgressWhereInput[]
+    NOT?: BuddyPreparationTaskProgressWhereInput | BuddyPreparationTaskProgressWhereInput[]
+    id?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    preparationId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    taskId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    completed?: BoolFilter<"BuddyPreparationTaskProgress"> | boolean
+    createdAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+    preparation?: XOR<BuddyPreparationScalarRelationFilter, BuddyPreparationWhereInput>
+  }
+
+  export type BuddyPreparationTaskProgressOrderByWithRelationInput = {
+    id?: SortOrder
+    preparationId?: SortOrder
+    taskId?: SortOrder
+    completed?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    task?: TaskOrderByWithRelationInput
+    preparation?: BuddyPreparationOrderByWithRelationInput
+  }
+
+  export type BuddyPreparationTaskProgressWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    preparationId_taskId?: BuddyPreparationTaskProgressPreparationIdTaskIdCompoundUniqueInput
+    AND?: BuddyPreparationTaskProgressWhereInput | BuddyPreparationTaskProgressWhereInput[]
+    OR?: BuddyPreparationTaskProgressWhereInput[]
+    NOT?: BuddyPreparationTaskProgressWhereInput | BuddyPreparationTaskProgressWhereInput[]
+    preparationId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    taskId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    completed?: BoolFilter<"BuddyPreparationTaskProgress"> | boolean
+    createdAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+    task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
+    preparation?: XOR<BuddyPreparationScalarRelationFilter, BuddyPreparationWhereInput>
+  }, "id" | "preparationId_taskId">
+
+  export type BuddyPreparationTaskProgressOrderByWithAggregationInput = {
+    id?: SortOrder
+    preparationId?: SortOrder
+    taskId?: SortOrder
+    completed?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BuddyPreparationTaskProgressCountOrderByAggregateInput
+    _max?: BuddyPreparationTaskProgressMaxOrderByAggregateInput
+    _min?: BuddyPreparationTaskProgressMinOrderByAggregateInput
+  }
+
+  export type BuddyPreparationTaskProgressScalarWhereWithAggregatesInput = {
+    AND?: BuddyPreparationTaskProgressScalarWhereWithAggregatesInput | BuddyPreparationTaskProgressScalarWhereWithAggregatesInput[]
+    OR?: BuddyPreparationTaskProgressScalarWhereWithAggregatesInput[]
+    NOT?: BuddyPreparationTaskProgressScalarWhereWithAggregatesInput | BuddyPreparationTaskProgressScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"BuddyPreparationTaskProgress"> | string
+    preparationId?: StringWithAggregatesFilter<"BuddyPreparationTaskProgress"> | string
+    taskId?: StringWithAggregatesFilter<"BuddyPreparationTaskProgress"> | string
+    completed?: BoolWithAggregatesFilter<"BuddyPreparationTaskProgress"> | boolean
+    createdAt?: DateTimeWithAggregatesFilter<"BuddyPreparationTaskProgress"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BuddyPreparationTaskProgress"> | Date | string
+  }
+
   export type PreAssignedRoleWhereInput = {
     AND?: PreAssignedRoleWhereInput | PreAssignedRoleWhereInput[]
     OR?: PreAssignedRoleWhereInput[]
@@ -17795,6 +19118,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyListRelationFilter
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    taskProgress?: BuddyPreparationTaskProgressListRelationFilter
   }
 
   export type BuddyPreparationOrderByWithRelationInput = {
@@ -17813,6 +19137,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyOrderByRelationAggregateInput
     organization?: OrganizationOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
+    taskProgress?: BuddyPreparationTaskProgressOrderByRelationAggregateInput
   }
 
   export type BuddyPreparationWhereUniqueInput = Prisma.AtLeast<{
@@ -17835,6 +19160,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyListRelationFilter
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
     user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    taskProgress?: BuddyPreparationTaskProgressListRelationFilter
   }, "id" | "userId" | "email_organizationId">
 
   export type BuddyPreparationOrderByWithAggregationInput = {
@@ -18516,6 +19842,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     category: CategoryCreateNestedOneWithoutTasksInput
     progress?: TaskProgressCreateNestedManyWithoutTaskInput
+    preparationProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateInput = {
@@ -18529,6 +19856,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     progress?: TaskProgressUncheckedCreateNestedManyWithoutTaskInput
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUpdateInput = {
@@ -18542,6 +19870,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutTasksNestedInput
     progress?: TaskProgressUpdateManyWithoutTaskNestedInput
+    preparationProgress?: BuddyPreparationTaskProgressUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateInput = {
@@ -18555,6 +19884,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     progress?: TaskProgressUncheckedUpdateManyWithoutTaskNestedInput
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
@@ -18653,6 +19983,67 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BuddyPreparationTaskProgressCreateInput = {
+    id?: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    task: TaskCreateNestedOneWithoutPreparationProgressInput
+    preparation: BuddyPreparationCreateNestedOneWithoutTaskProgressInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedCreateInput = {
+    id?: string
+    preparationId: string
+    taskId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    task?: TaskUpdateOneRequiredWithoutPreparationProgressNestedInput
+    preparation?: BuddyPreparationUpdateOneRequiredWithoutTaskProgressNestedInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    preparationId?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationTaskProgressCreateManyInput = {
+    id?: string
+    preparationId: string
+    taskId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    preparationId?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type PreAssignedRoleCreateInput = {
     id?: string
     email: string
@@ -18722,6 +20113,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyCreateNestedManyWithoutPreparationInput
     organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
     user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+    taskProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUncheckedCreateInput = {
@@ -18737,6 +20129,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     buddies?: BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUpdateInput = {
@@ -18752,6 +20145,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyUpdateManyWithoutPreparationNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
     user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateInput = {
@@ -18767,6 +20161,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     buddies?: BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationCreateManyInput = {
@@ -19514,6 +20909,16 @@ export namespace Prisma {
     isNot?: CategoryWhereInput
   }
 
+  export type BuddyPreparationTaskProgressListRelationFilter = {
+    every?: BuddyPreparationTaskProgressWhereInput
+    some?: BuddyPreparationTaskProgressWhereInput
+    none?: BuddyPreparationTaskProgressWhereInput
+  }
+
+  export type BuddyPreparationTaskProgressOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type TaskCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
@@ -19589,6 +20994,43 @@ export namespace Prisma {
   export type TaskProgressMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
+    taskId?: SortOrder
+    completed?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BuddyPreparationScalarRelationFilter = {
+    is?: BuddyPreparationWhereInput
+    isNot?: BuddyPreparationWhereInput
+  }
+
+  export type BuddyPreparationTaskProgressPreparationIdTaskIdCompoundUniqueInput = {
+    preparationId: string
+    taskId: string
+  }
+
+  export type BuddyPreparationTaskProgressCountOrderByAggregateInput = {
+    id?: SortOrder
+    preparationId?: SortOrder
+    taskId?: SortOrder
+    completed?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BuddyPreparationTaskProgressMaxOrderByAggregateInput = {
+    id?: SortOrder
+    preparationId?: SortOrder
+    taskId?: SortOrder
+    completed?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BuddyPreparationTaskProgressMinOrderByAggregateInput = {
+    id?: SortOrder
+    preparationId?: SortOrder
     taskId?: SortOrder
     completed?: SortOrder
     createdAt?: SortOrder
@@ -19690,11 +21132,6 @@ export namespace Prisma {
     userId?: SortOrder
     buddyId?: SortOrder
     createdAt?: SortOrder
-  }
-
-  export type BuddyPreparationScalarRelationFilter = {
-    is?: BuddyPreparationWhereInput
-    isNot?: BuddyPreparationWhereInput
   }
 
   export type BuddyPreparationBuddyBuddyPreparationIdBuddyIdCompoundUniqueInput = {
@@ -20432,11 +21869,25 @@ export namespace Prisma {
     connect?: TaskProgressWhereUniqueInput | TaskProgressWhereUniqueInput[]
   }
 
+  export type BuddyPreparationTaskProgressCreateNestedManyWithoutTaskInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput> | BuddyPreparationTaskProgressCreateWithoutTaskInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput | BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyTaskInputEnvelope
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+  }
+
   export type TaskProgressUncheckedCreateNestedManyWithoutTaskInput = {
     create?: XOR<TaskProgressCreateWithoutTaskInput, TaskProgressUncheckedCreateWithoutTaskInput> | TaskProgressCreateWithoutTaskInput[] | TaskProgressUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: TaskProgressCreateOrConnectWithoutTaskInput | TaskProgressCreateOrConnectWithoutTaskInput[]
     createMany?: TaskProgressCreateManyTaskInputEnvelope
     connect?: TaskProgressWhereUniqueInput | TaskProgressWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutTaskInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput> | BuddyPreparationTaskProgressCreateWithoutTaskInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput | BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyTaskInputEnvelope
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
   }
 
   export type CategoryUpdateOneRequiredWithoutTasksNestedInput = {
@@ -20461,6 +21912,20 @@ export namespace Prisma {
     deleteMany?: TaskProgressScalarWhereInput | TaskProgressScalarWhereInput[]
   }
 
+  export type BuddyPreparationTaskProgressUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput> | BuddyPreparationTaskProgressCreateWithoutTaskInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput | BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput[]
+    upsert?: BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutTaskInput | BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyTaskInputEnvelope
+    set?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    disconnect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    delete?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    update?: BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutTaskInput | BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: BuddyPreparationTaskProgressUpdateManyWithWhereWithoutTaskInput | BuddyPreparationTaskProgressUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
+  }
+
   export type TaskProgressUncheckedUpdateManyWithoutTaskNestedInput = {
     create?: XOR<TaskProgressCreateWithoutTaskInput, TaskProgressUncheckedCreateWithoutTaskInput> | TaskProgressCreateWithoutTaskInput[] | TaskProgressUncheckedCreateWithoutTaskInput[]
     connectOrCreate?: TaskProgressCreateOrConnectWithoutTaskInput | TaskProgressCreateOrConnectWithoutTaskInput[]
@@ -20473,6 +21938,20 @@ export namespace Prisma {
     update?: TaskProgressUpdateWithWhereUniqueWithoutTaskInput | TaskProgressUpdateWithWhereUniqueWithoutTaskInput[]
     updateMany?: TaskProgressUpdateManyWithWhereWithoutTaskInput | TaskProgressUpdateManyWithWhereWithoutTaskInput[]
     deleteMany?: TaskProgressScalarWhereInput | TaskProgressScalarWhereInput[]
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskNestedInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput> | BuddyPreparationTaskProgressCreateWithoutTaskInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput | BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput[]
+    upsert?: BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutTaskInput | BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutTaskInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyTaskInputEnvelope
+    set?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    disconnect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    delete?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    update?: BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutTaskInput | BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutTaskInput[]
+    updateMany?: BuddyPreparationTaskProgressUpdateManyWithWhereWithoutTaskInput | BuddyPreparationTaskProgressUpdateManyWithWhereWithoutTaskInput[]
+    deleteMany?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
   }
 
   export type TaskCreateNestedOneWithoutProgressInput = {
@@ -20503,6 +21982,34 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutProgressInput, UserUpdateWithoutProgressInput>, UserUncheckedUpdateWithoutProgressInput>
   }
 
+  export type TaskCreateNestedOneWithoutPreparationProgressInput = {
+    create?: XOR<TaskCreateWithoutPreparationProgressInput, TaskUncheckedCreateWithoutPreparationProgressInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutPreparationProgressInput
+    connect?: TaskWhereUniqueInput
+  }
+
+  export type BuddyPreparationCreateNestedOneWithoutTaskProgressInput = {
+    create?: XOR<BuddyPreparationCreateWithoutTaskProgressInput, BuddyPreparationUncheckedCreateWithoutTaskProgressInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutTaskProgressInput
+    connect?: BuddyPreparationWhereUniqueInput
+  }
+
+  export type TaskUpdateOneRequiredWithoutPreparationProgressNestedInput = {
+    create?: XOR<TaskCreateWithoutPreparationProgressInput, TaskUncheckedCreateWithoutPreparationProgressInput>
+    connectOrCreate?: TaskCreateOrConnectWithoutPreparationProgressInput
+    upsert?: TaskUpsertWithoutPreparationProgressInput
+    connect?: TaskWhereUniqueInput
+    update?: XOR<XOR<TaskUpdateToOneWithWhereWithoutPreparationProgressInput, TaskUpdateWithoutPreparationProgressInput>, TaskUncheckedUpdateWithoutPreparationProgressInput>
+  }
+
+  export type BuddyPreparationUpdateOneRequiredWithoutTaskProgressNestedInput = {
+    create?: XOR<BuddyPreparationCreateWithoutTaskProgressInput, BuddyPreparationUncheckedCreateWithoutTaskProgressInput>
+    connectOrCreate?: BuddyPreparationCreateOrConnectWithoutTaskProgressInput
+    upsert?: BuddyPreparationUpsertWithoutTaskProgressInput
+    connect?: BuddyPreparationWhereUniqueInput
+    update?: XOR<XOR<BuddyPreparationUpdateToOneWithWhereWithoutTaskProgressInput, BuddyPreparationUpdateWithoutTaskProgressInput>, BuddyPreparationUncheckedUpdateWithoutTaskProgressInput>
+  }
+
   export type UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput = {
     create?: XOR<UserCreateWithoutBuddyPreparationsAsBuddyInput, UserUncheckedCreateWithoutBuddyPreparationsAsBuddyInput>
     connectOrCreate?: UserCreateOrConnectWithoutBuddyPreparationsAsBuddyInput
@@ -20528,11 +22035,25 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput> | BuddyPreparationTaskProgressCreateWithoutPreparationInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput | BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyPreparationInputEnvelope
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+  }
+
   export type BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput = {
     create?: XOR<BuddyPreparationBuddyCreateWithoutPreparationInput, BuddyPreparationBuddyUncheckedCreateWithoutPreparationInput> | BuddyPreparationBuddyCreateWithoutPreparationInput[] | BuddyPreparationBuddyUncheckedCreateWithoutPreparationInput[]
     connectOrCreate?: BuddyPreparationBuddyCreateOrConnectWithoutPreparationInput | BuddyPreparationBuddyCreateOrConnectWithoutPreparationInput[]
     createMany?: BuddyPreparationBuddyCreateManyPreparationInputEnvelope
     connect?: BuddyPreparationBuddyWhereUniqueInput | BuddyPreparationBuddyWhereUniqueInput[]
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput> | BuddyPreparationTaskProgressCreateWithoutPreparationInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput | BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyPreparationInputEnvelope
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput = {
@@ -20575,6 +22096,20 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutBuddyPreparationAsUserInput, UserUpdateWithoutBuddyPreparationAsUserInput>, UserUncheckedUpdateWithoutBuddyPreparationAsUserInput>
   }
 
+  export type BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput> | BuddyPreparationTaskProgressCreateWithoutPreparationInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput | BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput[]
+    upsert?: BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutPreparationInput | BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutPreparationInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyPreparationInputEnvelope
+    set?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    disconnect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    delete?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    update?: BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutPreparationInput | BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutPreparationInput[]
+    updateMany?: BuddyPreparationTaskProgressUpdateManyWithWhereWithoutPreparationInput | BuddyPreparationTaskProgressUpdateManyWithWhereWithoutPreparationInput[]
+    deleteMany?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
+  }
+
   export type BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput = {
     create?: XOR<BuddyPreparationBuddyCreateWithoutPreparationInput, BuddyPreparationBuddyUncheckedCreateWithoutPreparationInput> | BuddyPreparationBuddyCreateWithoutPreparationInput[] | BuddyPreparationBuddyUncheckedCreateWithoutPreparationInput[]
     connectOrCreate?: BuddyPreparationBuddyCreateOrConnectWithoutPreparationInput | BuddyPreparationBuddyCreateOrConnectWithoutPreparationInput[]
@@ -20587,6 +22122,20 @@ export namespace Prisma {
     update?: BuddyPreparationBuddyUpdateWithWhereUniqueWithoutPreparationInput | BuddyPreparationBuddyUpdateWithWhereUniqueWithoutPreparationInput[]
     updateMany?: BuddyPreparationBuddyUpdateManyWithWhereWithoutPreparationInput | BuddyPreparationBuddyUpdateManyWithWhereWithoutPreparationInput[]
     deleteMany?: BuddyPreparationBuddyScalarWhereInput | BuddyPreparationBuddyScalarWhereInput[]
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput = {
+    create?: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput> | BuddyPreparationTaskProgressCreateWithoutPreparationInput[] | BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput[]
+    connectOrCreate?: BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput | BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput[]
+    upsert?: BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutPreparationInput | BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutPreparationInput[]
+    createMany?: BuddyPreparationTaskProgressCreateManyPreparationInputEnvelope
+    set?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    disconnect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    delete?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    connect?: BuddyPreparationTaskProgressWhereUniqueInput | BuddyPreparationTaskProgressWhereUniqueInput[]
+    update?: BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutPreparationInput | BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutPreparationInput[]
+    updateMany?: BuddyPreparationTaskProgressUpdateManyWithWhereWithoutPreparationInput | BuddyPreparationTaskProgressUpdateManyWithWhereWithoutPreparationInput[]
+    deleteMany?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutBuddyAssignmentsInput = {
@@ -21158,6 +22707,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyCreateNestedManyWithoutPreparationInput
     organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
     user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+    taskProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUncheckedCreateWithoutBuddyInput = {
@@ -21172,6 +22722,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     buddies?: BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationCreateOrConnectWithoutBuddyInput = {
@@ -21196,6 +22747,7 @@ export namespace Prisma {
     buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
     buddies?: BuddyPreparationBuddyCreateNestedManyWithoutPreparationInput
     organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
+    taskProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUncheckedCreateWithoutUserInput = {
@@ -21210,6 +22762,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     buddies?: BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationCreateOrConnectWithoutUserInput = {
@@ -21545,6 +23098,7 @@ export namespace Prisma {
     buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
     buddies?: BuddyPreparationBuddyUpdateManyWithoutPreparationNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateWithoutUserInput = {
@@ -21559,6 +23113,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     buddies?: BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationBuddyUpsertWithWhereUniqueWithoutBuddyInput = {
@@ -21880,6 +23435,7 @@ export namespace Prisma {
     buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
     buddies?: BuddyPreparationBuddyCreateNestedManyWithoutPreparationInput
     user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+    taskProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUncheckedCreateWithoutOrganizationInput = {
@@ -21894,6 +23450,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     buddies?: BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationCreateOrConnectWithoutOrganizationInput = {
@@ -22107,6 +23664,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     progress?: TaskProgressCreateNestedManyWithoutTaskInput
+    preparationProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutCategoryInput = {
@@ -22119,6 +23677,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     progress?: TaskProgressUncheckedCreateNestedManyWithoutTaskInput
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutCategoryInput = {
@@ -22238,6 +23797,32 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BuddyPreparationTaskProgressCreateWithoutTaskInput = {
+    id?: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    preparation: BuddyPreparationCreateNestedOneWithoutTaskProgressInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput = {
+    id?: string
+    preparationId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressCreateOrConnectWithoutTaskInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    create: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput>
+  }
+
+  export type BuddyPreparationTaskProgressCreateManyTaskInputEnvelope = {
+    data: BuddyPreparationTaskProgressCreateManyTaskInput | BuddyPreparationTaskProgressCreateManyTaskInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CategoryUpsertWithoutTasksInput = {
     update: XOR<CategoryUpdateWithoutTasksInput, CategoryUncheckedUpdateWithoutTasksInput>
     create: XOR<CategoryCreateWithoutTasksInput, CategoryUncheckedCreateWithoutTasksInput>
@@ -22285,6 +23870,34 @@ export namespace Prisma {
     data: XOR<TaskProgressUpdateManyMutationInput, TaskProgressUncheckedUpdateManyWithoutTaskInput>
   }
 
+  export type BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutTaskInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    update: XOR<BuddyPreparationTaskProgressUpdateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedUpdateWithoutTaskInput>
+    create: XOR<BuddyPreparationTaskProgressCreateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedCreateWithoutTaskInput>
+  }
+
+  export type BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutTaskInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    data: XOR<BuddyPreparationTaskProgressUpdateWithoutTaskInput, BuddyPreparationTaskProgressUncheckedUpdateWithoutTaskInput>
+  }
+
+  export type BuddyPreparationTaskProgressUpdateManyWithWhereWithoutTaskInput = {
+    where: BuddyPreparationTaskProgressScalarWhereInput
+    data: XOR<BuddyPreparationTaskProgressUpdateManyMutationInput, BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskInput>
+  }
+
+  export type BuddyPreparationTaskProgressScalarWhereInput = {
+    AND?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
+    OR?: BuddyPreparationTaskProgressScalarWhereInput[]
+    NOT?: BuddyPreparationTaskProgressScalarWhereInput | BuddyPreparationTaskProgressScalarWhereInput[]
+    id?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    preparationId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    taskId?: StringFilter<"BuddyPreparationTaskProgress"> | string
+    completed?: BoolFilter<"BuddyPreparationTaskProgress"> | boolean
+    createdAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+    updatedAt?: DateTimeFilter<"BuddyPreparationTaskProgress"> | Date | string
+  }
+
   export type TaskCreateWithoutProgressInput = {
     id?: string
     title: string
@@ -22295,6 +23908,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     category: CategoryCreateNestedOneWithoutTasksInput
+    preparationProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutTaskInput
   }
 
   export type TaskUncheckedCreateWithoutProgressInput = {
@@ -22307,6 +23921,7 @@ export namespace Prisma {
     isBuddyTask?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutTaskInput
   }
 
   export type TaskCreateOrConnectWithoutProgressInput = {
@@ -22384,6 +23999,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     category?: CategoryUpdateOneRequiredWithoutTasksNestedInput
+    preparationProgress?: BuddyPreparationTaskProgressUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutProgressInput = {
@@ -22396,6 +24012,7 @@ export namespace Prisma {
     isBuddyTask?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type UserUpsertWithoutProgressInput = {
@@ -22451,6 +24068,150 @@ export namespace Prisma {
     buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
     buddyPreparationAsUser?: BuddyPreparationUncheckedUpdateOneWithoutUserNestedInput
     buddyPreparationBuddyLinks?: BuddyPreparationBuddyUncheckedUpdateManyWithoutBuddyNestedInput
+  }
+
+  export type TaskCreateWithoutPreparationProgressInput = {
+    id?: string
+    title: string
+    description?: string | null
+    link?: string | null
+    order: number
+    isBuddyTask?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    category: CategoryCreateNestedOneWithoutTasksInput
+    progress?: TaskProgressCreateNestedManyWithoutTaskInput
+  }
+
+  export type TaskUncheckedCreateWithoutPreparationProgressInput = {
+    id?: string
+    title: string
+    description?: string | null
+    link?: string | null
+    categoryId: string
+    order: number
+    isBuddyTask?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    progress?: TaskProgressUncheckedCreateNestedManyWithoutTaskInput
+  }
+
+  export type TaskCreateOrConnectWithoutPreparationProgressInput = {
+    where: TaskWhereUniqueInput
+    create: XOR<TaskCreateWithoutPreparationProgressInput, TaskUncheckedCreateWithoutPreparationProgressInput>
+  }
+
+  export type BuddyPreparationCreateWithoutTaskProgressInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    isActive?: boolean
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
+    buddies?: BuddyPreparationBuddyCreateNestedManyWithoutPreparationInput
+    organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
+    user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+  }
+
+  export type BuddyPreparationUncheckedCreateWithoutTaskProgressInput = {
+    id?: string
+    firstName: string
+    lastName: string
+    email?: string | null
+    buddyId: string
+    organizationId: string
+    isActive?: boolean
+    userId?: string | null
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    buddies?: BuddyPreparationBuddyUncheckedCreateNestedManyWithoutPreparationInput
+  }
+
+  export type BuddyPreparationCreateOrConnectWithoutTaskProgressInput = {
+    where: BuddyPreparationWhereUniqueInput
+    create: XOR<BuddyPreparationCreateWithoutTaskProgressInput, BuddyPreparationUncheckedCreateWithoutTaskProgressInput>
+  }
+
+  export type TaskUpsertWithoutPreparationProgressInput = {
+    update: XOR<TaskUpdateWithoutPreparationProgressInput, TaskUncheckedUpdateWithoutPreparationProgressInput>
+    create: XOR<TaskCreateWithoutPreparationProgressInput, TaskUncheckedCreateWithoutPreparationProgressInput>
+    where?: TaskWhereInput
+  }
+
+  export type TaskUpdateToOneWithWhereWithoutPreparationProgressInput = {
+    where?: TaskWhereInput
+    data: XOR<TaskUpdateWithoutPreparationProgressInput, TaskUncheckedUpdateWithoutPreparationProgressInput>
+  }
+
+  export type TaskUpdateWithoutPreparationProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    isBuddyTask?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    category?: CategoryUpdateOneRequiredWithoutTasksNestedInput
+    progress?: TaskProgressUpdateManyWithoutTaskNestedInput
+  }
+
+  export type TaskUncheckedUpdateWithoutPreparationProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    link?: NullableStringFieldUpdateOperationsInput | string | null
+    categoryId?: StringFieldUpdateOperationsInput | string
+    order?: IntFieldUpdateOperationsInput | number
+    isBuddyTask?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    progress?: TaskProgressUncheckedUpdateManyWithoutTaskNestedInput
+  }
+
+  export type BuddyPreparationUpsertWithoutTaskProgressInput = {
+    update: XOR<BuddyPreparationUpdateWithoutTaskProgressInput, BuddyPreparationUncheckedUpdateWithoutTaskProgressInput>
+    create: XOR<BuddyPreparationCreateWithoutTaskProgressInput, BuddyPreparationUncheckedCreateWithoutTaskProgressInput>
+    where?: BuddyPreparationWhereInput
+  }
+
+  export type BuddyPreparationUpdateToOneWithWhereWithoutTaskProgressInput = {
+    where?: BuddyPreparationWhereInput
+    data: XOR<BuddyPreparationUpdateWithoutTaskProgressInput, BuddyPreparationUncheckedUpdateWithoutTaskProgressInput>
+  }
+
+  export type BuddyPreparationUpdateWithoutTaskProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
+    buddies?: BuddyPreparationBuddyUpdateManyWithoutPreparationNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
+    user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+  }
+
+  export type BuddyPreparationUncheckedUpdateWithoutTaskProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    firstName?: StringFieldUpdateOperationsInput | string
+    lastName?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    buddyId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    buddies?: BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type UserCreateWithoutBuddyPreparationsAsBuddyInput = {
@@ -22596,6 +24357,32 @@ export namespace Prisma {
   export type UserCreateOrConnectWithoutBuddyPreparationAsUserInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutBuddyPreparationAsUserInput, UserUncheckedCreateWithoutBuddyPreparationAsUserInput>
+  }
+
+  export type BuddyPreparationTaskProgressCreateWithoutPreparationInput = {
+    id?: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    task: TaskCreateNestedOneWithoutPreparationProgressInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput = {
+    id?: string
+    taskId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressCreateOrConnectWithoutPreparationInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    create: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput>
+  }
+
+  export type BuddyPreparationTaskProgressCreateManyPreparationInputEnvelope = {
+    data: BuddyPreparationTaskProgressCreateManyPreparationInput | BuddyPreparationTaskProgressCreateManyPreparationInput[]
+    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutBuddyPreparationsAsBuddyInput = {
@@ -22753,6 +24540,22 @@ export namespace Prisma {
     asBuddyAssignments?: BuddyAssignmentUncheckedUpdateManyWithoutBuddyNestedInput
     buddyPreparationsAsBuddy?: BuddyPreparationUncheckedUpdateManyWithoutBuddyNestedInput
     buddyPreparationBuddyLinks?: BuddyPreparationBuddyUncheckedUpdateManyWithoutBuddyNestedInput
+  }
+
+  export type BuddyPreparationTaskProgressUpsertWithWhereUniqueWithoutPreparationInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    update: XOR<BuddyPreparationTaskProgressUpdateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedUpdateWithoutPreparationInput>
+    create: XOR<BuddyPreparationTaskProgressCreateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedCreateWithoutPreparationInput>
+  }
+
+  export type BuddyPreparationTaskProgressUpdateWithWhereUniqueWithoutPreparationInput = {
+    where: BuddyPreparationTaskProgressWhereUniqueInput
+    data: XOR<BuddyPreparationTaskProgressUpdateWithoutPreparationInput, BuddyPreparationTaskProgressUncheckedUpdateWithoutPreparationInput>
+  }
+
+  export type BuddyPreparationTaskProgressUpdateManyWithWhereWithoutPreparationInput = {
+    where: BuddyPreparationTaskProgressScalarWhereInput
+    data: XOR<BuddyPreparationTaskProgressUpdateManyMutationInput, BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationInput>
   }
 
   export type UserCreateWithoutBuddyAssignmentsInput = {
@@ -22975,6 +24778,7 @@ export namespace Prisma {
     buddy: UserCreateNestedOneWithoutBuddyPreparationsAsBuddyInput
     organization: OrganizationCreateNestedOneWithoutBuddyPreparationsInput
     user?: UserCreateNestedOneWithoutBuddyPreparationAsUserInput
+    taskProgress?: BuddyPreparationTaskProgressCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationUncheckedCreateWithoutBuddiesInput = {
@@ -22989,6 +24793,7 @@ export namespace Prisma {
     notes?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    taskProgress?: BuddyPreparationTaskProgressUncheckedCreateNestedManyWithoutPreparationInput
   }
 
   export type BuddyPreparationCreateOrConnectWithoutBuddiesInput = {
@@ -23068,6 +24873,7 @@ export namespace Prisma {
     buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
     user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateWithoutBuddiesInput = {
@@ -23082,6 +24888,7 @@ export namespace Prisma {
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    taskProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type UserUpsertWithoutBuddyPreparationBuddyLinksInput = {
@@ -23404,6 +25211,7 @@ export namespace Prisma {
     buddies?: BuddyPreparationBuddyUpdateManyWithoutPreparationNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBuddyPreparationsNestedInput
     user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateWithoutBuddyInput = {
@@ -23418,6 +25226,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     buddies?: BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateManyWithoutBuddyInput = {
@@ -23546,6 +25355,7 @@ export namespace Prisma {
     buddy?: UserUpdateOneRequiredWithoutBuddyPreparationsAsBuddyNestedInput
     buddies?: BuddyPreparationBuddyUpdateManyWithoutPreparationNestedInput
     user?: UserUpdateOneWithoutBuddyPreparationAsUserNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateWithoutOrganizationInput = {
@@ -23560,6 +25370,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     buddies?: BuddyPreparationBuddyUncheckedUpdateManyWithoutPreparationNestedInput
+    taskProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationNestedInput
   }
 
   export type BuddyPreparationUncheckedUpdateManyWithoutOrganizationInput = {
@@ -23634,6 +25445,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     progress?: TaskProgressUpdateManyWithoutTaskNestedInput
+    preparationProgress?: BuddyPreparationTaskProgressUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateWithoutCategoryInput = {
@@ -23646,6 +25458,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     progress?: TaskProgressUncheckedUpdateManyWithoutTaskNestedInput
+    preparationProgress?: BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutCategoryInput = {
@@ -23662,6 +25475,14 @@ export namespace Prisma {
   export type TaskProgressCreateManyTaskInput = {
     id?: string
     userId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressCreateManyTaskInput = {
+    id?: string
+    preparationId: string
     completed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23691,10 +25512,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BuddyPreparationTaskProgressUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    preparation?: BuddyPreparationUpdateOneRequiredWithoutTaskProgressNestedInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    preparationId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateManyWithoutTaskInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    preparationId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BuddyPreparationBuddyCreateManyPreparationInput = {
     id?: string
     buddyId: string
     createdAt?: Date | string
+  }
+
+  export type BuddyPreparationTaskProgressCreateManyPreparationInput = {
+    id?: string
+    taskId: string
+    completed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type BuddyPreparationBuddyUpdateWithoutPreparationInput = {
@@ -23713,6 +25566,30 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     buddyId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUpdateWithoutPreparationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    task?: TaskUpdateOneRequiredWithoutPreparationProgressNestedInput
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateWithoutPreparationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BuddyPreparationTaskProgressUncheckedUpdateManyWithoutPreparationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
+    completed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

@@ -209,6 +209,15 @@ exports.Prisma.TaskProgressScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.BuddyPreparationTaskProgressScalarFieldEnum = {
+  id: 'id',
+  preparationId: 'preparationId',
+  taskId: 'taskId',
+  completed: 'completed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.PreAssignedRoleScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -286,6 +295,7 @@ exports.Prisma.ModelName = {
   Category: 'Category',
   Task: 'Task',
   TaskProgress: 'TaskProgress',
+  BuddyPreparationTaskProgress: 'BuddyPreparationTaskProgress',
   PreAssignedRole: 'PreAssignedRole',
   BuddyPreparation: 'BuddyPreparation',
   BuddyAssignment: 'BuddyAssignment',

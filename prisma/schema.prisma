@@ -114,6 +114,7 @@ model Task {
   updatedAt   DateTime       @updatedAt
   category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   progress    TaskProgress[]
+  preparationProgress BuddyPreparationTaskProgress[]
 }
 
 model TaskProgress {
@@ -127,6 +128,19 @@ model TaskProgress {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, taskId])
+}
+
+model BuddyPreparationTaskProgress {
+  id            String           @id @default(cuid())
+  preparationId String
+  taskId        String
+  completed     Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  task          Task             @relation(fields: [taskId], references: [id])
+  preparation   BuddyPreparation @relation(fields: [preparationId], references: [id])
+
+  @@unique([preparationId, taskId])
 }
 
 model PreAssignedRole {
@@ -155,6 +169,7 @@ model BuddyPreparation {
   buddies        BuddyPreparationBuddy[]
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User?         @relation("BuddyPreparationUser", fields: [userId], references: [id], onDelete: SetNull)
+  taskProgress   BuddyPreparationTaskProgress[]
 
   @@unique([email, organizationId]) // Prevent duplicate preparations for same email in same org
 }
