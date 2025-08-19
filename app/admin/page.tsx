@@ -154,7 +154,7 @@ export default function AdminPage() {
   const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | undefined>(undefined);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [importType, setImportType] = useState<'all' | 'regular' | 'buddy'>('all');
+  const [importType, setImportType] = useState<'regular' | 'buddy'>('regular');
 
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
@@ -511,8 +511,7 @@ export default function AdminPage() {
       fetchChecklist();
 
       const typeNames = {
-        all: 'Komplett checklista',
-        regular: 'Vanlig checklista',
+        regular: 'Onboarding checklista',
         buddy: 'Buddy-checklista'
       };
 
@@ -536,7 +535,7 @@ export default function AdminPage() {
   };
 
   // Hantera import-dialog för olika typer
-  const handleImportDialog = (type: 'all' | 'regular' | 'buddy') => {
+  const handleImportDialog = (type: 'regular' | 'buddy') => {
     setImportType(type);
     setImportDialogOpen(true);
   };
@@ -697,24 +696,14 @@ export default function AdminPage() {
                   <div className="border-t pt-2 mt-2">
                     <p className="text-sm text-muted-foreground mb-2">Importera checklista:</p>
                     <div className="space-y-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleImportDialog('all')}
-                        disabled={submitting}
-                        className="w-full justify-start"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Importera komplett checklista
-                      </Button>
-
-                      <Button
+                                            <Button
                         variant="outline"
                         onClick={() => handleImportDialog('regular')}
                         disabled={submitting}
                         className="w-full justify-start"
                       >
                         <Upload className="h-4 w-4 mr-2" />
-                        Importera vanlig checklista
+                        Importera onboarding checklista
                       </Button>
 
                       {buddyEnabled && (
@@ -1450,14 +1439,12 @@ export default function AdminPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              {importType === 'all' && 'Importera komplett checklista'}
-              {importType === 'regular' && 'Importera vanlig checklista'}
+              {importType === 'regular' && 'Importera onboarding checklista'}
               {importType === 'buddy' && 'Importera buddy-checklista'}
             </DialogTitle>
             <DialogDescription>
-              {importType === 'all' && 'Importera en komplett checklista (ersätter alla befintliga uppgifter).'}
-              {importType === 'regular' && 'Importera endast vanliga uppgifter (behåller befintliga buddy-uppgifter).'}
-              {importType === 'buddy' && 'Importera endast buddy-uppgifter (behåller befintliga vanliga uppgifter).'}
+              {importType === 'regular' && 'Importera endast onboarding uppgifter (behåller befintliga buddy-uppgifter).'}
+              {importType === 'buddy' && 'Importera endast buddy-uppgifter (behåller befintliga onboarding uppgifter).'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">

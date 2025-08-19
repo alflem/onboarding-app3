@@ -45,7 +45,9 @@ import {
   ClipboardCheck,
   Loader2,
   ChevronDown, ChevronRight,
-  Download
+  Download,
+  Upload,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -561,6 +563,9 @@ export default function TemplateEditPage() {
   const [saving, setSaving] = useState(false);
   const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [buddyEnabled, setBuddyEnabled] = useState<boolean>(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importType, setImportType] = useState<'regular' | 'buddy'>('regular');
   const [newCategory, setNewCategory] = useState({ name: "" });
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
     null
@@ -690,6 +695,96 @@ export default function TemplateEditPage() {
       console.error("Fel vid export av checklista:", error);
       toast.error("Kunde inte exportera checklista", {
         description: "Ett fel uppstod vid export av checklista."
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Import-funktioner
+  const handleImportDialog = (type: 'regular' | 'buddy') => {
+    setImportType(type);
+    setImportDialogOpen(true);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type === 'application/json' || file.name.endsWith('.json')) {
+        setImportFile(file);
+      } else {
+        toast.error("Fel filtyp", {
+          description: "Endast JSON-filer är tillåtna."
+        });
+      }
+    }
+  };
+
+  const handleImportChecklist = async () => {
+    if (!importFile) {
+      toast.error("Ingen fil vald", {
+        description: "Välj en JSON-fil att importera."
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Läs filen som text
+      const fileContent = await importFile.text();
+      let importData;
+
+      try {
+        importData = JSON.parse(fileContent);
+      } catch {
+        throw new Error('Ogiltig JSON-fil');
+      }
+
+      // Lägg till import-typ i metadata om det inte redan finns
+      if (!importData.metadata) {
+        importData.metadata = {};
+      }
+      importData.metadata.exportType = importType;
+
+      // Skicka till API
+      const response = await fetch('/api/templates/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(importData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Kunde inte importera checklista');
+      }
+
+      const result = await response.json();
+
+      // Stäng dialog och rensa fil
+      setImportDialogOpen(false);
+      setImportFile(null);
+
+      // Uppdatera data
+      fetchChecklist();
+
+      const typeNames = {
+        regular: 'Onboarding checklista',
+        buddy: 'Buddy-checklista'
+      };
+
+      const typeName = typeNames[result.exportType as keyof typeof typeNames] || 'Checklista';
+
+      toast.success("Import slutförd", {
+        description: `${typeName} importerad: ${result.categoriesCount} kategorier och ${result.tasksCount} uppgifter.`
+      });
+
+    } catch (error) {
+      console.error("Fel vid import av checklista:", error);
+      toast.error("Kunde inte importera checklista", {
+        description: error instanceof Error ? error.message : "Ett okänt fel uppstod."
       });
     } finally {
       setSaving(false);
@@ -1342,18 +1437,8 @@ export default function TemplateEditPage() {
           </Button>
                 )}
 
-        {/* Export-knappar */}
+                {/* Export-knappar */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handleExportChecklist('all')}
-            disabled={saving}
-            className="justify-start"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportera komplett checklista
-          </Button>
-
           <Button
             variant="outline"
             onClick={() => handleExportChecklist('regular')}
@@ -1361,7 +1446,7 @@ export default function TemplateEditPage() {
             className="justify-start"
           >
             <Download className="h-4 w-4 mr-2" />
-            Exportera vanlig checklista
+            Exportera onboarding checklista
           </Button>
 
           {buddyEnabled && (
@@ -1375,6 +1460,34 @@ export default function TemplateEditPage() {
               Exportera buddy-checklista
             </Button>
           )}
+        </div>
+
+        {/* Import-knappar */}
+        <div className="border-t pt-2 mt-2">
+          <p className="text-sm text-muted-foreground mb-2">Importera checklista:</p>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={() => handleImportDialog('regular')}
+              disabled={saving}
+              className="justify-start"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Importera onboarding checklista
+            </Button>
+
+            {buddyEnabled && (
+              <Button
+                variant="outline"
+                onClick={() => handleImportDialog('buddy')}
+                disabled={saving}
+                className="justify-start"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importera buddy-checklista
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Återställningsknappen är dold */}
@@ -1592,6 +1705,64 @@ export default function TemplateEditPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Import Dialog */}
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              {importType === 'regular' && 'Importera onboarding checklista'}
+              {importType === 'buddy' && 'Importera buddy-checklista'}
+            </DialogTitle>
+            <DialogDescription>
+              {importType === 'regular' && 'Importera endast onboarding uppgifter (behåller befintliga buddy-uppgifter).'}
+              {importType === 'buddy' && 'Importera endast buddy-uppgifter (behåller befintliga onboarding uppgifter).'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <label htmlFor="import-file" className="text-sm font-medium">
+                Välj fil
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <input
+                  id="import-file"
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="import-file"
+                  className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Välj JSON-fil
+                </label>
+                {importFile && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Vald fil: {importFile.name}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
+              Avbryt
+            </Button>
+            <Button
+              onClick={handleImportChecklist}
+              disabled={!importFile || saving}
+            >
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Importera
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

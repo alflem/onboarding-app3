@@ -87,7 +87,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Skapa exportformat
     const exportTypeNames = {
       all: 'Komplett',
-      regular: 'Vanlig',
+      regular: 'Onboarding',
       buddy: 'Buddy'
     };
 

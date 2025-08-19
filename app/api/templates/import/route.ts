@@ -179,9 +179,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const typeNames = {
+        const typeNames = {
       all: 'Komplett checklista',
-      regular: 'Vanlig checklista',
+      regular: 'Onboarding checklista',
       buddy: 'Buddy-checklista'
     };
 
