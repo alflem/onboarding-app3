@@ -26,10 +26,19 @@ export async function GET() {
       include: { user: { select: { id: true, name: true, email: true, createdAt: true, role: true } } },
       orderBy: { createdAt: "desc" },
     });
-    const buddyForUsers = [
+    // Combine and deduplicate users based on ID
+    const allBuddyUsers = [
       ...buddyForUsersLegacy,
       ...assignmentUsers.map(a => a.user)
     ];
+
+    // Remove duplicates by creating a Map with user ID as key
+    const uniqueUsersMap = new Map();
+    allBuddyUsers.forEach(user => {
+      uniqueUsersMap.set(user.id, user);
+    });
+
+    const buddyForUsers = Array.from(uniqueUsersMap.values());
 
     // Get active buddy preparations this person is buddy for
     const activeBuddyPreparations = await prisma.buddyPreparation.findMany({

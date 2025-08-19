@@ -66,12 +66,20 @@ export async function GET() {
       select: { id: true, firstName: true, lastName: true, email: true }
     });
 
+    // Combine and deduplicate buddy users based on ID
+    const allBuddyUsers = [...employeesWithThisBuddy, ...assignedUsers];
+    const uniqueBuddyUsersMap = new Map();
+    allBuddyUsers.forEach(user => {
+      uniqueBuddyUsersMap.set(user.id, user);
+    });
+    const uniqueBuddyUsers = Array.from(uniqueBuddyUsersMap.values());
+
     // User is a buddy if they have either existing employees or active preparations
-    const isBuddy = employeesWithThisBuddy.length > 0 || assignedUsers.length > 0 || activeBuddyPreparations.length > 0;
+    const isBuddy = uniqueBuddyUsers.length > 0 || activeBuddyPreparations.length > 0;
 
     return NextResponse.json({
       isBuddy,
-      buddyFor: [...employeesWithThisBuddy, ...assignedUsers],
+      buddyFor: uniqueBuddyUsers,
       buddyPreparations: activeBuddyPreparations,
       buddyEnabled: true
     });

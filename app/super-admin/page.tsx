@@ -159,6 +159,9 @@ export default function SuperAdminOrganization() {
       setOrganization(prev => prev ? { ...prev, ...updatedOrg } : null);
       toast.success(`Buddy-funktionen har ${buddyEnabled ? 'aktiverats' : 'inaktiverats'}`);
 
+      // Skicka event för att uppdatera header-navigationen
+      window.dispatchEvent(new CustomEvent('buddy-status-changed'));
+
     } catch (error) {
       console.error("Fel vid uppdatering av buddyinställningar:", error);
       toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddyinställningar");

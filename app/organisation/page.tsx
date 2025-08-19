@@ -123,6 +123,9 @@ export default function OrganisationPage() {
       setOrganization(prev => prev ? { ...prev, ...updatedOrg } : null);
       toast.success("Buddy-inställningar har uppdaterats");
 
+      // Skicka event för att uppdatera header-navigationen
+      window.dispatchEvent(new CustomEvent('buddy-status-changed'));
+
     } catch (error) {
       console.error("Fel vid uppdatering:", error);
       toast.error(error instanceof Error ? error.message : "Kunde inte uppdatera buddy-inställningar");

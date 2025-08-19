@@ -400,6 +400,9 @@ export default function AdminPage() {
       toast.success("Buddy tilldelad", {
         description: "Medarbetaren har tilldelats en buddy."
       });
+
+      // Skicka event för att uppdatera header-navigationen
+      window.dispatchEvent(new CustomEvent('buddy-status-changed'));
     } catch {
       toast.error("Kunde inte tilldela buddy", {
         description: "Ett fel uppstod vid tilldelning av buddy."
@@ -439,6 +442,9 @@ export default function AdminPage() {
       toast.success(buddyId ? "Buddy tilldelad" : "Buddy borttagen", {
         description: buddyId ? "Medarbetaren har tilldelats en buddy." : "Buddy-tilldelningen har tagits bort."
       });
+
+      // Skicka event för att uppdatera header-navigationen
+      window.dispatchEvent(new CustomEvent('buddy-status-changed'));
     } catch {
       toast.error("Kunde inte uppdatera buddy", {
         description: "Ett fel uppstod vid uppdatering av buddytilldelning."

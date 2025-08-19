@@ -365,27 +365,42 @@ function BuddyChecklistContent() {
           <CardHeader className="pb-0 py-0">
             <CardTitle className="flex items-center gap-2 text-lg">
               <UserCheck className="h-4 w-4" />
-              Du är buddy för
+              Du är buddy för ({buddyRelationships.activeUsers.length + buddyRelationships.activePreparations.length + buddyRelationships.completedPreparations.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            {(buddyRelationships.activePreparations.length + buddyRelationships.completedPreparations.length) > 0 ? (
+            {(buddyRelationships.activeUsers.length + buddyRelationships.activePreparations.length + buddyRelationships.completedPreparations.length) > 0 ? (
               <div className="space-y-2">
+                {/* Aktiva anställda användare */}
+                {buddyRelationships.activeUsers.map((user: BuddyUser) => (
+                  <div key={`user-${user.id}`} className="border rounded-lg p-2 bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800/30 w-full flex flex-col md:flex-row md:items-center md:gap-4 text-sm">
+                    <span className="font-medium">{user.name}</span>
+                    <span className="text-muted-foreground">{user.email}</span>
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-200 w-fit">
+                      <UserCheck className="h-3 w-3 mr-1" />
+                      Aktiv anställd
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">Anställd: {new Date(user.createdAt).toLocaleDateString('sv-SE')}</span>
+                  </div>
+                ))}
+
+                {/* Förberedelser */}
                 {[...(buddyRelationships?.activePreparations ?? []), ...(buddyRelationships?.completedPreparations ?? [])].map((prep: BuddyPreparation | CompletedBuddyPreparation) => (
-                  <div key={prep.id} className="border rounded-lg p-2 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800/30 w-full flex flex-col md:flex-row md:items-center md:gap-4 text-sm">
+                  <div key={`prep-${prep.id}`} className="border rounded-lg p-2 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30 w-full flex flex-col md:flex-row md:items-center md:gap-4 text-sm">
                     <span>{prep.firstName} {prep.lastName}</span>
+                    <span className="text-muted-foreground">{prep.email || 'Ingen e-post'}</span>
                     <span className="text-muted-foreground font-medium">
                       {buddyRelationships && isCompletedBuddyPreparation(prep) ? (
-                        <Badge className="bg-green-50 text-green-700 hover:bg-green-100">
-                          Anställd
+                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
+                          Slutförd förberedelse
                         </Badge>
                       ) : (
-                        <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
                           Väntar på anställning
                         </Badge>
                       )}
                     </span>
-                    <span className="text-muted-foreground">Förberedd: {new Date(prep.createdAt).toLocaleDateString('sv-SE')}</span>
+                    <span className="text-muted-foreground text-xs">Förberedd: {new Date(prep.createdAt).toLocaleDateString('sv-SE')}</span>
                   </div>
                 ))}
               </div>
