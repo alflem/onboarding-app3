@@ -218,13 +218,16 @@ function BuddyChecklistContent() {
   // Hämta checklista när anställd väljs
   useEffect(() => {
     if (selectedEmployeeId && buddyRelationships) {
-      // Kontrollera att den valda anställda finns i buddy-relationerna
-      const isValidEmployee = buddyRelationships.activeUsers.some(user => user.id === selectedEmployeeId);
-      if (isValidEmployee) {
+      // Kontrollera att den valda personen finns i buddy-relationerna
+      const isValidUser = buddyRelationships.activeUsers.some(user => user.id === selectedEmployeeId);
+      const isValidPreparation = buddyRelationships.activePreparations.some(prep => prep.id === selectedEmployeeId) ||
+                                  buddyRelationships.completedPreparations.some(prep => prep.id === selectedEmployeeId);
+
+      if (isValidUser || isValidPreparation) {
         fetchChecklist(selectedEmployeeId);
       } else {
         setSelectedEmployeeId(null);
-        toast.error('Du har inte behörighet att se denna anställds checklista');
+        toast.error('Du har inte behörighet att se denna persons checklista');
       }
     } else if (selectedEmployeeId === null) {
       fetchChecklist();
@@ -415,30 +418,60 @@ function BuddyChecklistContent() {
         </Card>
       )}
 
-      {/* Employee Selector */}
-      {buddyRelationships && buddyRelationships.activeUsers.length > 0 && (
+      {/* Person Selector */}
+      {buddyRelationships && (buddyRelationships.activeUsers.length > 0 || buddyRelationships.activePreparations.length > 0 || buddyRelationships.completedPreparations.length > 0) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Välj anställd
+              Välj person
             </CardTitle>
             <CardDescription>
-              Välj vilken anställd du vill se buddy-checklistan för
+              Välj vilken person du vill se buddy-checklistan för (anställd eller förberedelse)
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={selectedEmployeeId || ""} onValueChange={handleEmployeeSelect}>
                 <SelectTrigger className="w-full sm:w-[300px]">
-                  <SelectValue placeholder="Välj en anställd..." />
+                  <SelectValue placeholder="Välj person..." />
                 </SelectTrigger>
                 <SelectContent>
+                  {/* Aktiva anställda */}
                   {buddyRelationships.activeUsers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                    <SelectItem key={`user-${user.id}`} value={user.id}>
                       <div className="flex flex-col">
                         <span className="font-medium">{user.name}</span>
-                        <span className="text-sm text-muted-foreground">{user.email}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">{user.email}</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Aktiv anställd</span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+
+                  {/* Aktiva förberedelser */}
+                  {buddyRelationships.activePreparations.map((prep) => (
+                    <SelectItem key={`prep-${prep.id}`} value={prep.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{prep.firstName} {prep.lastName}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">{prep.email || 'Ingen e-post'}</span>
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Väntar på anställning</span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+
+                  {/* Slutförda förberedelser */}
+                  {buddyRelationships.completedPreparations.map((prep) => (
+                    <SelectItem key={`completed-${prep.id}`} value={prep.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{prep.firstName} {prep.lastName}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">{prep.email || 'Ingen e-post'}</span>
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">Slutförd förberedelse</span>
+                        </div>
                       </div>
                     </SelectItem>
                   ))}

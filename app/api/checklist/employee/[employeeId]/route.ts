@@ -18,8 +18,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const { employeeId } = await context.params;
 
-    // Kontrollera att den inloggade användaren är buddy för den anställda
-    const employee = await prisma.user.findUnique({
+    // Kontrollera om det är en anställd eller en förberedelse
+    let employee = null;
+    let preparation = null;
+    let organizationId = null;
+    let personData = null;
+
+    // Först, försök hitta som anställd användare
+    employee = await prisma.user.findUnique({
       where: { id: employeeId },
       include: {
         organization: true,
@@ -29,26 +35,62 @@ export async function GET(request: NextRequest, context: RouteContext) {
       }
     });
 
-    if (!employee) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
-    }
+    if (employee) {
+      // Kontrollera buddy-relation (både legacy och nya systemet)
+      const isBuddyLegacy = employee.buddyId === session.user.id;
+      const isBuddyAssignment = employee.buddyAssignments.length > 0;
 
-    // Kontrollera buddy-relation (både legacy och nya systemet)
-    const isBuddyLegacy = employee.buddyId === session.user.id;
-    const isBuddyAssignment = employee.buddyAssignments.length > 0;
+      if (!isBuddyLegacy && !isBuddyAssignment) {
+        return NextResponse.json({ error: "Not authorized to view this employee's checklist" }, { status: 403 });
+      }
 
-    if (!isBuddyLegacy && !isBuddyAssignment) {
-      return NextResponse.json({ error: "Not authorized to view this employee's checklist" }, { status: 403 });
-    }
+      // Kontrollera att organisationen har buddy-funktionen aktiverad
+      if (!employee.organization?.buddyEnabled) {
+        return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      }
 
-    // Kontrollera att organisationen har buddy-funktionen aktiverad
-    if (!employee.organization?.buddyEnabled) {
-      return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      organizationId = employee.organizationId;
+      personData = {
+        id: employee.id,
+        name: employee.name,
+        email: employee.email,
+        type: 'employee' as const
+      };
+    } else {
+      // Om inte anställd, försök hitta som förberedelse
+      preparation = await prisma.buddyPreparation.findUnique({
+        where: { id: employeeId },
+        include: {
+          organization: true
+        }
+      });
+
+      if (!preparation) {
+        return NextResponse.json({ error: "Person not found" }, { status: 404 });
+      }
+
+      // Kontrollera att den inloggade användaren är buddy för förberedelsen
+      if (preparation.buddyId !== session.user.id) {
+        return NextResponse.json({ error: "Not authorized to view this preparation's checklist" }, { status: 403 });
+      }
+
+      // Kontrollera att organisationen har buddy-funktionen aktiverad
+      if (!preparation.organization?.buddyEnabled) {
+        return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      }
+
+      organizationId = preparation.organizationId;
+      personData = {
+        id: preparation.id,
+        name: `${preparation.firstName} ${preparation.lastName}`,
+        email: preparation.email || null,
+        type: 'preparation' as const
+      };
     }
 
     // Hämta checklistan för organisationen
     const checklist = await prisma.checklist.findFirst({
-      where: { organizationId: employee.organizationId! },
+      where: { organizationId: organizationId! },
       include: {
         categories: {
           include: {
@@ -66,7 +108,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Checklist not found" }, { status: 404 });
     }
 
-    // Hämta framsteg för den specifika anställda
+    // Hämta framsteg för den specifika personen
     const taskProgress = await prisma.taskProgress.findMany({
       where: { userId: employeeId },
       select: { taskId: true, completed: true }
@@ -89,11 +131,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({
       categories: categoriesWithTasks,
-      employee: {
-        id: employee.id,
-        name: employee.name,
-        email: employee.email
-      }
+      employee: personData
     });
 
   } catch (error) {

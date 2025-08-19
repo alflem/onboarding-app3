@@ -40,8 +40,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "This is not a buddy task" }, { status: 403 });
     }
 
-    // Kontrollera att den anställda existerar och att användaren är buddy
-    const employee = await prisma.user.findUnique({
+    // Kontrollera om det är en anställd eller en förberedelse
+    let employee = null;
+    let preparation = null;
+    let personData = null;
+
+    // Först, försök hitta som anställd användare
+    employee = await prisma.user.findUnique({
       where: { id: employeeId },
       include: {
         organization: true,
@@ -51,21 +56,53 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     });
 
-    if (!employee) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
-    }
+    if (employee) {
+      // Kontrollera buddy-relation
+      const isBuddyLegacy = employee.buddyId === session.user.id;
+      const isBuddyAssignment = employee.buddyAssignments.length > 0;
 
-    // Kontrollera buddy-relation
-    const isBuddyLegacy = employee.buddyId === session.user.id;
-    const isBuddyAssignment = employee.buddyAssignments.length > 0;
+      if (!isBuddyLegacy && !isBuddyAssignment) {
+        return NextResponse.json({ error: "Not authorized to update this employee's tasks" }, { status: 403 });
+      }
 
-    if (!isBuddyLegacy && !isBuddyAssignment) {
-      return NextResponse.json({ error: "Not authorized to update this employee's tasks" }, { status: 403 });
-    }
+      // Kontrollera att organisationen har buddy-funktionen aktiverad
+      if (!employee.organization?.buddyEnabled) {
+        return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      }
 
-    // Kontrollera att organisationen har buddy-funktionen aktiverad
-    if (!employee.organization?.buddyEnabled) {
-      return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      personData = {
+        id: employee.id,
+        name: employee.name,
+        type: 'employee' as const
+      };
+    } else {
+      // Om inte anställd, försök hitta som förberedelse
+      preparation = await prisma.buddyPreparation.findUnique({
+        where: { id: employeeId },
+        include: {
+          organization: true
+        }
+      });
+
+      if (!preparation) {
+        return NextResponse.json({ error: "Person not found" }, { status: 404 });
+      }
+
+      // Kontrollera att den inloggade användaren är buddy för förberedelsen
+      if (preparation.buddyId !== session.user.id) {
+        return NextResponse.json({ error: "Not authorized to update this preparation's tasks" }, { status: 403 });
+      }
+
+      // Kontrollera att organisationen har buddy-funktionen aktiverad
+      if (!preparation.organization?.buddyEnabled) {
+        return NextResponse.json({ error: "Buddy function not enabled for this organization" }, { status: 403 });
+      }
+
+      personData = {
+        id: preparation.id,
+        name: `${preparation.firstName} ${preparation.lastName}`,
+        type: 'preparation' as const
+      };
     }
 
     // Uppdatera eller skapa framsteg för den specifika anställda
@@ -89,10 +126,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       taskProgress,
-      employee: {
-        id: employee.id,
-        name: employee.name
-      }
+      employee: personData
     });
 
   } catch (error) {
