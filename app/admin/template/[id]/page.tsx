@@ -44,7 +44,8 @@ import {
   Save,
   ClipboardCheck,
   Loader2,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight,
+  Download
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -650,6 +651,50 @@ export default function TemplateEditPage() {
       setBuddyEnabled(false);
     }
   }, []);
+
+  // Exportera checklista
+  const handleExportChecklist = async (exportType: 'all' | 'regular' | 'buddy') => {
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/templates/${id}/export?type=${exportType}`);
+
+      if (!response.ok) {
+        throw new Error('Kunde inte exportera checklista');
+      }
+
+      // Hämta filnamnet från Content-Disposition header
+      const contentDisposition = response.headers.get('Content-Disposition');
+      const filename = contentDisposition?.match(/filename="([^"]+)"/)?.[1] || 'checklist-export.json';
+
+      // Skapa blob och ladda ner filen
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      const typeNames = {
+        all: 'Komplett checklista',
+        regular: 'Vanlig checklista',
+        buddy: 'Buddy-checklista'
+      };
+
+      toast.success("Checklista exporterad", {
+        description: `${typeNames[exportType]} har exporterats som JSON-fil.`
+      });
+    } catch (error) {
+      console.error("Fel vid export av checklista:", error);
+      toast.error("Kunde inte exportera checklista", {
+        description: "Ett fel uppstod vid export av checklista."
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (status === "authenticated" && id) {
@@ -1295,7 +1340,43 @@ export default function TemplateEditPage() {
             <ClipboardCheck className="h-4 w-4 mr-2" />
             Hantera Buddyuppgifter
           </Button>
-        )}
+                )}
+
+        {/* Export-knappar */}
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="outline"
+            onClick={() => handleExportChecklist('all')}
+            disabled={saving}
+            className="justify-start"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportera komplett checklista
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => handleExportChecklist('regular')}
+            disabled={saving}
+            className="justify-start"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportera vanlig checklista
+          </Button>
+
+          {buddyEnabled && (
+            <Button
+              variant="outline"
+              onClick={() => handleExportChecklist('buddy')}
+              disabled={saving}
+              className="justify-start"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportera buddy-checklista
+            </Button>
+          )}
+        </div>
+
         {/* Återställningsknappen är dold */}
       </div>
 
