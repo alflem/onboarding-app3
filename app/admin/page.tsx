@@ -624,52 +624,7 @@ export default function AdminPage() {
                       {t('buddy_tasks')}
                     </Button>
                   )}
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full text-destructive hover:text-destructive"
-                        disabled={submitting}
-                      >
-                        {submitting ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Återställer...
-                          </>
-                        ) : (
-                          <>
-                            <RotateCcw className="h-4 w-4 mr-2" />
-                            Återställ till standardmall
-                          </>
-                        )}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Återställ checklista?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Detta kommer att ta bort alla befintliga kategorier och uppgifter och ersätta dem med standardmallen från organization_seeder. Buddyuppgifter påverkas inte. Denna åtgärd kan inte ångras.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          onClick={resetChecklist}
-                          disabled={submitting}
-                        >
-                          {submitting ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Återställer...
-                            </>
-                          ) : (
-                            "Återställ"
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  {/* Återställningsknappen är dold */}
                 </div>
 
                 <div className="text-xs text-muted-foreground">

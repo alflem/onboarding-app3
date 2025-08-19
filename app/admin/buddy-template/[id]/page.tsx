@@ -1230,52 +1230,7 @@ export default function BuddyTemplatePage() {
             Till checklista för nyanställd
           </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="text-destructive hover:text-destructive"
-                disabled={saving}
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Återställer...
-                  </>
-                ) : (
-                  <>
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Återställ Buddy-checklista
-                  </>
-                )}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Återställ buddy-checklista?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Detta kommer att ta bort alla befintliga buddyuppgifter och ersätta dem med standardmallen för svenska processer (nyanställningsintroduktion). Vanliga uppgifter påverkas inte. Denna åtgärd kan inte ångras.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  onClick={resetBuddyChecklist}
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Återställer...
-                    </>
-                  ) : (
-                    "Återställ Buddy-checklista"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {/* Återställningsknappen för buddy-checklista är dold */}
         </div>
       </div>
 
