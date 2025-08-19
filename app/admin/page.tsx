@@ -54,8 +54,6 @@ import {
 
   UserPlus,
   Trash2,
-  Upload,
-  FileText,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
@@ -152,9 +150,7 @@ export default function AdminPage() {
   const [buddyDialogOpen, setBuddyDialogOpen] = useState(false);
   const [buddyPrepFormOpen, setBuddyPrepFormOpen] = useState(false);
   const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | undefined>(undefined);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
-  const [importType, setImportType] = useState<'regular' | 'buddy'>('regular');
+
 
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
@@ -459,101 +455,9 @@ export default function AdminPage() {
     }
   };
 
-  // Importera checklista
-  const handleImportChecklist = async () => {
-    if (!importFile) {
-      toast.error("Ingen fil vald", {
-        description: "Välj en JSON-fil att importera."
-      });
-      return;
-    }
 
-    try {
-      setSubmitting(true);
 
-      // Läs filen som text
-      const fileContent = await importFile.text();
-      let importData;
 
-      try {
-        importData = JSON.parse(fileContent);
-      } catch {
-        throw new Error('Ogiltig JSON-fil');
-      }
-
-      // Lägg till import-typ i metadata om det inte redan finns
-      if (!importData.metadata) {
-        importData.metadata = {};
-      }
-      importData.metadata.exportType = importType;
-
-      // Skicka till API
-      const response = await fetch('/api/templates/import', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(importData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Kunde inte importera checklista');
-      }
-
-      const result = await response.json();
-
-      // Stäng dialog och rensa fil
-      setImportDialogOpen(false);
-      setImportFile(null);
-
-      // Uppdatera data
-      fetchChecklist();
-
-      const typeNames = {
-        regular: 'Onboarding checklista',
-        buddy: 'Buddy-checklista'
-      };
-
-      const typeName = typeNames[result.exportType as keyof typeof typeNames] || 'Checklista';
-
-      toast.success("Import slutförd", {
-        description: `${typeName} importerad: ${result.categoriesCount} kategorier och ${result.tasksCount} uppgifter.`
-      });
-
-      // Skicka event för att uppdatera header-navigationen
-      window.dispatchEvent(new CustomEvent('buddy-status-changed'));
-
-    } catch (error) {
-      console.error("Fel vid import:", error);
-      toast.error("Kunde inte importera checklista", {
-        description: error instanceof Error ? error.message : "Ett okänt fel uppstod."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Hantera import-dialog för olika typer
-  const handleImportDialog = (type: 'regular' | 'buddy') => {
-    setImportType(type);
-    setImportDialogOpen(true);
-  };
-
-  // Hantera filval
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type === 'application/json' || file.name.endsWith('.json')) {
-        setImportFile(file);
-      } else {
-        toast.error("Fel filtyp", {
-          description: "Endast JSON-filer är tillåtna."
-        });
-        event.target.value = '';
-      }
-    }
-  };
 
   // Funktioner för buddy preparations
   const handleOpenBuddyPrepForm = (preparation?: BuddyPreparation) => {
@@ -692,33 +596,7 @@ export default function AdminPage() {
                     </Button>
                   )}
 
-                  {/* Import-knappar */}
-                  <div className="border-t pt-2 mt-2">
-                    <p className="text-sm text-muted-foreground mb-2">Importera checklista:</p>
-                    <div className="space-y-2">
-                                            <Button
-                        variant="outline"
-                        onClick={() => handleImportDialog('regular')}
-                        disabled={submitting}
-                        className="w-full justify-start"
-                      >
-                        <Upload className="h-4 w-4 mr-2" />
-                        Importera onboarding checklista
-                      </Button>
 
-                      {buddyEnabled && (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleImportDialog('buddy')}
-                          disabled={submitting}
-                          className="w-full justify-start"
-                        >
-                          <Upload className="h-4 w-4 mr-2" />
-                          Importera buddy-checklista
-                        </Button>
-                      )}
-                    </div>
-                  </div>
                   {/* Återställningsknappen är dold */}
                 </div>
 
@@ -1433,72 +1311,7 @@ export default function AdminPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Import Dialog */}
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              {importType === 'regular' && 'Importera onboarding checklista'}
-              {importType === 'buddy' && 'Importera buddy-checklista'}
-            </DialogTitle>
-            <DialogDescription>
-              {importType === 'regular' && 'Importera endast onboarding uppgifter (behåller befintliga buddy-uppgifter).'}
-              {importType === 'buddy' && 'Importera endast buddy-uppgifter (behåller befintliga onboarding uppgifter).'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <label htmlFor="import-file" className="text-sm font-medium">
-                Välj fil
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <input
-                  id="import-file"
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="import-file"
-                  className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Välj JSON-fil
-                </label>
-                {importFile && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    Vald fil: {importFile.name}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Avbryt</Button>
-            </DialogClose>
-            <Button
-              onClick={handleImportChecklist}
-              disabled={submitting || !importFile}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importerar...
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importera
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Buddy Preparation Form Dialog */}
       <BuddyPreparationForm
