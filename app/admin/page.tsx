@@ -142,8 +142,8 @@ export default function AdminPage() {
 
   // State för formulär
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-  const [selectedBuddyIds, setSelectedBuddyIds] = useState<string[]>([]);
-  const [selectedBuddyIdsForDetail, setSelectedBuddyIdsForDetail] = useState<string[]>([]);
+  const [selectedBuddyId, setSelectedBuddyId] = useState<string>('');
+  const [selectedBuddyIdForDetail, setSelectedBuddyIdForDetail] = useState<string>('');
 
   // State för åtgärder
   const [submitting, setSubmitting] = useState(false);
@@ -372,46 +372,43 @@ export default function AdminPage() {
     }
   };
 
-  // Funktion för att tilldela buddies
+  // Funktion för att tilldela buddy
   const handleAssignBuddy = async () => {
-    if (!selectedEmployeeId || selectedBuddyIds.length === 0) return;
+    if (!selectedEmployeeId || !selectedBuddyId) return;
 
     setSubmitting(true);
 
     try {
-      // Skapa alla buddy-tilldelningar i en request
       const response = await fetch(`/api/employees/${selectedEmployeeId}/buddy`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mode: 'multi',
-          buddyIds: selectedBuddyIds
+          buddyId: selectedBuddyId
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Kunde inte tilldela buddies');
+        throw new Error('Kunde inte tilldela buddy');
       }
 
       await response.json();
 
       fetchUsers(); // Uppdatera listan med medarbetare
       setSelectedEmployeeId(null);
-      setSelectedBuddyIds([]);
+      setSelectedBuddyId('');
       setBuddyDialogOpen(false);
 
-      const buddyText = selectedBuddyIds.length === 1 ? 'en buddy' : `${selectedBuddyIds.length} buddies`;
-      toast.success("Buddies tilldelade", {
-        description: `Medarbetaren har tilldelats ${buddyText}.`
+      toast.success("Buddy tilldelad", {
+        description: "Medarbetaren har tilldelats en buddy."
       });
 
       // Skicka event för att uppdatera header-navigationen
       window.dispatchEvent(new CustomEvent('buddy-status-changed'));
     } catch {
-      toast.error("Kunde inte tilldela buddies", {
-        description: "Ett fel uppstod vid tilldelning av buddies."
+      toast.error("Kunde inte tilldela buddy", {
+        description: "Ett fel uppstod vid tilldelning av buddy."
       });
     } finally {
       setSubmitting(false);
@@ -431,8 +428,7 @@ export default function AdminPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mode: 'multi',
-          buddyIds: buddyId ? [buddyId] : []
+          buddyId: buddyId
         }),
       });
 
@@ -1004,66 +1000,26 @@ export default function AdminPage() {
         <Dialog open={buddyDialogOpen} onOpenChange={setBuddyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Tilldela buddies</DialogTitle>
+            <DialogTitle>Tilldela buddy</DialogTitle>
             <DialogDescription>
-              Välj en eller flera medarbetare som ska vara buddies för den valda medarbetaren.
+              Välj en medarbetare som ska vara buddy för den valda medarbetaren.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="buddy-select">Välj buddies</Label>
-              <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  {selectedBuddyIds.length === 0
-                    ? "Inga buddies valda"
-                    : selectedBuddyIds.length === 1
-                    ? `Vald: ${buddies.find(b => b.id === selectedBuddyIds[0])?.name}`
-                    : `${selectedBuddyIds.length} buddies valda`}
-                </div>
-
-                {selectedBuddyIds.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Valda buddies:</p>
-                    {selectedBuddyIds.map(buddyId => {
-                      const buddy = buddies.find(b => b.id === buddyId);
-                      return (
-                        <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
-                          <span className="text-sm">{buddy?.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedBuddyIds(current => current.filter(id => id !== buddyId))}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {buddies.filter(buddy => !selectedBuddyIds.includes(buddy.id)).length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Lägg till fler buddies:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {buddies
-                        .filter(buddy => !selectedBuddyIds.includes(buddy.id))
-                        .map(buddy => (
-                          <Button
-                            key={buddy.id}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedBuddyIds(current => [...current, buddy.id])}
-                            className="justify-start"
-                          >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            {buddy.name}
-                          </Button>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <Label htmlFor="buddy-select">Välj buddy</Label>
+              <Select value={selectedBuddyId} onValueChange={setSelectedBuddyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Välj en buddy..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {buddies.map((buddy) => (
+                    <SelectItem key={buddy.id} value={buddy.id}>
+                      {buddy.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
@@ -1072,7 +1028,7 @@ export default function AdminPage() {
             </DialogClose>
             <Button
               onClick={handleAssignBuddy}
-              disabled={submitting || selectedBuddyIds.length === 0}
+              disabled={submitting || !selectedBuddyId}
             >
               {submitting ? (
                 <>
@@ -1245,68 +1201,28 @@ export default function AdminPage() {
                         <div className="space-y-3">
                           <p className="text-sm text-muted-foreground">Ingen buddy tilldelad</p>
                           <div className="space-y-2">
-                            <Label htmlFor="detail-buddy-select">Välj buddies</Label>
+                            <Label htmlFor="detail-buddy-select">Välj buddy</Label>
                             <div className="flex gap-2">
-                              <div className="space-y-2 flex-1">
-                                <div className="text-sm text-muted-foreground">
-                                  {selectedBuddyIdsForDetail.length === 0
-                                    ? "Inga buddies valda"
-                                    : selectedBuddyIdsForDetail.length === 1
-                                    ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
-                                    : `${selectedBuddyIdsForDetail.length} buddies valda`}
-                                </div>
-
-                                {selectedBuddyIdsForDetail.length > 0 && (
-                                  <div className="space-y-1">
-                                    <p className="text-sm font-medium">Valda buddies:</p>
-                                    {selectedBuddyIdsForDetail.map(buddyId => {
-                                      const buddy = buddies.find(b => b.id === buddyId);
-                                      return (
-                                        <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
-                                          <span className="text-sm">{buddy?.name}</span>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => setSelectedBuddyIdsForDetail(current => current.filter(id => id !== buddyId))}
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
-
-                                {buddies.filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id)).length > 0 && (
-                                  <div className="space-y-2">
-                                    <p className="text-sm font-medium">Lägg till fler buddies:</p>
-                                    <div className="grid grid-cols-2 gap-2">
-                                      {buddies
-                                        .filter(buddy => !selectedBuddyIdsForDetail.includes(buddy.id))
-                                        .map(buddy => (
-                                          <Button
-                                            key={buddy.id}
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => setSelectedBuddyIdsForDetail(current => [...current, buddy.id])}
-                                            className="justify-start"
-                                          >
-                                            <UserPlus className="h-4 w-4 mr-2" />
-                                            {buddy.name}
-                                          </Button>
-                                        ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
+                              <Select value={selectedBuddyIdForDetail} onValueChange={setSelectedBuddyIdForDetail}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Välj en buddy..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {buddies.map((buddy) => (
+                                    <SelectItem key={buddy.id} value={buddy.id}>
+                                      {buddy.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               <Button
                                 onClick={() => {
-                                  if (selectedBuddyIdsForDetail.length > 0) {
-                                    handleUpdateBuddyFromDetail(selectedBuddyIdsForDetail[0]);
-                                    setSelectedBuddyIdsForDetail([]);
+                                  if (selectedBuddyIdForDetail) {
+                                    handleUpdateBuddyFromDetail(selectedBuddyIdForDetail);
+                                    setSelectedBuddyIdForDetail('');
                                   }
                                 }}
-                                disabled={submitting || selectedBuddyIdsForDetail.length === 0}
+                                disabled={submitting || !selectedBuddyIdForDetail}
                               >
                                 {submitting ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1321,73 +1237,35 @@ export default function AdminPage() {
 
                       {employeeDetails.buddy && (
                         <div className="space-y-2">
-                          <Label htmlFor="change-buddy-select">Lägg till fler buddies</Label>
+                          <Label htmlFor="change-buddy-select">Byt buddy</Label>
                           <div className="flex gap-2">
-                            <div className="space-y-2 flex-1">
-                              <div className="text-sm text-muted-foreground">
-                                {selectedBuddyIdsForDetail.length === 0
-                                  ? "Inga buddies valda"
-                                  : selectedBuddyIdsForDetail.length === 1
-                                  ? `Vald: ${buddies.find(b => b.id === selectedBuddyIdsForDetail[0])?.name}`
-                                  : `${selectedBuddyIdsForDetail.length} buddies valda`}
-                              </div>
-
-                              {selectedBuddyIdsForDetail.length > 0 && (
-                                <div className="space-y-1">
-                                  <p className="text-sm font-medium">Valda buddies:</p>
-                                  {selectedBuddyIdsForDetail.map(buddyId => {
-                                    const buddy = buddies.find(b => b.id === buddyId);
-                                    return (
-                                      <div key={buddyId} className="flex items-center justify-between bg-muted p-2 rounded">
-                                        <span className="text-sm">{buddy?.name}</span>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => setSelectedBuddyIdsForDetail(current => current.filter(id => id !== buddyId))}
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-
-                              {buddies.filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id)).length > 0 && (
-                                <div className="space-y-2">
-                                  <p className="text-sm font-medium">Lägg till fler buddies:</p>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {buddies
-                                      .filter(buddy => buddy.id !== employeeDetails.buddy?.id && !selectedBuddyIdsForDetail.includes(buddy.id))
-                                      .map(buddy => (
-                                        <Button
-                                          key={buddy.id}
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => setSelectedBuddyIdsForDetail(current => [...current, buddy.id])}
-                                          className="justify-start"
-                                        >
-                                          <UserPlus className="h-4 w-4 mr-2" />
-                                          {buddy.name}
-                                        </Button>
-                                      ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            <Select value={selectedBuddyIdForDetail} onValueChange={setSelectedBuddyIdForDetail}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Välj en ny buddy..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {buddies
+                                  .filter(buddy => buddy.id !== employeeDetails.buddy?.id)
+                                  .map((buddy) => (
+                                    <SelectItem key={buddy.id} value={buddy.id}>
+                                      {buddy.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
                             <Button
                               onClick={() => {
-                                if (selectedBuddyIdsForDetail.length > 0) {
-                                  handleUpdateBuddyFromDetail(selectedBuddyIdsForDetail[0]);
-                                  setSelectedBuddyIdsForDetail([]);
+                                if (selectedBuddyIdForDetail) {
+                                  handleUpdateBuddyFromDetail(selectedBuddyIdForDetail);
+                                  setSelectedBuddyIdForDetail('');
                                 }
                               }}
-                              disabled={submitting || selectedBuddyIdsForDetail.length === 0}
+                              disabled={submitting || !selectedBuddyIdForDetail}
                             >
                               {submitting ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                "Lägg till"
+                                "Byt"
                               )}
                             </Button>
                           </div>
