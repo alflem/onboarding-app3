@@ -90,11 +90,7 @@ type Buddy = {
   name: string;
 };
 
-type Category = {
-  id: string;
-  name: string;
-  tasks: Array<{ id: string }>;
-};
+
 
 type BuddyPreparation = {
   id: string;

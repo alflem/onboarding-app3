@@ -294,7 +294,11 @@ export default function ChecklistPage() {
                 <AccordionContent>
                   <div className="space-y-3 pb-4">
                     {category.tasks.map((task) => (
-                      <div key={task.id} className="flex items-start gap-3 border rounded-md p-3 bg-card">
+                      <div key={task.id} className={`flex items-start gap-3 border rounded-md p-3 transition-all duration-200 ${
+                        task.completed
+                          ? 'bg-muted/50 opacity-60 border-muted'
+                          : 'bg-card'
+                      }`}>
                         <Checkbox
                           id={task.id}
                           checked={task.completed}
@@ -304,13 +308,17 @@ export default function ChecklistPage() {
                         <div className="grid gap-1">
                           <label
                             htmlFor={task.id}
-                            className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            className={`font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 transition-all duration-200 ${
+                              task.completed ? 'line-through text-muted-foreground' : ''
+                            }`}
                           >
                             <div className="flex items-center gap-2">
                               {task.title}
                             </div>
                           </label>
-                          <p className="text-sm text-muted-foreground">
+                          <p className={`text-sm transition-all duration-200 ${
+                            task.completed ? 'text-muted-foreground/60 line-through' : 'text-muted-foreground'
+                          }`}>
                             {task.description}
                           </p>
                           {task.link && (
