@@ -42,6 +42,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       buddyIds?: string[];
     };
 
+    // Debug-loggning
+    console.log('API Request Body:', body);
+    console.log('buddyIds:', buddyIds);
+    console.log('mode:', mode);
+
     // buddyId kan vara null för att ta bort buddy
     if (buddyId !== undefined && buddyId !== null && (typeof buddyId !== 'string' || buddyId.trim() === '')) {
       return NextResponse.json(
@@ -120,22 +125,52 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       }
     }
 
+    // Validera buddyIds array om den finns
+    if (buddyIds && (!Array.isArray(buddyIds) || buddyIds.some(id => typeof id !== 'string' || id.trim() === ''))) {
+      return NextResponse.json(
+        { error: 'Ogiltig buddyIds array' },
+        { status: 400 }
+      );
+    }
+
+    // Validera att alla buddies i buddyIds arrayen finns och tillhör rätt organisation
+    if (buddyIds && Array.isArray(buddyIds)) {
+      for (const bId of buddyIds) {
+        const buddy = await prisma.user.findUnique({ where: { id: bId } });
+        if (!buddy) {
+          return NextResponse.json({ error: `Buddy-användaren med ID ${bId} hittades inte` }, { status: 404 });
+        }
+        if (buddy.organizationId !== session.user.organizationId) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (id === bId) {
+          return NextResponse.json({ error: 'En medarbetare kan inte vara sin egen buddy' }, { status: 400 });
+        }
+      }
+    }
+
     let updatedEmployee;
     if (mode === 'multi') {
       // Handle multiple buddies via buddyIds array
       if (buddyIds && Array.isArray(buddyIds)) {
+        console.log('Processing buddyIds array:', buddyIds);
+
         // Clear existing assignments
         await prisma.buddyAssignment.deleteMany({ where: { userId: id } });
+        console.log('Cleared existing assignments for user:', id);
 
         // Create new assignments for all selected buddies
         for (const bId of buddyIds) {
+          console.log('Creating assignment for buddy:', bId);
           await prisma.buddyAssignment.create({
             data: { userId: id, buddyId: bId }
           });
         }
+        console.log('Created assignments for all buddies');
 
         // Set the first buddy as the primary buddy for legacy compatibility
         const primaryBuddyId = buddyIds.length > 0 ? buddyIds[0] : null;
+        console.log('Setting primary buddy:', primaryBuddyId);
         updatedEmployee = await prisma.user.update({
           where: { id },
           data: { buddyId: primaryBuddyId },
