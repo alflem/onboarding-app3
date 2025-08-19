@@ -154,6 +154,7 @@ export default function AdminPage() {
   const [editingPreparation, setEditingPreparation] = useState<BuddyPreparation | undefined>(undefined);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
+  const [importType, setImportType] = useState<'all' | 'regular' | 'buddy'>('all');
 
   const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
   const [selectedEmployeeForDetail, setSelectedEmployeeForDetail] = useState<string | null>(null);
@@ -480,6 +481,12 @@ export default function AdminPage() {
         throw new Error('Ogiltig JSON-fil');
       }
 
+      // Lägg till import-typ i metadata om det inte redan finns
+      if (!importData.metadata) {
+        importData.metadata = {};
+      }
+      importData.metadata.exportType = importType;
+
       // Skicka till API
       const response = await fetch('/api/templates/import', {
         method: 'POST',
@@ -526,6 +533,12 @@ export default function AdminPage() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // Hantera import-dialog för olika typer
+  const handleImportDialog = (type: 'all' | 'regular' | 'buddy') => {
+    setImportType(type);
+    setImportDialogOpen(true);
   };
 
   // Hantera filval
@@ -679,6 +692,44 @@ export default function AdminPage() {
                       {t('buddy_tasks')}
                     </Button>
                   )}
+
+                  {/* Import-knappar */}
+                  <div className="border-t pt-2 mt-2">
+                    <p className="text-sm text-muted-foreground mb-2">Importera checklista:</p>
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleImportDialog('all')}
+                        disabled={submitting}
+                        className="w-full justify-start"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Importera komplett checklista
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleImportDialog('regular')}
+                        disabled={submitting}
+                        className="w-full justify-start"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Importera vanlig checklista
+                      </Button>
+
+                      {buddyEnabled && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleImportDialog('buddy')}
+                          disabled={submitting}
+                          className="w-full justify-start"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Importera buddy-checklista
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   {/* Återställningsknappen är dold */}
                 </div>
 
@@ -709,15 +760,7 @@ export default function AdminPage() {
                     )}
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    onClick={() => setImportDialogOpen(true)}
-                    disabled={submitting}
-                    className="w-full"
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importera checklista
-                  </Button>
+
                 </div>
               </CardContent>
             </Card>
@@ -1405,9 +1448,16 @@ export default function AdminPage() {
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Importera checklista</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              {importType === 'all' && 'Importera komplett checklista'}
+              {importType === 'regular' && 'Importera vanlig checklista'}
+              {importType === 'buddy' && 'Importera buddy-checklista'}
+            </DialogTitle>
             <DialogDescription>
-              Välj en JSON-fil som tidigare exporterats från systemet. Detta kommer att ersätta din nuvarande checklista.
+              {importType === 'all' && 'Importera en komplett checklista (ersätter alla befintliga uppgifter).'}
+              {importType === 'regular' && 'Importera endast vanliga uppgifter (behåller befintliga buddy-uppgifter).'}
+              {importType === 'buddy' && 'Importera endast buddy-uppgifter (behåller befintliga vanliga uppgifter).'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
