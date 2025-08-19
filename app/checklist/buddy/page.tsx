@@ -312,6 +312,25 @@ function BuddyChecklistContent() {
     router.push(newUrl.toString(), { scroll: false });
   };
 
+  // Hitta namnet på den valda personen för att visa i selectorn
+  const getSelectedPersonName = () => {
+    if (!selectedEmployeeId || !buddyRelationships) return '';
+
+    // Kolla aktiva användare
+    const activeUser = buddyRelationships.activeUsers.find(user => user.id === selectedEmployeeId);
+    if (activeUser) return activeUser.name;
+
+    // Kolla aktiva förberedelser
+    const activePrep = buddyRelationships.activePreparations.find(prep => prep.id === selectedEmployeeId);
+    if (activePrep) return `${activePrep.firstName} ${activePrep.lastName}`;
+
+    // Kolla slutförda förberedelser
+    const completedPrep = buddyRelationships.completedPreparations.find(prep => prep.id === selectedEmployeeId);
+    if (completedPrep) return `${completedPrep.firstName} ${completedPrep.lastName}`;
+
+    return '';
+  };
+
   function isCompletedBuddyPreparation(
     prep: BuddyPreparation | CompletedBuddyPreparation
   ): prep is CompletedBuddyPreparation {
@@ -429,7 +448,9 @@ function BuddyChecklistContent() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Select value={selectedEmployeeId || ""} onValueChange={handleEmployeeSelect}>
                 <SelectTrigger className="w-full sm:w-[300px]">
-                  <SelectValue placeholder="Välj person..." />
+                  <SelectValue placeholder="Välj person...">
+                    {selectedEmployeeId ? getSelectedPersonName() : "Välj person..."}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {/* Aktiva anställda */}
