@@ -731,14 +731,14 @@ export default function AdminPage() {
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="icon"
-                                  className="h-8 w-8 text-destructive"
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                   }}
                                 >
-                                  <User className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
