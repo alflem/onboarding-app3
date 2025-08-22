@@ -140,15 +140,25 @@ export const authOptions: NextAuthOptions = {
                 console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
               }
 
-              // Check if user should be connected to a buddy preparation
-              if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
-                try {
-                  await connectUserToBuddyPreparation(prisma, dbUser.id, dbUser.email, dbUser.organizationId);
-                } catch (buddyError) {
-                  console.error("Error connecting user to buddy preparation (continuing with login):", buddyError);
-                  // Don't stop the login process if buddy connection fails
-                }
-              }
+                    // Check if user should be connected to a buddy preparation
+      if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
+        try {
+          await connectUserToBuddyPreparation(prisma, dbUser.id, dbUser.email, dbUser.organizationId);
+        } catch (buddyError) {
+          console.error("Error connecting user to buddy preparation (continuing with login):", buddyError);
+          // Don't stop the login process if buddy connection fails
+        }
+      }
+
+      // Also check if there are any completed buddy preparations that should be cleaned up
+      if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
+        try {
+          await cleanupCompletedBuddyPreparations(prisma, dbUser.email, dbUser.organizationId);
+        } catch (cleanupError) {
+          console.error("Error cleaning up completed buddy preparations (continuing with login):", cleanupError);
+          // Don't stop the login process if cleanup fails
+        }
+      }
             } else if (needsOrgCheck) {
               console.log(`JWT callback - User with ID ${token.id} not found in database`);
             }
@@ -239,20 +249,37 @@ async function connectUserToBuddyPreparation(
     if (buddyPreparation) {
       console.log(`Found buddy preparation for user ${userEmail}, connecting...`);
 
-      // Connect the user to the buddy preparation
+      // Migrate task progress from BuddyPreparationTaskProgress to TaskProgress FIRST
+      const migratedTasks = await migrateTaskProgress(prisma, buddyPreparation.id, userId);
+      console.log(`Migration completed: ${migratedTasks} tasks migrated`);
+
+      // Clear any existing buddy assignments for this user
+      await prisma.buddyAssignment.deleteMany({
+        where: { userId: userId }
+      });
+
+      // Create new buddy assignment
+      await prisma.buddyAssignment.create({
+        data: {
+          userId: userId,
+          buddyId: buddyPreparation.buddyId,
+        },
+      });
+
+      // Set the user's buddy to the preparation's buddy (legacy compatibility)
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          buddyId: buddyPreparation.buddyId,
+        },
+      });
+
+      // Only AFTER successful migration, connect the user to the buddy preparation
       await prisma.buddyPreparation.update({
         where: { id: buddyPreparation.id },
         data: {
           userId: userId,
           isActive: false, // Mark as connected
-        },
-      });
-
-      // Set the user's buddy to the preparation's buddy
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          buddyId: buddyPreparation.buddyId,
         },
       });
 
@@ -262,6 +289,117 @@ async function connectUserToBuddyPreparation(
     }
   } catch (error) {
     console.error("Error connecting user to buddy preparation:", error);
+    throw error;
+  }
+}
+
+/**
+ * Cleans up completed buddy preparations that are no longer needed
+ */
+async function cleanupCompletedBuddyPreparations(
+  prisma: PrismaClient,
+  userEmail: string,
+  organizationId: string
+) {
+  try {
+    // Find all buddy preparations for this email that are completed (have userId) but still marked as active
+    const completedPreparations = await prisma.buddyPreparation.findMany({
+      where: {
+        email: userEmail.toLowerCase().trim(),
+        organizationId: organizationId,
+        userId: { not: null }, // Has been connected to a user
+        isActive: true, // But still marked as active
+      },
+    });
+
+    if (completedPreparations.length > 0) {
+      console.log(`Found ${completedPreparations.length} completed buddy preparations for ${userEmail}, cleaning up...`);
+
+      // Mark all as inactive since they're completed
+      await prisma.buddyPreparation.updateMany({
+        where: {
+          id: { in: completedPreparations.map(p => p.id) }
+        },
+        data: {
+          isActive: false,
+        },
+      });
+
+      console.log(`Successfully cleaned up ${completedPreparations.length} completed buddy preparations for ${userEmail}`);
+    }
+  } catch (error) {
+    console.error("Error cleaning up completed buddy preparations:", error);
+    throw error;
+  }
+}
+
+/**
+ * Migrates task progress from BuddyPreparationTaskProgress to TaskProgress
+ * when a user is connected to a buddy preparation
+ * Returns the number of tasks migrated
+ */
+async function migrateTaskProgress(
+  prisma: PrismaClient,
+  preparationId: string,
+  userId: string
+): Promise<number> {
+  try {
+    console.log(`Migrating task progress from preparation ${preparationId} to user ${userId}...`);
+
+    // Get all task progress from the buddy preparation
+    const preparationProgress = await prisma.buddyPreparationTaskProgress.findMany({
+      where: { preparationId: preparationId },
+      include: { task: true }
+    });
+
+    if (preparationProgress.length > 0) {
+      console.log(`Found ${preparationProgress.length} tasks to migrate...`);
+
+      // Migrate each task progress
+      for (const progress of preparationProgress) {
+        // Check if task progress already exists for this user and task
+        const existingProgress = await prisma.taskProgress.findUnique({
+          where: {
+            userId_taskId: {
+              userId: userId,
+              taskId: progress.taskId
+            }
+          }
+        });
+
+        if (!existingProgress) {
+          // Create new task progress for the user
+          await prisma.taskProgress.create({
+            data: {
+              userId: userId,
+              taskId: progress.taskId,
+              completed: progress.completed,
+              createdAt: progress.createdAt,
+              updatedAt: progress.updatedAt
+            }
+          });
+        } else {
+          // Update existing progress if preparation progress is more recent
+          if (progress.updatedAt > existingProgress.updatedAt) {
+            await prisma.taskProgress.update({
+              where: { id: existingProgress.id },
+              data: {
+                completed: progress.completed,
+                updatedAt: progress.updatedAt
+              }
+            });
+          }
+        }
+      }
+
+      console.log(`Successfully migrated ${preparationProgress.length} task progress items`);
+      return preparationProgress.length;
+    } else {
+      console.log(`No task progress to migrate for preparation ${preparationId}`);
+      return 0;
+    }
+  } catch (error) {
+    console.error("Error migrating task progress:", error);
     throw error;
   }
 }
