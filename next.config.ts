@@ -8,8 +8,6 @@ const nextConfig: NextConfig = {
   basePath: process.env.NODE_ENV === 'production' ? '' : undefined,
   // Azure Web App stability settings
   experimental: {
-    // Reduce unnecessary re-renders
-    optimizeCss: true,
     // Better caching for Azure
     scrollRestoration: true,
   },
@@ -17,8 +15,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
   compress: true,
-  // Reduce build time and improve stability
-  swcMinify: true,
 };
 
 export default nextConfig;
