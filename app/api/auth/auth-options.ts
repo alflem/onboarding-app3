@@ -22,6 +22,7 @@ interface AzureADProfile {
 // Updated to trigger database reset and Demo Company creation
 export const authOptions: NextAuthOptions = {
   adapter: CustomPrismaAdapter(prisma),
+
   providers: [
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
