@@ -140,25 +140,25 @@ export const authOptions: NextAuthOptions = {
                 console.log(`JWT callback - User ${dbUser.email} assigned to organization: ${dbUser.organization?.name} (${dbUser.organizationId})`);
               }
 
-                    // Check if user should be connected to a buddy preparation
-      if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
-        try {
-          await connectUserToBuddyPreparation(prisma, dbUser.id, dbUser.email, dbUser.organizationId);
-        } catch (buddyError) {
-          console.error("Error connecting user to buddy preparation (continuing with login):", buddyError);
-          // Don't stop the login process if buddy connection fails
-        }
-      }
+              // Check if user should be connected to a buddy preparation
+              if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
+                try {
+                  await connectUserToBuddyPreparation(prisma, dbUser.id, dbUser.email, dbUser.organizationId);
+                } catch (buddyError) {
+                  console.error("Error connecting user to buddy preparation (continuing with login):", buddyError);
+                  // Don't stop the login process if buddy connection fails
+                }
+              }
 
-      // Also check if there are any completed buddy preparations that should be cleaned up
-      if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
-        try {
-          await cleanupCompletedBuddyPreparations(prisma, dbUser.email, dbUser.organizationId);
-        } catch (cleanupError) {
-          console.error("Error cleaning up completed buddy preparations (continuing with login):", cleanupError);
-          // Don't stop the login process if cleanup fails
-        }
-      }
+              // Also check if there are any completed buddy preparations that should be cleaned up
+              if (needsOrgCheck && dbUser.email && dbUser.organizationId) {
+                try {
+                  await cleanupCompletedBuddyPreparations(prisma, dbUser.email, dbUser.organizationId);
+                } catch (cleanupError) {
+                  console.error("Error cleaning up completed buddy preparations (continuing with login):", cleanupError);
+                  // Don't stop the login process if cleanup fails
+                }
+              }
             } else if (needsOrgCheck) {
               console.log(`JWT callback - User with ID ${token.id} not found in database`);
             }

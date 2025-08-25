@@ -10,7 +10,7 @@ export function AuthProvider({
 }) {
   return (
     <SessionProvider
-      refetchInterval={30 * 60} // Refetch session every 30 minutes instead of 5
+      refetchInterval={60 * 60} // Refetch session every 1 hour (Azure AD access token lifetime)
       refetchOnWindowFocus={false} // Don't refetch when window gains focus
       refetchWhenOffline={false} // Don't refetch when offline
     >

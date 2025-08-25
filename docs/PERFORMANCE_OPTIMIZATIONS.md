@@ -11,8 +11,8 @@ Sidan laddade om när användaren var på samma sida, vilket orsakades av onödi
 **Fil:** `components/auth-provider.tsx`
 
 **Ändringar:**
+- `refetchInterval={60 * 60}` - Refetch session every 1 hour (Azure AD access token lifetime)
 - `refetchOnWindowFocus={false}` - Stängde av automatisk session-uppdatering när fönstret får fokus
-- `refetchInterval={30 * 60}` - Ökade intervallet från 5 minuter till 30 minuter
 
 **Före:**
 ```tsx
@@ -26,11 +26,17 @@ Sidan laddade om när användaren var på samma sida, vilket orsakades av onödi
 **Efter:**
 ```tsx
 <SessionProvider
-  refetchInterval={30 * 60} // Refetch session every 30 minutes
+  refetchInterval={60 * 60} // Refetch session every 1 hour (Azure AD access token lifetime)
   refetchOnWindowFocus={false} // Don't refetch when window gains focus
   refetchWhenOffline={false}
 >
 ```
+
+**Varför 1 timme?**
+- **Azure AD Access Token** har en livslängd på 1 timme
+- **NextAuth JWT Token** har en livslängd på 30 dagar
+- **Azure AD Refresh Token** har en livslängd på 90 dagar
+- `refetchInterval` behövs för att synkronisera användardata och hantera Azure AD token-förnyelse
 
 ### 2. ViewContext Optimering
 
@@ -56,6 +62,35 @@ Sidan laddade om när användaren var på samma sida, vilket orsakades av onödi
 **Nya hooks:**
 - `useOptimizedSession()` - För sidor som inte behöver real-time uppdateringar
 - `useRequiredSession()` - För sidor som kräver autentisering men inte behöver frekventa kontroller
+
+### 5. JWT Callback Optimering
+
+**Fil:** `app/api/auth/auth-options.ts`
+
+**Ändringar:**
+- Optimerade JWT-callback för att endast kontrollera organisation när det verkligen behövs
+- Minskade onödiga databasanrop vid varje session-uppdatering
+
+## Token-hantering och varför refetch behövs
+
+### Token-typer och livslängd
+```
+Azure AD Access Token: 1 timme (behöver förnyas)
+Azure AD Refresh Token: 90 dagar (används för att förnya access token)
+NextAuth JWT Token: 30 dagar (lokal session)
+```
+
+### Varför inte 30 dagar?
+Trots att NextAuth JWT är giltig i 30 dagar behöver vi fortfarande `refetchInterval` för att:
+
+1. **Förnya Azure AD Access Token** - Som går ut efter 1 timme
+2. **Synkronisera användardata** - Om roll/organisation har ändrats
+3. **Hantera Azure AD-specifika uppdateringar** - Som company name, department, etc.
+
+### Optimerad strategi
+- **1 timme** = Balanserar prestanda med Azure AD-kompatibilitet
+- **Ingen window focus refetch** = Undviker omladdningar vid flikbyte
+- **Intelligent JWT-callback** = Endast databaskontroller när nödvändigt
 
 ## Användning av optimerade hooks
 
@@ -92,6 +127,7 @@ export default function ProtectedPage() {
 2. **Minskad serverbelastning** från färre session-kontroller
 3. **Bättre användarupplevelse** med stabilare sidor
 4. **Optimerad prestanda** för alla autentiserade sidor
+5. **Azure AD-kompatibilitet** med automatisk token-förnyelse
 
 ## Kompatibilitet
 
@@ -103,3 +139,4 @@ Alla ändringar är bakåtkompatibla och påverkar inte befintlig funktionalitet
 - Lägg till caching för ofta använda data
 - Implementera lazy loading för komponenter
 - Optimera bundle-storlek med code splitting
+- Implementera intelligent token-caching baserat på Azure AD-policyer
