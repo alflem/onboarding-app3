@@ -32,18 +32,34 @@ export async function GET() {
       return NextResponse.json({ error: 'Organization not found' }, { status: 400 });
     }
 
+    // Hämta checklistan för organisationen först
+    const checklist = await prisma.checklist.findUnique({
+      where: { organizationId: organizationId },
+      include: {
+        categories: {
+          include: {
+            tasks: {
+              select: { id: true, isBuddyTask: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!checklist) {
+      return NextResponse.json({ error: 'Checklist not found' }, { status: 404 });
+    }
+
     // Hämta alla medarbetare för användarens organisation
     const employees = await prisma.user.findMany({
       where: {
         organizationId: organizationId,
-        role: 'EMPLOYEE'
+        role: 'EMPLOYEE' // Endast medarbetare, inte admins
       },
       include: {
         buddy: true,
         progress: {
-          include: {
-            task: true
-          }
+          select: { taskId: true, completed: true }
         }
       },
       orderBy: {
@@ -51,11 +67,32 @@ export async function GET() {
       }
     });
 
-    // Beräkna progress för varje medarbetare
+    // Beräkna progress för varje medarbetare baserat på checklistans uppgifter
     const employeesWithProgress = employees.map((employee: typeof employees[0]) => {
-      // Räkna ut progress-procent
-      const completedTasks = employee.progress.filter((p: typeof employee.progress[0]) => p.completed).length;
-      const totalTasks = employee.progress.length;
+      // Skapa en Set av slutförda uppgifts-ID:n för snabbare lookup
+      const completedTaskIds = new Set(
+        employee.progress
+          .filter((p: typeof employee.progress[0]) => p.completed)
+          .map((p: typeof employee.progress[0]) => p.taskId)
+      );
+
+      // Räkna totala och slutförda uppgifter från checklistan
+      let totalTasks = 0;
+      let completedTasks = 0;
+
+      checklist.categories.forEach((category: typeof checklist.categories[0]) => {
+        category.tasks.forEach((task: typeof category.tasks[0]) => {
+          // Exkludera buddy-uppgifter från progress-beräkningen för vanliga medarbetare
+          if (!task.isBuddyTask) {
+            totalTasks++;
+            if (completedTaskIds.has(task.id)) {
+              completedTasks++;
+            }
+          }
+        });
+      });
+
+      // Beräkna progress-procent
       const progressPercentage = totalTasks > 0
         ? Math.round((completedTasks / totalTasks) * 100)
         : 0;

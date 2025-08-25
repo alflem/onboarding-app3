@@ -1096,11 +1096,16 @@ export default function AdminPage() {
                         })}
                       </div>
                     </div>
-                    <div className="w-full bg-secondary/20 rounded-full h-3">
-                      <div
-                        className="bg-primary h-3 rounded-full transition-all duration-300"
-                        style={{ width: `${(employeeDetails.progress / 100) * 100}%` }}
-                      ></div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-full bg-secondary/20 rounded-full h-3">
+                        <div
+                          className="bg-primary h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${employeeDetails.progress}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium text-muted-foreground min-w-[3rem] text-right">
+                        {employeeDetails.progress}%
+                      </span>
                     </div>
 
                     {employeeDetails.categories && (
@@ -1120,7 +1125,9 @@ export default function AdminPage() {
                                   <div className="w-20 bg-secondary/20 rounded-full h-2">
                                     <div
                                       className="bg-primary h-2 rounded-full"
-                                      style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
+                                      style={{
+                                        width: `${category.totalTasks > 0 ? (category.completedTasks / category.totalTasks) * 100 : 0}%`
+                                      }}
                                     ></div>
                                   </div>
                                 </div>
@@ -1144,7 +1151,9 @@ export default function AdminPage() {
                                     <div className="w-20 bg-secondary/20 rounded-full h-2">
                                       <div
                                         className="bg-primary h-2 rounded-full"
-                                        style={{ width: `${(category.completedTasks / category.totalTasks) * 100}%` }}
+                                        style={{
+                                          width: `${category.totalTasks > 0 ? (category.completedTasks / category.totalTasks) * 100 : 0}%`
+                                        }}
                                       ></div>
                                     </div>
                                   </div>
