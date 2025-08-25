@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react";
+import { useOptimizedSession } from "@/lib/session-utils";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ interface DashboardData {
 }
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session, status, isAuthenticated, isLoading } = useOptimizedSession();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export default function Home() {
 
   useEffect(() => {
     async function fetchDashboardData() {
-      if (status === "authenticated" && session?.user) {
+      if (isAuthenticated && session?.user) {
         setLoading(true);
         setError(null);
 
@@ -88,10 +88,10 @@ export default function Home() {
     }
 
     fetchDashboardData();
-  }, [status, session?.user]);
+  }, [isAuthenticated, session?.user, status]);
 
   // Show loading only when NextAuth is still determining session status
-  if (status === "loading") {
+  if (isLoading) {
     return (
       <div className="container p-8 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin mb-4" />
