@@ -310,7 +310,36 @@ export default function DatabaseManagementPage() {
 
   // Hantera borttagning av buddyförberedelser
   const handleDeleteBuddyPreparation = async (preparationId: string) => {
-    if (!confirm("Är du säker på att du vill ta bort denna buddyförberedelse?")) return;
+    // Hitta buddy preparation för att visa information
+    const preparation = buddyPreparations.find(p => p.id === preparationId);
+    if (!preparation) {
+      alert("Kunde inte hitta buddyförberedelsen");
+      return;
+    }
+
+    // Kontrollera om det finns relaterade poster som kan förhindra borttagning
+    const hasTaskProgress = preparation.taskProgress && preparation.taskProgress.length > 0;
+    const hasAdditionalBuddies = preparation.buddies && preparation.buddies.length > 0;
+    const isLinkedToUser = preparation.user;
+
+    // Bygg upp varningsmeddelande baserat på vad som finns
+    let warningMessage = `Är du säker på att du vill ta bort buddyförberedelsen för ${preparation.firstName} ${preparation.lastName}?\n\n`;
+
+    if (isLinkedToUser) {
+      warningMessage += "⚠️ Denna förberedelse är kopplad till en användare.\n";
+    }
+
+    if (hasTaskProgress) {
+      warningMessage += `⚠️ Det finns ${preparation.taskProgress.length} uppgiftsframsteg kopplade till denna förberedelse.\n`;
+    }
+
+    if (hasAdditionalBuddies) {
+      warningMessage += `⚠️ Det finns ${preparation.buddies.length} ytterligare buddies kopplade.\n`;
+    }
+
+    warningMessage += "\nAlla relaterade data kommer att tas bort permanent. Detta går inte att ångra.";
+
+    if (!confirm(warningMessage)) return;
 
     try {
       const response = await fetch(`/api/super-admin/buddy-preparations?id=${preparationId}`, {
@@ -319,6 +348,7 @@ export default function DatabaseManagementPage() {
 
       if (response.ok) {
         fetchData(); // Ladda om data
+        alert("Buddyförberedelse borttagen framgångsrikt");
       } else {
         const error = await response.json();
         alert(error.error || "Fel vid borttagning");

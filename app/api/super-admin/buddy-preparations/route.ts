@@ -153,7 +153,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Preparation ID is required" }, { status: 400 });
     }
 
-    // Delete the buddy preparation
+    // First, delete all related task progress records
+    await prisma.buddyPreparationTaskProgress.deleteMany({
+      where: { preparationId },
+    });
+
+    // Then, delete all related buddy assignments
+    await prisma.buddyPreparationBuddy.deleteMany({
+      where: { buddyPreparationId: preparationId },
+    });
+
+    // Finally, delete the buddy preparation
     await prisma.buddyPreparation.delete({
       where: { id: preparationId },
     });
