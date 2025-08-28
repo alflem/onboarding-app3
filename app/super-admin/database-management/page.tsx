@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import OrganizationForm from "./components/OrganizationForm";
 import UserForm from "./components/UserForm";
 import PreAssignedRoleForm from "./components/PreAssignedRoleForm";
+import ChecklistViewer from "./components/ChecklistViewer";
 import { useLanguage } from "@/lib/language-context";
 import { useTranslations } from "@/lib/translations";
 
@@ -121,6 +122,54 @@ interface PreAssignedRole {
   updatedAt: string;
 }
 
+interface BuddyPreparation {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  isActive: boolean;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  buddy: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  buddies: Array<{
+    buddy: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+    };
+  }>;
+  organization: {
+    id: string;
+    name: string;
+    buddyEnabled: boolean;
+  };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+  };
+  taskProgress: Array<{
+    id: string;
+    completed: boolean;
+    task: {
+      id: string;
+      title: string;
+      category: {
+        id: string;
+        name: string;
+      };
+    };
+  }>;
+}
+
 export default function DatabaseManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -134,6 +183,7 @@ export default function DatabaseManagementPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [buddyData, setBuddyData] = useState<BuddyData[]>([]);
+  const [buddyPreparations, setBuddyPreparations] = useState<BuddyPreparation[]>([]);
   const [preAssignedRoles, setPreAssignedRoles] = useState<PreAssignedRole[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
@@ -141,6 +191,9 @@ export default function DatabaseManagementPage() {
   const [isOrgFormOpen, setIsOrgFormOpen] = useState(false);
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState("organizations");
+  const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null);
+  const [isChecklistViewerOpen, setIsChecklistViewerOpen] = useState(false);
+  const [selectedOrganizationFilter, setSelectedOrganizationFilter] = useState<string>("");
 
   // Redirect if not SUPER_ADMIN
   useEffect(() => {
@@ -153,12 +206,13 @@ export default function DatabaseManagementPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [orgRes, userRes, taskRes, checklistRes, buddyRes, preAssignedRes] = await Promise.all([
+      const [orgRes, userRes, taskRes, checklistRes, buddyRes, buddyPrepRes, preAssignedRes] = await Promise.all([
         fetch("/api/super-admin/organizations"),
         fetch("/api/super-admin/users"),
         fetch("/api/super-admin/tasks"),
         fetch("/api/super-admin/checklists"),
         fetch("/api/super-admin/buddies"),
+        fetch("/api/super-admin/buddy-preparations"),
         fetch("/api/super-admin/pre-assigned-roles")
       ]);
 
@@ -185,6 +239,11 @@ export default function DatabaseManagementPage() {
       if (buddyRes.ok) {
         const buddyDataRes = await buddyRes.json();
         setBuddyData(buddyDataRes.data);
+      }
+
+      if (buddyPrepRes.ok) {
+        const buddyPrepData = await buddyPrepRes.json();
+        setBuddyPreparations(buddyPrepData.data || []);
       }
 
       if (preAssignedRes.ok) {
@@ -246,6 +305,36 @@ export default function DatabaseManagementPage() {
     } catch (error) {
       console.error("Error deleting pre-assigned role:", error);
       alert("Fel vid borttagning");
+    }
+  };
+
+  // Hantera borttagning av buddyförberedelser
+  const handleDeleteBuddyPreparation = async (preparationId: string) => {
+    if (!confirm("Är du säker på att du vill ta bort denna buddyförberedelse?")) return;
+
+    try {
+      const response = await fetch(`/api/super-admin/buddy-preparations?id=${preparationId}`, {
+        method: "DELETE"
+      });
+
+      if (response.ok) {
+        fetchData(); // Ladda om data
+      } else {
+        const error = await response.json();
+        alert(error.error || "Fel vid borttagning");
+      }
+    } catch (error) {
+      console.error("Error deleting buddy preparation:", error);
+      alert("Fel vid borttagning");
+    }
+  };
+
+  // Visa checklista för en organisation
+  const handleViewChecklist = (organizationId: string) => {
+    const checklist = checklists.find(c => c.organizationId === organizationId);
+    if (checklist) {
+      setSelectedChecklist(checklist);
+      setIsChecklistViewerOpen(true);
     }
   };
 
@@ -350,7 +439,7 @@ export default function DatabaseManagementPage() {
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="organizations" className="flex items-center gap-2">
             <Building className="h-4 w-4" />
             {t('organizations')} ({organizations.length})
@@ -362,6 +451,10 @@ export default function DatabaseManagementPage() {
           <TabsTrigger value="buddies" className="flex items-center gap-2">
             <Heart className="h-4 w-4" />
                             Buddysystem ({buddyData.reduce((sum, org) => sum + org.stats.totalBuddyRelations, 0)})
+          </TabsTrigger>
+          <TabsTrigger value="buddy-preparations" className="flex items-center gap-2">
+            <UserCheck className="h-4 w-4" />
+            Buddyförberedelser ({buddyPreparations.length})
           </TabsTrigger>
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -541,7 +634,7 @@ export default function DatabaseManagementPage() {
           </Card>
         </TabsContent>
 
-        {/* Buddy-system */}
+                {/* Buddy-system */}
         <TabsContent value="buddies">
           <Card>
             <CardHeader>
@@ -625,7 +718,7 @@ export default function DatabaseManagementPage() {
                                     <div className="flex items-center justify-between mt-2">
                                       <Badge variant="outline" className="text-xs">
                                         {buddy.role}
-                                      </Badge>
+                                        </Badge>
                                       <span className="text-xs text-muted-foreground">
                                         Buddy för: {buddy._count.buddyFor} personer
                                       </span>
@@ -644,6 +737,284 @@ export default function DatabaseManagementPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Buddyförberedelser */}
+        <TabsContent value="buddy-preparations">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5" />
+                Buddyförberedelser för alla organisationer
+              </CardTitle>
+              <div className="text-sm text-muted-foreground">
+                Hantera buddyförberedelser för alla organisationer. Du kan ta bort förberedelser och visa tillhörande checklistor.
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Filter Controls */}
+              <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span className="font-medium">Filtrera per organisation:</span>
+                  </div>
+                  <select
+                    value={selectedOrganizationFilter}
+                    onChange={(e) => setSelectedOrganizationFilter(e.target.value)}
+                    className="px-3 py-2 border rounded-md bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Alla organisationer</option>
+                    {organizations.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        {org.name}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedOrganizationFilter && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedOrganizationFilter("")}
+                    >
+                      Rensa filter
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filtered Preparations */}
+              {(() => {
+                const filteredPreparations = selectedOrganizationFilter
+                  ? buddyPreparations.filter(p => p.organization.id === selectedOrganizationFilter)
+                  : buddyPreparations;
+
+                if (filteredPreparations.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {selectedOrganizationFilter
+                        ? "Inga buddyförberedelser hittades för den valda organisationen"
+                        : "Inga buddyförberedelser hittades"
+                      }
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Organisation</TableHead>
+                            <TableHead>Namn</TableHead>
+                            <TableHead>E-post</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Huvudbuddy</TableHead>
+                            <TableHead>Ytterligare Buddies</TableHead>
+                            <TableHead>Anteckningar</TableHead>
+                            <TableHead>Skapad</TableHead>
+                            <TableHead>Checklista</TableHead>
+                            <TableHead>Åtgärder</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredPreparations.map((prep) => (
+                            <TableRow key={prep.id}>
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4" />
+                                  {prep.organization.name}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-medium">
+                                  {prep.firstName} {prep.lastName}
+                                </div>
+                              </TableCell>
+                              <TableCell>{prep.email || "Ingen"}</TableCell>
+                              <TableCell>
+                                <Badge variant={prep.isActive ? "default" : "secondary"}>
+                                  {prep.isActive ? "Aktiv" : "Kopplad"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4" />
+                                  <div>
+                                    <div className="font-medium">{prep.buddy.name}</div>
+                                    <div className="text-xs text-muted-foreground">{prep.buddy.role}</div>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {prep.buddies.length > 0 ? (
+                                  <div className="space-y-1">
+                                    {prep.buddies.map((buddy, index) => (
+                                      <div key={index} className="text-xs">
+                                        {buddy.buddy.name} ({buddy.buddy.role})
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">Ingen</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {prep.notes ? (
+                                  <div className="max-w-xs truncate" title={prep.notes}>
+                                    {prep.notes}
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">Inga</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {new Date(prep.createdAt).toLocaleDateString("sv-SE")}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewChecklist(prep.organization.id)}
+                                  title="Visa checklista"
+                                >
+                                  <List className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDeleteBuddyPreparation(prep.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4">
+                      {filteredPreparations.map((prep) => (
+                        <Card key={prep.id} className="border-l-4 border-l-blue-500">
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4" />
+                                  <span className="font-semibold">{prep.organization.name}</span>
+                                </div>
+                                <Badge variant={prep.isActive ? "default" : "secondary"}>
+                                  {prep.isActive ? "Aktiv" : "Kopplad"}
+                                </Badge>
+                              </div>
+
+                              <div>
+                                <div className="font-semibold text-base">
+                                  {prep.firstName} {prep.lastName}
+                                </div>
+                                {prep.email && (
+                                  <div className="text-sm text-muted-foreground">{prep.email}</div>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-1 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Huvudbuddy:</span>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <User className="h-3 w-3" />
+                                    <span>{prep.buddy.name}</span>
+                                    <Badge variant="outline" className="text-xs">{prep.buddy.role}</Badge>
+                                  </div>
+                                </div>
+
+                                {prep.buddies.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Ytterligare buddies:</span>
+                                    <div className="mt-1 space-y-1">
+                                      {prep.buddies.map((buddy, index) => (
+                                        <div key={index} className="text-xs">
+                                          {buddy.buddy.name} ({buddy.buddy.role})
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {prep.notes && (
+                                  <div>
+                                    <span className="font-medium">Anteckningar:</span>
+                                    <div className="text-muted-foreground mt-1">{prep.notes}</div>
+                                  </div>
+                                )}
+
+                                <div>
+                                  <span className="font-medium">Skapad:</span>
+                                  <div className="text-muted-foreground mt-1">
+                                    {new Date(prep.createdAt).toLocaleDateString("sv-SE")}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end pt-2 border-t gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewChecklist(prep.organization.id)}
+                                  title="Visa checklista"
+                                >
+                                  <List className="h-4 w-4 mr-2" />
+                                  Checklista
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => handleDeleteBuddyPreparation(prep.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Ta bort
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Summary Stats */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {filteredPreparations.length}
+                        </div>
+                        <div className="text-sm text-blue-700">Filtrerade förberedelser</div>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {filteredPreparations.filter(p => p.isActive).length}
+                        </div>
+                        <div className="text-sm text-green-700">Aktiva förberedelser</div>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {filteredPreparations.filter(p => !p.isActive).length}
+                        </div>
+                        <div className="text-sm text-purple-700">Kopplade förberedelser</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
 
         {/* Användare */}
         <TabsContent value="users">
@@ -1036,6 +1407,16 @@ export default function DatabaseManagementPage() {
           Använd med försiktighet och säkerhetskopiera alltid innan du gör stora ändringar.
         </p>
       </div>
+
+      {/* Checklist Viewer Modal */}
+      <ChecklistViewer
+        checklist={selectedChecklist}
+        isOpen={isChecklistViewerOpen}
+        onClose={() => {
+          setIsChecklistViewerOpen(false);
+          setSelectedChecklist(null);
+        }}
+      />
     </div>
   );
 }
