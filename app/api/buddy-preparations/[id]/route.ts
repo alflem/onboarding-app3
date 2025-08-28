@@ -47,7 +47,17 @@ export async function DELETE(
       return NextResponse.json({ error: "Can only delete preparations from your own organization" }, { status: 403 });
     }
 
-    // Delete the preparation
+    // First, delete all related task progress records
+    await prisma.buddyPreparationTaskProgress.deleteMany({
+      where: { preparationId: id },
+    });
+
+    // Then, delete all related buddy assignments
+    await prisma.buddyPreparationBuddy.deleteMany({
+      where: { buddyPreparationId: id },
+    });
+
+    // Finally, delete the buddy preparation
     await prisma.buddyPreparation.delete({
       where: { id },
     });
