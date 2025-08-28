@@ -89,7 +89,6 @@ En omfattande onboardingapplikation byggd med Next.js och Prisma för att fören
 - **Admin**: Kan hantera användare och checklistor inom sin organisation
 - **Medarbetare**: Kan se och slutföra sina tilldelade checklistor
 
-**🔄 Tillfällig konfiguration**: För närvarande får alla nya användare automatiskt Admin-rollen för att förenkla utveckling och testning.
 
 ### Flöde för nya användare
 
