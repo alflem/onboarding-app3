@@ -1,8 +1,8 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckSquare, List, BarChart3 } from "lucide-react";
+import { CheckSquare, List } from "lucide-react";
 
 interface Task {
   id: string;
@@ -17,13 +17,7 @@ interface Task {
   };
 }
 
-interface Category {
-  id: string;
-  name: string;
-  order: number;
-  isBuddyCategory: boolean;
-  tasks: Task[];
-}
+
 
 interface Checklist {
   id: string;
@@ -33,7 +27,11 @@ interface Checklist {
     name: string;
     buddyEnabled: boolean;
   };
-  categories: Category[];
+  categories: Array<{
+    id: string;
+    name: string;
+    tasks: Task[];
+  }>;
   stats: {
     totalCategories: number;
     totalTasks: number;
@@ -94,9 +92,7 @@ export default function ChecklistViewer({ checklist, isOpen, onClose }: Checklis
                       <h5 className="font-medium text-left">{category.name}</h5>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">{category.tasks.length} uppgifter</Badge>
-                        {category.isBuddyCategory && (
-                          <Badge variant="secondary" className="text-xs">Buddy</Badge>
-                        )}
+
                       </div>
                     </div>
                   </AccordionTrigger>

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const organizationId = searchParams.get("organizationId");
 
-    let whereClause: any = {};
+    const whereClause: Record<string, string> = {};
 
     // If specific organization is requested, filter by it
     if (organizationId) {
@@ -109,7 +109,13 @@ export async function GET(request: NextRequest) {
       }
 
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, {
+      organizationId: string;
+      organizationName: string;
+      total: number;
+      active: number;
+      completed: number;
+    }>);
 
     const stats = Object.values(statsByOrg);
 

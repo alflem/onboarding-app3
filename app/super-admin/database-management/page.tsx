@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3, Shield } from "lucide-react";
+import { Trash2, Edit, Plus, Users, Building, CheckSquare, RefreshCw, List, UserCheck, Heart, BarChart3, Shield, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import OrganizationForm from "./components/OrganizationForm";
 import UserForm from "./components/UserForm";
